@@ -16,14 +16,13 @@ The music module contains libraries that help you make a music player. To use, a
 ##Structure
 * SDK
     * Music Library
-     * Data Loading Library
-     * Tag Editing Library
-     * Playback Library
-     * Base (Shared elements) Library
+       * Data Loading Library
+       * Tag Editing Library
+       * Playback Library
+       * Base (Shared elements) Library
     * Plugin API
-      * Is a plugin
-      * Communication
-        * Official Plugins
-          * GEM
-          * Tags
+       * For Plugins
+       * For Apps
+    * Theme Engine (fork of app-theme-engine by @afollestad)
+       * Manual (Just the core of TE. It will give you methods to easily theme individual views)
     * Etc
