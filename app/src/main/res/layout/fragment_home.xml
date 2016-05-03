@@ -9,7 +9,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:fontFamily="sans-serif-medium"
-        android:text="Welcome to the Substance SDK!"
+        android:text="@string/welcome_desc"
         android:textColor="@color/primary_text_color_light"
         android:textSize="@dimen/text_size_title" />
 
@@ -17,7 +17,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:fontFamily="sans-serif-medium"
-        android:text="Tap the hamburger icon to see all projects"
+        android:text="@string/welcome_sum"
         android:textColor="@color/secondary_text_color_light"
         android:textSize="@dimen/text_size_default" />
 

@@ -3,4 +3,6 @@
 
     <string name="open_drawer">Open Navigation Drawer</string>
     <string name="close_drawer">Close Navigation Drawer</string>
+    <string name="welcome_desc">Welcome to the Substance SDK!</string>
+    <string name="welcome_sum">Tap the hamburger icon to see all projects</string>
 </resources>

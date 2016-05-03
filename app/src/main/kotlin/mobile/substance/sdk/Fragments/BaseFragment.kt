@@ -12,7 +12,7 @@ import android.view.ViewGroup
 open class BaseFragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val view: View = getRootView(inflater, container)!!
+        val view: View = inflater!!.inflate(getLayoutResId(), container, false)
         initViews(view)
         init()
         return view
@@ -24,7 +24,7 @@ open class BaseFragment : Fragment() {
     open fun init() {
     }
 
-    open fun getRootView(inflater: LayoutInflater?, container: ViewGroup?): View? {
-        return null
+    open fun getLayoutResId(): Int {
+        return 0
     }
 }

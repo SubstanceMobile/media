@@ -1,10 +1,11 @@
 package mobile.substance.sdk.Activities
 
 import android.support.design.widget.NavigationView
+import android.support.v4.view.GravityCompat
 import android.support.v4.widget.DrawerLayout
-import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.widget.Toolbar
 import mobile.substance.sdk.Fragments.HomeFragment
+import mobile.substance.sdk.Fragments.MusicFragment
 import mobile.substance.sdk.R
 
 class MainActivity : NavigationDrawerActivity() {
@@ -17,9 +18,12 @@ class MainActivity : NavigationDrawerActivity() {
     }
 
     override fun init() {
-        val drawerToggle = ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.open_drawer, R.string.close_drawer)
-        drawerLayout!!.addDrawerListener(drawerToggle)
-        drawerToggle.syncState()
+        toolbar!!.setNavigationIcon(R.drawable.ic_menu_white_24dp)
+        toolbar!!.setNavigationOnClickListener { drawerLayout!!.openDrawer(GravityCompat.START) }
+        navigationView!!.setNavigationItemSelectedListener { it ->
+            drawerLayout!!.closeDrawer(GravityCompat.START)
+            handleNavigationClick(it)
+        }
         super.init()
     }
 
@@ -34,6 +38,9 @@ class MainActivity : NavigationDrawerActivity() {
         when (getFragment()) {
             is HomeFragment -> {
                 return "Home"
+            }
+            is MusicFragment -> {
+                return "Music"
             }
         }
         return null

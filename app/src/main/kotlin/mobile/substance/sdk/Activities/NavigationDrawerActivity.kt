@@ -1,8 +1,10 @@
 package mobile.substance.sdk.Activities
 
 import android.support.v4.app.Fragment
+import android.util.Log
 import android.view.MenuItem
 import mobile.substance.sdk.Fragments.HomeFragment
+import mobile.substance.sdk.Fragments.MusicFragment
 import mobile.substance.sdk.R
 
 open class NavigationDrawerActivity : BaseActivity() {
@@ -22,8 +24,22 @@ open class NavigationDrawerActivity : BaseActivity() {
         updateTitle(getFragmentTitle()!!)
     }
 
-    fun handleNavigationClick(item: MenuItem) {
-
+    fun handleNavigationClick(item: MenuItem): Boolean {
+        Log.d("handleNavigationClick()", "handleNavigationClick()")
+        item.isChecked = true
+        when (item.itemId) {
+            R.id.drawer_home -> {
+                fragment = HomeFragment()
+                applyFragmentChanges()
+                return true
+            }
+            R.id.drawer_music -> {
+                fragment = MusicFragment()
+                applyFragmentChanges()
+                return true
+            }
+        }
+        return false
     }
 
     fun getFragment(): Fragment {

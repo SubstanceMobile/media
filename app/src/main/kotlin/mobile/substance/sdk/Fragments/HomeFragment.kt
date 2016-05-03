@@ -1,8 +1,6 @@
 package mobile.substance.sdk.Fragments
 
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import mobile.substance.sdk.R
 
 /**
@@ -18,7 +16,7 @@ class HomeFragment : BaseFragment() {
 
     }
 
-    override fun getRootView(inflater: LayoutInflater?, container: ViewGroup?): View? {
-        return inflater!!.inflate(R.layout.fragment_home, container, false)
+    override fun getLayoutResId(): Int {
+        return R.layout.fragment_home
     }
 }
