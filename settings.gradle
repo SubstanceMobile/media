@@ -1,1 +1,1 @@
-include ':app', ':plugin-support', ':music', ':tags', ':core'
+include ':app', ':plugin-support', ':music', ':tags', ':music-core'

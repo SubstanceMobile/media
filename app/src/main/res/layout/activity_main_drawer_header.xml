@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="192dp">
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:foreground="#33000000"
+        android:scaleType="centerCrop"
+        android:src="@drawable/header" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="start|bottom"
+        android:fontFamily="sans-serif-medium"
+        android:padding="16dp"
+        android:text="Substance SDK"
+        android:textColor="@color/primary_text_color_dark"
+        android:textSize="@dimen/text_size_title" />
+
+</FrameLayout>

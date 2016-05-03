@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group android:checkableBehavior="single">
+
+        <item
+            android:id="@+id/drawer_home"
+            android:checked="true"
+            android:icon="@drawable/ic_home_black_24dp"
+            android:title="Home" />
+
+        <item
+            android:id="@+id/drawer_music"
+            android:icon="@drawable/ic_library_music_black_24dp"
+            android:title="Music" />
+
+        <item
+            android:id="@+id/drawer_api"
+            android:icon="@drawable/ic_code_black_24dp"
+            android:title="API" />
+
+    </group>
+
+    <item android:title="Other">
+        <menu>
+            <item
+                android:id="@+id/drawer_info"
+                android:icon="@drawable/ic_info_outline_black_24dp"
+                android:title="Info" />
+        </menu>
+    </item>
+
+</menu>
