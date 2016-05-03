@@ -2,10 +2,12 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/SDK.iml" filepath="$PROJECT_DIR$/SDK.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Substance SDK.iml" filepath="$PROJECT_DIR$/Substance SDK.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/core/base.iml" filepath="$PROJECT_DIR$/core/base.iml" />
       <module fileurl="file://$PROJECT_DIR$/music/music.iml" filepath="$PROJECT_DIR$/music/music.iml" />
       <module fileurl="file://$PROJECT_DIR$/plugin-support/plugin-support.iml" filepath="$PROJECT_DIR$/plugin-support/plugin-support.iml" />
+      <module fileurl="file://$PROJECT_DIR$/tags/tags.iml" filepath="$PROJECT_DIR$/tags/tags.iml" />
     </modules>
   </component>
 </project>

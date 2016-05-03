@@ -9,16 +9,20 @@
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/app" />
+            <option value="$PROJECT_DIR$/core" />
             <option value="$PROJECT_DIR$/music" />
             <option value="$PROJECT_DIR$/plugin-support" />
+            <option value="$PROJECT_DIR$/tags" />
           </set>
         </option>
         <option name="myModules">
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/app" />
+            <option value="$PROJECT_DIR$/core" />
             <option value="$PROJECT_DIR$/music" />
             <option value="$PROJECT_DIR$/plugin-support" />
+            <option value="$PROJECT_DIR$/tags" />
           </set>
         </option>
       </GradleProjectSettings>
