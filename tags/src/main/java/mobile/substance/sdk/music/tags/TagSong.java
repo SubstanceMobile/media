@@ -6,7 +6,7 @@ import org.jaudiotagger.tag.images.Artwork;
  * Created by Julian Os on 03.05.2016.
  */
 public class TagSong {
-    private String title, artist, album, genre, year, comment, label, diskNo, path;
+    private String title, artist, album, genre, year, comment, label, diskNo, path, lyrics;
     private Artwork artwork;
 
 
@@ -95,7 +95,17 @@ public class TagSong {
         return path;
     }
 
-    public void setPath(String path) {
+    public TagSong setPath(String path) {
         this.path = path;
+        return this;
+    }
+
+    public String getLyrics() {
+        return lyrics;
+    }
+
+    public TagSong setLyrics(String lyrics) {
+        this.lyrics = lyrics;
+        return this;
     }
 }

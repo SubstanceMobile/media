@@ -11,20 +11,24 @@ import android.provider.MediaStore;
 import org.jaudiotagger.audio.AudioFileIO;
 import org.jaudiotagger.tag.FieldKey;
 import org.jaudiotagger.tag.Tag;
+import org.jaudiotagger.tag.images.Artwork;
+import org.jaudiotagger.tag.images.ArtworkFactory;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
+import mobile.substance.sdk.music.core.objects.Album;
 import mobile.substance.sdk.music.core.objects.Song;
 
-/**
- * Created by Julian Os on 03.05.2016.
- */
 public class TagHelper {
 
     public static TagSong read(Context context, Song song) {
         Tag tag = null;
+        String filePath = getFileUri(context, song.getUri()).getPath();
         try {
-            tag = AudioFileIO.read(new File(getFileUri(context, song.getUri()).getPath())).getTag();
+            tag = AudioFileIO.read(new File(filePath)).getTag();
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -38,7 +42,31 @@ public class TagHelper {
                 .setYear(tag.getFirst(FieldKey.YEAR))
                 .setComment(tag.getFirst(FieldKey.COMMENT))
                 .setLabel(tag.getFirst(FieldKey.RECORD_LABEL))
-                .setDiskNo(tag.getFirst(FieldKey.DISC_NO));
+                .setDiskNo(tag.getFirst(FieldKey.DISC_NO))
+                .setPath(filePath)
+                .setLyrics(tag.getFirst(FieldKey.LYRICS));
+    }
+
+    public static TagAlbum read(Context context, Album album) {
+        List<TagSong> songs = new ArrayList<>();
+        for (Song song : album.getSongs()) {
+            songs.add(read(context, song));
+        }
+
+        Artwork artwork = null;
+        try {
+            artwork = ArtworkFactory.createArtworkFromFile(new File(album.getAlbumArtPath()));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return new TagAlbum()
+                .setTitle(album.getTitle())
+                .setArtist(album.getAlbumArtistName())
+                //.setGenre(album.getGenre())
+                //.setYear(album.getYear())
+                .setArtwork(artwork)
+                .setSongs(songs);
     }
 
     public static Uri getFileUri(Context context, Uri uri) {

@@ -14,63 +14,49 @@ import org.jaudiotagger.tag.images.ArtworkFactory;
 
 import java.io.File;
 import java.io.IOException;
-public class SongEditor {
-    private Context context;
-    private String title, artist, album, genre, diskNo, year, comment, label, lyrics;
-    private Artwork artwork;
-    private TagSong song;
 
-    public SongEditor(Context context, TagSong song) {
+public class AlbumEditor {
+    private Context context;
+    private String title, artist, genre, year, comment, label;
+    private Artwork artwork;
+    private TagAlbum album;
+
+    public AlbumEditor(Context context, TagAlbum album) {
         this.context = context;
-        this.song = song;
+        this.album = this.album;
     }
 
-    public SongEditor setTitle(String title) {
+    public AlbumEditor setTitle(String title) {
         this.title = title;
         return this;
     }
 
-    public SongEditor setArtist(String artist) {
+    public AlbumEditor setArtist(String artist) {
         this.artist = artist;
         return this;
     }
 
-    public SongEditor setAlbum(String album) {
-        this.album = album;
-        return this;
-    }
-
-    public SongEditor setGenre(String genre) {
+    public AlbumEditor setGenre(String genre) {
         this.genre = genre;
         return this;
     }
 
-    public SongEditor setDiskNo(String diskNo) {
-        this.diskNo = diskNo;
-        return this;
-    }
-
-    public SongEditor setComment(String comment) {
+    public AlbumEditor setComment(String comment) {
         this.comment = comment;
         return this;
     }
 
-    public SongEditor setYear(String year) {
+    public AlbumEditor setYear(String year) {
         this.year = year;
         return this;
     }
 
-    public SongEditor setLabel(String label) {
+    public AlbumEditor setLabel(String label) {
         this.label = label;
         return this;
     }
 
-    public SongEditor setLyrics(String lyrics) {
-        this.lyrics = lyrics;
-        return this;
-    }
-
-    public SongEditor setArtwork(File file) {
+    public AlbumEditor setArtwork(File file) {
         try {
             this.artwork = ArtworkFactory.createArtworkFromFile(file);
         } catch (IOException e) {
@@ -79,7 +65,7 @@ public class SongEditor {
         return this;
     }
 
-    public SongEditor setArtwork(Context context, Uri uri) {
+    public AlbumEditor setArtwork(Context context, Uri uri) {
         try {
             this.artwork = ArtworkFactory.createArtworkFromFile(new File(TagHelper.getFileUri(context, uri).getPath()));
         } catch (IOException e) {
@@ -89,18 +75,31 @@ public class SongEditor {
     }
 
     public boolean commit() {
-        return writeTags();
+        return write();
     }
 
     public boolean commitAndUpdateMediaStore(MediaStoreCallbacks mediaStoreCallbacks) {
-        if (writeTags()) {
-            MediaStoreHelper.updateMedia(new String[]{song.getPath()}, context, mediaStoreCallbacks);
+        if (write()) {
+            String[] paths = new String[album.getSongs().size()];
+            for (int i = 0; i < album.getSongs().size(); i++) {
+                paths[i] = album.getSongs().get(i).getPath();
+            }
+            MediaStoreHelper.updateMedia(paths, context, mediaStoreCallbacks);
             return true;
         } else return false;
     }
 
 
-    private boolean writeTags() {
+    private boolean write() {
+        for (TagSong song : album.getSongs()) {
+            if (!writeTags(song)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private boolean writeTags(TagSong song) {
         AudioFile file = null;
         try {
             file = new AudioFileIO().readFile(new File(song.getPath()));
@@ -111,21 +110,18 @@ public class SongEditor {
         Tag tag = file.getTag();
 
         try {
-            tag.setField(artwork == null ? song.getArtwork() : artwork);
+            tag.setField(artwork == null ? album.getArtwork() : artwork);
         } catch (FieldDataInvalidException e) {
             e.printStackTrace();
             return false;
         }
 
-        if (applyField(tag, FieldKey.TITLE, title == null ? song.getTitle() : title)
-                && applyField(tag, FieldKey.ARTIST, artist == null ? song.getArtist() : artist)
-                && applyField(tag, FieldKey.ALBUM, album == null ? song.getAlbum() : album)
-                && applyField(tag, FieldKey.DISC_NO, diskNo == null ? song.getDiskNo() : diskNo)
-                && applyField(tag, FieldKey.YEAR, year == null ? song.getYear() : year)
-                && applyField(tag, FieldKey.COMMENT, comment == null ? song.getComment() : comment)
-                && applyField(tag, FieldKey.RECORD_LABEL, label == null ? song.getLabel() : label)
-                && applyField(tag, FieldKey.GENRE, genre == null ? song.getGenre() : genre)
-                && applyField(tag, FieldKey.LYRICS, lyrics == null ? song.getLyrics() : lyrics)) {
+        if (applyField(tag, FieldKey.TITLE, title == null ? album.getTitle() : title)
+                && applyField(tag, FieldKey.ARTIST, artist == null ? album.getArtist() : artist)
+                && applyField(tag, FieldKey.YEAR, year == null ? album.getYear() : year)
+                && applyField(tag, FieldKey.COMMENT, comment == null ? album.getComment() : comment)
+                && applyField(tag, FieldKey.RECORD_LABEL, label == null ? album.getLabel() : label)
+                && applyField(tag, FieldKey.GENRE, genre == null ? album.getGenre() : genre)) {
             try {
                 file.commit();
                 return true;
@@ -148,5 +144,4 @@ public class SongEditor {
             return false;
         }
     }
-
 }
