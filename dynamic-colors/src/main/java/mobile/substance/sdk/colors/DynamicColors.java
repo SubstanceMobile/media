@@ -35,15 +35,20 @@ public class DynamicColors {
         return new DynamicColors(image.getPath());
     }
 
-    public void generate(Context context, DynamicColorsCallback callback) {
-        new DynamicColorsGenerator(context, callback).execute(from);
+    public void generate(Context context, DynamicColorsCallback callback, boolean useSmartPicking) {
+        if (useSmartPicking) {
+            new DynamicColorsGenerator.SmartPicking(context, callback).execute(from);
+        } else new DynamicColorsGenerator(context, callback).execute(from);
+
     }
 
-    public void generateOnExecutor(Executor exec, Context context, DynamicColorsCallback callback) {
-        new DynamicColorsGenerator(context, callback).executeOnExecutor(exec, from);
+    public void generateOnExecutor(Executor exec, Context context, DynamicColorsCallback callback, boolean useSmartPicking) {
+        if (useSmartPicking) {
+            new DynamicColorsGenerator.SmartPicking(context, callback).executeOnExecutor(exec, from);
+        } else new DynamicColorsGenerator(context, callback).executeOnExecutor(exec, from);
     }
 
-    class DynamicColorsGenerator extends AsyncTask<Object, Void, ColorPackage> {
+    private static class DynamicColorsGenerator extends AsyncTask<Object, Void, ColorPackage> {
         private Context context;
         private DynamicColorsCallback callback;
 
@@ -85,5 +90,18 @@ public class DynamicColors {
         protected void onPostExecute(ColorPackage colorPackage) {
             callback.onColorsReady(colorPackage);
         }
+
+        private static class SmartPicking extends DynamicColorsGenerator {
+
+            SmartPicking(Context context, DynamicColorsCallback callback) {
+                super(context, callback);
+            }
+
+            @Override
+            protected ColorPackage doInBackground(Object... params) {
+                return null;
+            }
+        }
+
     }
 }
