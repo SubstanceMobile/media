@@ -15,17 +15,15 @@ import org.jaudiotagger.tag.images.ArtworkFactory;
 import java.io.File;
 import java.io.IOException;
 
-import mobile.substance.sdk.music.core.objects.Song;
-
 public class SongEditor {
     private Context context;
     private String title, artist, album, genre, diskNo, year, comment, label, lyrics;
     private Artwork artwork;
     private TagSong song;
 
-    public SongEditor(Context context, Song song) {
+    public SongEditor(Context context, TagSong song) {
         this.context = context;
-        this.song = TagHelper.read(context, song);
+        this.song = song;
     }
 
     public SongEditor setTitle(String title) {

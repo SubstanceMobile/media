@@ -1,8 +1,10 @@
 package mobile.substance.sdk.music.tags;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Environment;
 import android.provider.DocumentsContract;
@@ -17,9 +19,11 @@ import org.jaudiotagger.tag.images.ArtworkFactory;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import mobile.substance.sdk.music.core.objects.Album;
+import mobile.substance.sdk.music.core.objects.Playlist;
 import mobile.substance.sdk.music.core.objects.Song;
 
 public class TagHelper {
@@ -67,6 +71,14 @@ public class TagHelper {
                 //.setYear(album.getYear())
                 .setArtwork(artwork)
                 .setSongs(songs);
+    }
+
+    public static void readAsync(Context context, Song song, SongReadCallback callback) {
+        new AsyncTagSong(context, callback).execute(song);
+    }
+
+    public static void readAsync(Context context, Album album, AlbumReadCallback callback) {
+        new AsyncTagAlbum(context, callback).execute(album);
     }
 
     public static Uri getFileUri(Context context, Uri uri) {
@@ -127,5 +139,87 @@ public class TagHelper {
 
     public static boolean isMediaDocument(Uri uri) {
         return "com.android.providers.media.documents".equals(uri.getAuthority());
+    }
+
+    private Playlist createPlaylist(Context context, String name) {
+        if (name == null || name.length() <= 0) {
+            return null;
+        } else {
+            try {
+                Cursor mQuery = context.getContentResolver().query(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, new String[]{"_id"}, "name=?", new String[]{name}, null);
+                if (mQuery == null || mQuery.getCount() < 1) {
+                    ContentValues mValues = new ContentValues(1);
+                    mValues.put(MediaStore.Audio.Playlists.NAME, name);
+                    Uri mInsert = context.getContentResolver().insert(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, mValues);
+                    if (mQuery != null) {
+                        mQuery.close();
+                    }
+                    if (mInsert != null) {
+                        context.getContentResolver().notifyChange(Uri.parse("content://media/audio/playlists"), null);
+                        Playlist p = new Playlist();
+                        p.setName(name);
+                        p.setId(Integer.valueOf(mInsert.getLastPathSegment()));
+                        p.setSongs(Collections.<Song>emptyList());
+                        //p.setType(TYPE);
+                        return p;
+                    } else return null;
+                } else return null;
+            } catch (Exception e) {
+                e.printStackTrace();
+                return null;
+            }
+        }
+    }
+
+    interface AlbumReadCallback {
+
+        void onReadFinished(TagAlbum album);
+
+    }
+
+    interface SongReadCallback {
+
+        void onReadFinished(TagSong song);
+
+    }
+
+    static class AsyncTagAlbum extends AsyncTask<Album, Void, TagAlbum> {
+        private Context context;
+        private AlbumReadCallback callback;
+
+        public AsyncTagAlbum(Context context, AlbumReadCallback callback) {
+            this.context = context;
+            this.callback = callback;
+        }
+
+        @Override
+        protected TagAlbum doInBackground(Album... params) {
+            return read(context, params[0]);
+        }
+
+        @Override
+        protected void onPostExecute(TagAlbum tagAlbum) {
+            callback.onReadFinished(tagAlbum);
+        }
+    }
+
+    static class AsyncTagSong extends AsyncTask<Song, Void, TagSong> {
+        private Context context;
+        private SongReadCallback callback;
+
+        public AsyncTagSong(Context context, SongReadCallback callback) {
+            this.context = context;
+            this.callback = callback;
+        }
+
+        @Override
+        protected TagSong doInBackground(Song... params) {
+            return read(context, params[0]);
+        }
+
+        @Override
+        protected void onPostExecute(TagSong tagSong) {
+            callback.onReadFinished(tagSong);
+        }
     }
 }

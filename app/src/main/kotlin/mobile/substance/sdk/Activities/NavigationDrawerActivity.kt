@@ -12,14 +12,14 @@ open class NavigationDrawerActivity : BaseActivity() {
 
     private fun handleLaunch() {
         fragment = HomeFragment()
-        applyFragmentChanges()
+        commitFragment()
     }
 
     override fun init() {
         handleLaunch()
     }
 
-    private fun applyFragmentChanges() {
+    private fun commitFragment() {
         supportFragmentManager.beginTransaction().replace(R.id.activity_main_fragment_placeholder, fragment).commit()
         updateTitle(getFragmentTitle()!!)
     }
@@ -30,12 +30,12 @@ open class NavigationDrawerActivity : BaseActivity() {
         when (item.itemId) {
             R.id.drawer_home -> {
                 fragment = HomeFragment()
-                applyFragmentChanges()
+                commitFragment()
                 return true
             }
             R.id.drawer_music -> {
                 fragment = MusicFragment()
-                applyFragmentChanges()
+                commitFragment()
                 return true
             }
         }
