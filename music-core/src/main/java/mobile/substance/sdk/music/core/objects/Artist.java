@@ -16,25 +16,24 @@
 
 package mobile.substance.sdk.music.core.objects;
 
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.provider.MediaStore;
+import android.support.v4.media.MediaMetadataCompat;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Created by Adrian on 7/5/2015.
  */
 public class Artist extends MediaObject {
-    String artistName;
-    String artistBio;
-
-    List<Album> artistAlbums;
-    List<Song> artistSongs;
-
-    Bitmap artistImage;
+    private String artistName, artistBio, artistImagePath;
+    private long artistId;
+    private List<Album> artistAlbums = new ArrayList<>();
+    private List<Song> artistSongs = new ArrayList<>();
 
     public Artist() {
+
     }
 
     @Override
@@ -46,32 +45,33 @@ public class Artist extends MediaObject {
     //This manages the strings
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    public void setArtistBio(String artistBio) {
-        this.artistBio = artistBio;
-    }
-
-    public String getName() {
+    public String getArtistName() {
         return artistName;
     }
 
-    public void setName(String artistName) {
+    public void setArtistName(String artistName) {
         this.artistName = artistName;
+        putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_TITLE, artistName);
     }
 
-    public String getBio() {
+    public String getArtistBio() {
         return artistBio;
+    }
+
+    public void setArtistBio(String artistBio) {
+        this.artistBio = artistBio;
     }
 
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //This manages the image
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    public Bitmap getArtistImage() {
-        return artistImage;
+    public String getArtistImagePath() {
+        return artistImagePath;
     }
 
-    public void setArtistImage(Bitmap artistImage) {
-        this.artistImage = artistImage;
+    public void setArtistImagePath(String artistImagePath) {
+        this.artistImagePath = artistImagePath;
     }
 
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -93,4 +93,51 @@ public class Artist extends MediaObject {
     public void setArtistSongs(List<Song> artistSongs) {
         this.artistSongs = artistSongs;
     }
+
+    public long getArtistId() {
+        return artistId;
+    }
+
+    public void setArtistId(long artistId) {
+        this.artistId = artistId;
+    }
+
+    public static class Builder {
+        private Artist artist;
+
+        public Builder() {
+            this.artist = new Artist();
+        }
+
+        public Builder setName(String name) {
+            this.artist.setArtistName(name);
+            return this;
+        }
+
+        public Builder setBio(String bio) {
+            this.artist.setArtistBio(bio);
+            return this;
+        }
+
+        public Builder setId(long id) {
+            this.artist.setArtistId(id);
+            return this;
+        }
+
+        public Builder setSongs(List<Song> songs) {
+            this.artist.setArtistSongs(songs);
+            return this;
+        }
+
+        public Builder setAlbums(List<Album> albums) {
+            this.artist.setArtistAlbums(albums);
+            return this;
+        }
+
+        public Artist build() {
+            return artist;
+        }
+
+    }
+
 }

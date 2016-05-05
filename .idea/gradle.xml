@@ -12,9 +12,10 @@
             <option value="$PROJECT_DIR$/dynamic-colors" />
             <option value="$PROJECT_DIR$/music" />
             <option value="$PROJECT_DIR$/music-core" />
+            <option value="$PROJECT_DIR$/music-loading" />
+            <option value="$PROJECT_DIR$/music-tags" />
             <option value="$PROJECT_DIR$/permissions" />
             <option value="$PROJECT_DIR$/plugin-support" />
-            <option value="$PROJECT_DIR$/tags" />
           </set>
         </option>
         <option name="myModules">
@@ -24,9 +25,10 @@
             <option value="$PROJECT_DIR$/dynamic-colors" />
             <option value="$PROJECT_DIR$/music" />
             <option value="$PROJECT_DIR$/music-core" />
+            <option value="$PROJECT_DIR$/music-loading" />
+            <option value="$PROJECT_DIR$/music-tags" />
             <option value="$PROJECT_DIR$/permissions" />
             <option value="$PROJECT_DIR$/plugin-support" />
-            <option value="$PROJECT_DIR$/tags" />
           </set>
         </option>
       </GradleProjectSettings>

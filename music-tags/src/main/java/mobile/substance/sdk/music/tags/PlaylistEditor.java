@@ -89,7 +89,7 @@ public class PlaylistEditor {
 
     private TagResult addToPlaylist(List<Song> songs) {
         String[] s = new String[]{"max(play_order)"};
-        Uri uri = MediaStore.Audio.Playlists.Members.getContentUri("external", playlist.getId());
+        Uri uri = MediaStore.Audio.Playlists.Members.getContentUri("external", playlist.getID());
         try {
             Cursor query = context.getContentResolver().query(uri, s, null, null, null);
             if (query != null) {
@@ -98,7 +98,6 @@ public class PlaylistEditor {
                         int count = query.getInt(query.getColumnIndex(MediaStore.Audio.Playlists.Members._COUNT)) + 1;
                         query.close();
                         context.getContentResolver().bulkInsert(uri, newPlaylistMemberValues(songs, count));
-                        playlist.addAll(songs);
                         return TagResult.SUCCESS;
                     } else return TagResult.ERR_ADD_FAILED;
                 } catch (Throwable th) {
@@ -114,7 +113,7 @@ public class PlaylistEditor {
 
     private TagResult deletePlaylist() {
         try {
-            context.getContentResolver().delete(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, "_id IN (" + playlist.getId() + ")", null);
+            context.getContentResolver().delete(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, "_id IN (" + playlist.getID() + ")", null);
             playlist = null;
             return TagResult.SUCCESS;
         } catch (Exception ignored) {
@@ -134,7 +133,7 @@ public class PlaylistEditor {
 
     private TagResult movePlaylistItem(int fromPos, int toPos) {
         try {
-            MediaStore.Audio.Playlists.Members.moveItem(context.getContentResolver(), playlist.getId(), fromPos, toPos);
+            MediaStore.Audio.Playlists.Members.moveItem(context.getContentResolver(), playlist.getID(), fromPos, toPos);
             return TagResult.SUCCESS;
         } catch (Exception e) {
             e.printStackTrace();
@@ -145,8 +144,7 @@ public class PlaylistEditor {
     private TagResult removeFromPlaylist(List<Song> songs) {
         try {
             for (Song song : songs) {
-                context.getContentResolver().delete(MediaStore.Audio.Playlists.Members.getContentUri("external", playlist.getId()), "audio_id =?", new String[]{String.valueOf(song.getID())});
-                playlist.removeSong(song);
+                context.getContentResolver().delete(MediaStore.Audio.Playlists.Members.getContentUri("external", playlist.getID()), "audio_id =?", new String[]{String.valueOf(song.getID())});
             }
             return TagResult.SUCCESS;
         } catch (Exception e) {
@@ -160,9 +158,9 @@ public class PlaylistEditor {
         ContentValues contentValues = new ContentValues();
         contentValues.put(MediaStore.Audio.Playlists.NAME, newName);
         try {
-            context.getContentResolver().update(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, contentValues, "_id=?", new String[]{String.valueOf(playlist.getId())});
+            context.getContentResolver().update(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, contentValues, "_id=?", new String[]{String.valueOf(playlist.getID())});
             context.getContentResolver().notifyChange(Uri.parse("content://media"), null);
-            playlist.setName(newName);
+            playlist.setPlaylistName(newName);
             return TagResult.SUCCESS;
         } catch (Exception e) {
             e.printStackTrace();

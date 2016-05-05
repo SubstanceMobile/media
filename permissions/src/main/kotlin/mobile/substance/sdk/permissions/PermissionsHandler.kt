@@ -14,6 +14,8 @@ class PermissionsHandler(activity: Activity, permissions: Array<String>?, callba
     var granted: Array<Boolean>? = null
     var showedRationale: Array<Boolean>? = null
 
+    var allGranted: Boolean = false
+
     init {
         this.activity = activity
         this.permissions = permissions
@@ -59,8 +61,11 @@ class PermissionsHandler(activity: Activity, permissions: Array<String>?, callba
             } else callbacks!!.onPermissionUnavailable(permissions[i])
         }
 
-        if (granted!!.all { true })
+        if (granted!!.all { true }) {
             callbacks!!.onAllGranted()
+            allGranted = true
+        }
+
 
         return true
     }

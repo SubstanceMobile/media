@@ -18,18 +18,14 @@ package mobile.substance.sdk.music.core.objects;
 
 import android.net.Uri;
 import android.provider.MediaStore;
-
-import java.util.ArrayList;
-import java.util.List;
+import android.support.v4.media.MediaMetadataCompat;
 
 /**
  * Created by Adrian on 7/5/2015.
  */
 public class Playlist extends MediaObject {
-    List<Song> songs = new ArrayList<>();
-    String name;
-    long id;
-    int type;
+    private String playlistName;
+    private int playlistType;
 
     public Playlist() {
     }
@@ -43,63 +39,53 @@ public class Playlist extends MediaObject {
     //Manages the title of the playlist
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    public String getName() {
-        return name;
+    public String getPlaylistName() {
+        return playlistName;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    //////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    //These are the songs in the
-    //////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    public List<Song> getSongs() {
-        return songs;
-    }
-
-    public void setSongs(List<Song> songs) {
-        this.songs = songs;
-    }
-
-    public void addSong(Song s) {
-        getSongs().add(s);
-    }
-
-    public void removeSong(Song s) {
-        getSongs().remove(s);
-    }
-
-    public void addAll(List<Song> songs) {
-        for (Song s : songs) addSong(s);
-    }
-
-    public void removeAll(List<Song> songs) {
-        for (Song s : songs) removeSong(s);
-    }
-
-    ///////////////////////////////////////////////////////////////////////////
-    // ID
-    ///////////////////////////////////////////////////////////////////////////
-
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
+    public void setPlaylistName(String playlistName) {
+        this.playlistName = playlistName;
+        putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_TITLE, playlistName);
     }
 
     ///////////////////////////////////////////////////////////////////////////
     // Order
     ///////////////////////////////////////////////////////////////////////////
 
-    public int getType() {
-        return type;
+    public int getPlaylistType() {
+        return playlistType;
     }
 
-    public void setType(int type) {
-        this.type = type;
+    public void setPlaylistType(int playlistType) {
+        this.playlistType = playlistType;
     }
+
+    public static class Builder {
+        private Playlist playlist;
+
+        public Builder() {
+            this.playlist = new Playlist();
+        }
+
+        public Builder setName(String name) {
+            this.playlist.setPlaylistName(name);
+            return this;
+        }
+
+        public Builder setId(long id) {
+            this.playlist.setID(id);
+            return this;
+        }
+
+        public Builder setType(int type) {
+            this.playlist.setPlaylistType(type);
+            return this;
+        }
+
+        public Playlist build() {
+            return playlist;
+        }
+
+    }
+
 }

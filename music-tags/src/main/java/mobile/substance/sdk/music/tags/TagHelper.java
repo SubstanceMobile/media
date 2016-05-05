@@ -13,14 +13,8 @@ import android.provider.MediaStore;
 import org.jaudiotagger.audio.AudioFileIO;
 import org.jaudiotagger.tag.FieldKey;
 import org.jaudiotagger.tag.Tag;
-import org.jaudiotagger.tag.images.Artwork;
-import org.jaudiotagger.tag.images.ArtworkFactory;
 
 import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 import mobile.substance.sdk.music.core.objects.Album;
 import mobile.substance.sdk.music.core.objects.Playlist;
@@ -51,27 +45,27 @@ public class TagHelper {
                 .setLyrics(tag.getFirst(FieldKey.LYRICS));
     }
 
-    public static TagAlbum read(Context context, Album album) {
-        List<TagSong> songs = new ArrayList<>();
-        for (Song song : album.getSongs()) {
-            songs.add(read(context, song));
-        }
-
-        Artwork artwork = null;
-        try {
-            artwork = ArtworkFactory.createArtworkFromFile(new File(album.getAlbumArtPath()));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return new TagAlbum()
-                .setTitle(album.getTitle())
-                .setArtist(album.getAlbumArtistName())
-                //.setGenre(album.getGenre())
-                //.setYear(album.getYear())
-                .setArtwork(artwork)
-                .setSongs(songs);
-    }
+    //public static TagAlbum read(Context context, Album album) {
+    //    List<TagSong> songs = new ArrayList<>();
+    //    for (Song song : album.getSongs()) {
+    //        songs.add(read(context, song));
+    //    }
+//
+    //      Artwork artwork = null;
+    //    try {
+    //      artwork = ArtworkFactory.createArtworkFromFile(new File(album.getAlbumArtworkPath()));
+    //  } catch (IOException e) {
+    //      e.printStackTrace();
+    //  }
+//
+    //      return new TagAlbum()
+    //            .setTitle(album.getTitle())
+    //          .setArtist(album.getAlbumArtistName())
+    //          //.setGenre(album.getGenre())
+    //        //.setYear(album.getYear())
+    //      .setArtwork(artwork)
+    //    .setSongs(songs);
+    //}
 
     public static void readAsync(Context context, Song song, SongReadCallback callback) {
         new AsyncTagSong(context, callback).execute(song);
@@ -157,9 +151,8 @@ public class TagHelper {
                     if (mInsert != null) {
                         context.getContentResolver().notifyChange(Uri.parse("content://media/audio/playlists"), null);
                         Playlist p = new Playlist();
-                        p.setName(name);
-                        p.setId(Integer.valueOf(mInsert.getLastPathSegment()));
-                        p.setSongs(Collections.<Song>emptyList());
+                        p.setPlaylistName(name);
+                        p.setID(Integer.valueOf(mInsert.getLastPathSegment()));
                         //p.setType(TYPE);
                         return p;
                     } else return null;
@@ -194,7 +187,7 @@ public class TagHelper {
 
         @Override
         protected TagAlbum doInBackground(Album... params) {
-            return read(context, params[0]);
+            return null; //
         }
 
         @Override

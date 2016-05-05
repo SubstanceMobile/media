@@ -24,24 +24,79 @@ import android.support.annotation.Nullable;
 import android.support.v4.media.MediaMetadataCompat;
 import android.util.Log;
 
-import static android.support.v4.media.MediaMetadataCompat.METADATA_KEY_TITLE;
 
-public abstract class MediaObject {
+public class MediaObject {
     private static final MediaMetadataCompat.Builder builder = new MediaMetadataCompat.Builder();
-    public MediaMetadataCompat data;
-    long id;
-    boolean locked = false;
-    long TIME_LOADED = 0;
+    MediaMetadataCompat data;
+    private long id, TIME_LOADED = 0;
+    private boolean isLocked, isAnimated = false;
 
     ///////////////////////////////////////////////////////////////////////////
     // Uri
     ///////////////////////////////////////////////////////////////////////////
-    int posInList;
-    private Context cxt;
+    private int posInList;
+    private Context context;
 
     ///////////////////////////////////////////////////////////////////////////
     //Title
     ///////////////////////////////////////////////////////////////////////////
+
+    protected Uri getBaseUri() {
+        return null;
+    }
+
+    public Uri getUri() {
+        return ContentUris.withAppendedId(getBaseUri(), getID());
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
+    // Handles time data
+    ///////////////////////////////////////////////////////////////////////////
+
+    public long getID() {
+        return id;
+    }
+
+    public MediaObject setID(long id) {
+        this.id = id;
+        return this;
+    }
+
+    public MediaObject lock() {
+        TIME_LOADED = System.currentTimeMillis();
+        isLocked = true;
+        return this;
+    }
+
+    public MediaObject unlock() {
+        TIME_LOADED = 0;
+        isLocked = false;
+        return this;
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
+    // Context
+    ///////////////////////////////////////////////////////////////////////////
+
+    public boolean isLocked() {
+        return isLocked;
+    }
+
+    public long getTimeLoaded() {
+        return TIME_LOADED;
+    }
+
+    public boolean isAnimated() {
+        return isAnimated;
+    }
+
+    public void setAnimated(boolean isAnimated) {
+        this.isAnimated = isAnimated;
+    }
+
+    protected void onContextSet(Context context) {
+        //Override if you want to do something when the context is set
+    }
 
     protected void putLong(String key, long value) {
         if (isLocked()) throw new Error("Object locked. Cannot edit");
@@ -55,71 +110,12 @@ public abstract class MediaObject {
         data = builder.build();
     }
 
-    ///////////////////////////////////////////////////////////////////////////
-    // ID
-    ///////////////////////////////////////////////////////////////////////////
-
     protected void putBitmap(String key, Bitmap value) {
         if (isLocked()) throw new Error("Object locked. Cannot edit");
         builder.putBitmap(key, value);
         data = builder.build();
     }
 
-    protected abstract Uri getBaseUri();
-
-    public Uri getUri() {
-        return ContentUris.withAppendedId(getBaseUri(), getID());
-    }
-
-    ///////////////////////////////////////////////////////////////////////////
-    // Handles time data
-    ///////////////////////////////////////////////////////////////////////////
-
-    public String getTitle() {
-        return data.getString(METADATA_KEY_TITLE);
-    }
-
-    public MediaObject setTitle(String songTitle) {
-        putString(METADATA_KEY_TITLE, songTitle);
-        return this;
-    }
-
-    public long getID() {
-        return id;
-    }
-
-    public MediaObject setID(long id) {
-        this.id = id;
-        return this;
-    }
-
-    public MediaObject lock() {
-        TIME_LOADED = System.currentTimeMillis();
-        locked = true;
-        return this;
-    }
-
-    public MediaObject unlock() {
-        TIME_LOADED = 0;
-        locked = false;
-        return this;
-    }
-
-    ///////////////////////////////////////////////////////////////////////////
-    // Context
-    ///////////////////////////////////////////////////////////////////////////
-
-    public boolean isLocked() {
-        return locked;
-    }
-
-    public long getTimeLoaded() {
-        return TIME_LOADED;
-    }
-
-    protected void onContextSet(Context context) {
-        //Override if you want to do something when the context is set
-    }
 
     protected boolean isContextRequired() {
         //Override to change
@@ -128,19 +124,23 @@ public abstract class MediaObject {
 
     @Nullable
     public Context getContext() {
-        return cxt.getApplicationContext();
+        return context.getApplicationContext();
     }
 
     ///////////////////////////////////////////////////////////////////////////
     // Position in list
     ///////////////////////////////////////////////////////////////////////////
 
-    public MediaObject setContext(Context cxt) {
+    public MediaObject setContext(Context context) {
         if (isContextRequired()) {
-            this.cxt = cxt;
-            onContextSet(cxt);
+            this.context = context;
+            onContextSet(context);
         } else Log.d(getClass().getSimpleName(), "Context was not requested. Ignoring");
         return this;
+    }
+
+    public MediaMetadataCompat getMetadataCompat() {
+        return getMetadataCompat();
     }
 
     public int getPosInList() {

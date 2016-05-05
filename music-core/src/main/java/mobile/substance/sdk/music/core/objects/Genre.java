@@ -16,36 +16,50 @@
 
 package mobile.substance.sdk.music.core.objects;
 
+import android.net.Uri;
+import android.provider.MediaStore;
+import android.support.v4.media.MediaMetadataCompat;
+
 /**
  * Created by Adrian on 7/5/2015.
  */
-public class Genre {
-    //TODO:Unfinished
+public class Genre extends MediaObject {
+    String genreName;
 
-    ///////////////////////////////////////////////////////////////////////////
-    // Name
-    ///////////////////////////////////////////////////////////////////////////
-
-    String name;
-    long id;
-
-    public String getName() {
-        return name;
+    public String getGenreName() {
+        return genreName;
     }
 
-    ///////////////////////////////////////////////////////////////////////////
-    // ID
-    ///////////////////////////////////////////////////////////////////////////
-
-    public void setName(String name) {
-        this.name = name;
+    public void setGenreName(String genreName) {
+        this.genreName = genreName;
+        putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_TITLE, genreName);
     }
 
-    public long getId() {
-        return id;
+    @Override
+    protected Uri getBaseUri() {
+        return MediaStore.Audio.Genres.EXTERNAL_CONTENT_URI;
     }
 
-    public void setId(long id) {
-        this.id = id;
+    public static class Builder {
+        private Genre genre;
+
+        public Builder() {
+            this.genre = new Genre();
+        }
+
+        public Builder setGenreName(String genreName) {
+            this.genre.setGenreName(genreName);
+            return this;
+        }
+
+        public Builder setGenreId(long genreId) {
+            this.genre.setID(genreId);
+            return this;
+        }
+
+        public Genre build() {
+            return genre;
+        }
     }
+
 }

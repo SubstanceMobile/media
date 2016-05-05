@@ -7,6 +7,9 @@ import android.support.v7.widget.Toolbar
 import mobile.substance.sdk.Fragments.HomeFragment
 import mobile.substance.sdk.Fragments.MusicFragment
 import mobile.substance.sdk.R
+import mobile.substance.sdk.music.loading.Library
+import mobile.substance.sdk.music.loading.LibraryConfig
+import mobile.substance.sdk.music.loading.LibraryData
 
 class MainActivity : NavigationDrawerActivity() {
     var drawerLayout: DrawerLayout? = null
@@ -24,6 +27,7 @@ class MainActivity : NavigationDrawerActivity() {
             drawerLayout!!.closeDrawer(GravityCompat.START)
             handleNavigationClick(it)
         }
+        Library(this, LibraryConfig().put(LibraryData.SONGS).put(LibraryData.ALBUMS))
         super.init()
     }
 

@@ -7,9 +7,11 @@
       <module fileurl="file://$PROJECT_DIR$/dynamic-colors/dynamic-colors.iml" filepath="$PROJECT_DIR$/dynamic-colors/dynamic-colors.iml" />
       <module fileurl="file://$PROJECT_DIR$/music/music.iml" filepath="$PROJECT_DIR$/music/music.iml" />
       <module fileurl="file://$PROJECT_DIR$/music-core/music-core.iml" filepath="$PROJECT_DIR$/music-core/music-core.iml" />
+      <module fileurl="file://$PROJECT_DIR$/music-loading/music-loading.iml" filepath="$PROJECT_DIR$/music-loading/music-loading.iml" />
+      <module fileurl="file://$PROJECT_DIR$/music-tags/music-tags.iml" filepath="$PROJECT_DIR$/music-tags/music-tags.iml" />
       <module fileurl="file://$PROJECT_DIR$/permissions/permissions.iml" filepath="$PROJECT_DIR$/permissions/permissions.iml" />
       <module fileurl="file://$PROJECT_DIR$/plugin-support/plugin-support.iml" filepath="$PROJECT_DIR$/plugin-support/plugin-support.iml" />
-      <module fileurl="file://$PROJECT_DIR$/tags/tags.iml" filepath="$PROJECT_DIR$/tags/tags.iml" />
+      <module fileurl="file://$PROJECT_DIR$/music-tags/tags.iml" filepath="$PROJECT_DIR$/music-tags/tags.iml" />
     </modules>
   </component>
 </project>

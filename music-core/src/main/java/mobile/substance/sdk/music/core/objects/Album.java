@@ -17,10 +17,10 @@
 package mobile.substance.sdk.music.core.objects;
 
 import android.graphics.Bitmap;
-import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.provider.MediaStore;
+import android.support.v4.media.MediaMetadataCompat;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
@@ -28,63 +28,42 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * Created by Adrian on 7/5/2015.
  */
 public class Album extends MediaObject {
-    public static final int FRAME_COLOR = 0, TITLE_COLOR = 1, SUBTITLE_COLOR = 2;
-    public String albumArtistName;
-    public boolean animated;
-
-    //////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    //This manages the songs of the album
-    //////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    public String albumArtPath;
-
-    //////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    //This handles the Album Art
-    //////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    public boolean defaultArt = false;
-    public boolean colorAnimated = false;
-    public int[] mainColors;
-    public int[] accentColors = new int[]{
-            Color.BLACK, Color.WHITE, Color.GRAY
-    };
-    public boolean colorsLoaded = false;
+    private String albumName, albumGenreName, albumYear, albumArtistName, albumArtworkPath;
+    private int albumDefaultArtworkResId, albumNumberOfSongs;
 
     @Override
     protected Uri getBaseUri() {
         return MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI;
     }
 
-    public List<Song> getSongs() {
-        return new ArrayList<>();
+    public int getAlbumDefaultArtworkResId() {
+        return albumDefaultArtworkResId;
     }
 
-    ///////////////////////////////////////////////////////////////////////////
-    // Colors
-    ///////////////////////////////////////////////////////////////////////////
-
-    public String getAlbumArtPath() {
-        return albumArtPath;
+    public void setAlbumDefaultArtworkResId(int albumDefaultArtworkResId) {
+        this.albumDefaultArtworkResId = albumDefaultArtworkResId;
     }
 
-    public void setAlbumArtPath(String albumArtPath) {
-        this.albumArtPath = "file://" + albumArtPath;
-        if (albumArtPath != null) {
-            defaultArt = false;
-            colorAnimated = false;
+    public String getAlbumArtworkPath() {
+        return albumArtworkPath;
+    }
+
+    public void setAlbumArtworkPath(String albumArtworkPath) {
+
+        this.albumArtworkPath = "file://" + albumArtworkPath;
+        if (albumArtworkPath != null) {
+            setAnimated(false);
         } else {
-            defaultArt = true;
-            colorAnimated = true;
+            setAnimated(true);
         }
     }
 
     public void requestArt(final ArtRequest request) { // <- Not sure about this one
-        Glide.with(getContext()).load(getAlbumArtPath())
+        Glide.with(getContext()).load(getAlbumArtworkPath())
                 .asBitmap()
                 //.placeholder(!Options.isLightTheme() ? R.drawable.art_dark : R.drawable.art_light)
                 .diskCacheStrategy(DiskCacheStrategy.SOURCE)
@@ -99,7 +78,7 @@ public class Album extends MediaObject {
     }
 
     public void requestArt(ImageView imageView, Drawable placeholder) {
-        Glide.with(imageView.getContext()).load(getAlbumArtPath())
+        Glide.with(imageView.getContext()).load(getAlbumArtworkPath())
                 .placeholder(placeholder)
                 .diskCacheStrategy(DiskCacheStrategy.SOURCE)
                 .crossFade()
@@ -107,45 +86,51 @@ public class Album extends MediaObject {
                 .into(imageView);
     }
 
-    public int getBackgroundColor() {
-        return mainColors[FRAME_COLOR];
-    }
-
-    public int getTitleTextColor() {
-        return mainColors[TITLE_COLOR];
-    }
-
-    public int getSubtitleTextColor() {
-        return mainColors[SUBTITLE_COLOR];
-    }
-
-    public int getAccentColor() {
-        return accentColors[FRAME_COLOR];
-    }
-
-    public int getAccentIconColor() {
-        return accentColors[TITLE_COLOR];
-    }
-
-    public int getAccentSecondaryIconColor() {
-        return accentColors[SUBTITLE_COLOR];
-    }
-
     public String getAlbumArtistName() {
         return albumArtistName;
     }
 
-    //////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    //This handles the album artist
-    //////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
     public void setAlbumArtistName(String albumArtistName) {
         this.albumArtistName = albumArtistName;
+        putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_SUBTITLE, albumArtistName);
     }
 
     @Override
     protected boolean isContextRequired() {
         return true;
+    }
+
+    public String getAlbumName() {
+        return albumName;
+    }
+
+    public void setAlbumName(String albumName) {
+        this.albumName = albumName;
+        putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_TITLE, albumName);
+    }
+
+    public String getAlbumGenreName() {
+        return albumGenreName;
+    }
+
+    public void setAlbumGenreName(String albumGenreName) {
+        this.albumGenreName = albumGenreName;
+    }
+
+    public String getAlbumYear() {
+        return albumYear;
+    }
+
+    public void setAlbumYear(String albumYear) {
+        this.albumYear = albumYear;
+    }
+
+    public int getAlbumNumberOfSongs() {
+        return albumNumberOfSongs;
+    }
+
+    public void setAlbumNumberOfSongs(int albumNumberOfSongs) {
+        this.albumNumberOfSongs = albumNumberOfSongs;
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -154,6 +139,69 @@ public class Album extends MediaObject {
 
     public interface ArtRequest {
         void respond(Bitmap albumArt);
+    }
+
+    public static class Builder {
+        private Album album;
+
+        public Builder() {
+            this.album = new Album();
+        }
+
+        public Builder setName(String name) {
+            this.album.setAlbumName(name);
+            return this;
+        }
+
+        public Builder setArtistName(String artistName) {
+            this.album.setAlbumArtistName(artistName);
+            return this;
+        }
+
+        public Builder setGenreName(String genreName) {
+            this.album.setAlbumGenreName(genreName);
+            return this;
+        }
+
+        public Builder setYear(String year) {
+            this.album.setAlbumYear(year);
+            return this;
+        }
+
+        public Builder setAlbumId(long id) {
+            this.album.setID(id);
+            return this;
+        }
+
+        public Builder setNumberOfSongs(int numberOfSongs) {
+            this.album.setAlbumNumberOfSongs(numberOfSongs);
+            return this;
+        }
+
+        public Builder setArtworkPath(String path) {
+            this.album.setAlbumArtworkPath(path);
+            return this;
+        }
+
+        public Album build() {
+            return album;
+        }
+    }
+
+    public static class WithColors<ColorContainer> extends Album {
+        private ColorContainer container;
+
+        public WithColors(ColorContainer container) {
+            this.container = container;
+        }
+
+        public ColorContainer getContainer() {
+            return container;
+        }
+
+        public void setContainer(ColorContainer container) {
+            this.container = container;
+        }
     }
 
 }

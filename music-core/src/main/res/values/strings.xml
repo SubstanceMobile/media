@@ -1,3 +1,10 @@
 <resources>
-    <string name="app_name">base</string>
+    <string name="app_name">core</string>
+
+    // Data descriptions
+    <string name="albums">Albums</string>
+    <string name="songs">Songs</string>
+    <string name="playlists">Playlists</string>
+    <string name="artists">Artists</string>
+    <string name="genres">Genres</string>
 </resources>

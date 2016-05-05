@@ -12,7 +12,8 @@ open class NavigationDrawerActivity : BaseActivity() {
 
     private fun handleLaunch() {
         fragment = HomeFragment()
-        commitFragment()
+        supportFragmentManager.beginTransaction().add(R.id.activity_main_fragment_placeholder, fragment, "SubstanceSDk").commit()
+        updateTitle(getFragmentTitle()!!)
     }
 
     override fun init() {
@@ -20,8 +21,10 @@ open class NavigationDrawerActivity : BaseActivity() {
     }
 
     private fun commitFragment() {
-        supportFragmentManager.beginTransaction().replace(R.id.activity_main_fragment_placeholder, fragment).commit()
+        Log.d("LOG", "fragment is HomeFragment => " + (fragment is HomeFragment).toString())
+        supportFragmentManager.beginTransaction().replace(R.id.activity_main_fragment_placeholder, fragment, "SubstanceSDK").commit()
         updateTitle(getFragmentTitle()!!)
+        Log.d("LOG", supportFragmentManager.fragments.size.toString())
     }
 
     fun handleNavigationClick(item: MenuItem): Boolean {
