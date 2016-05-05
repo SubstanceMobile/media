@@ -17,7 +17,7 @@ gen/
 build/
 
 # Android Studio Workspace
-.idea/workspace.xml
+app/src/workspace.xml
 
 # Local configuration file (sdk path, etc)
 local.properties

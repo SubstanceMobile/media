@@ -1,28 +1,36 @@
 #Substance SDK (Pre-Alpha)
 Project Managed by the entire Substance team.
 
+[![Version](https://jitpack.io/v/SubstanceMobile/SDK.svg)](https://jitpack.io/#SubstanceMobile/SDK)
 
 Substance SDK is a collection of libraries ddesigned to make developers' lives easier. It is extremely modular; you can go by individual libraries, packages, and even the entire SDK.
 
 ##Modules
 ###Music
-The music module contains libraries that help you make a music player. To use, add `COMING SOON` to your `build.gradle ` file.
-###Plugin Support
-######For Plugins
-######For Receivers
+The music package contains the entire playback engine from GEM Player. It will help you make an extremely functional music player with very little code.
+######Core
+This is the base library. It contains classes you can use to configure the entire music package. It also includes the base media objects: `Song`, `Album`, `Playlist`, and `Artist`.
+######Tags
+This library is used to edit your media tags. It can also control your playlists.
+###Dynamic Colors
+A simple library that wraps around `Palette` and has the best possible color extraction system. Straight from GEM Player.
+###Permissions
+A simple permissions helper library.
 ###More coming in the future!
 
 
 ##Structure
 * SDK
-    * Music Library
+    * music
+       * music-core
        * Data Loading Library
-       * Tag Editing Library
        * Playback Library
-       * Base (Shared elements) Library
+       * tags
     * Plugin API
-       * For Plugins
-       * For Apps
-    * Theme Engine (fork of app-theme-engine by @afollestad)
-       * Manual (Just the core of TE. It will give you methods to easily theme individual views)
-    * Etc
+       * App Communication
+       * Library Communication
+       * Remote Views
+    * theme-engine (fork of app-theme-engine by @afollestad)
+       * core
+    * dynamic-colors
+    * permissions
