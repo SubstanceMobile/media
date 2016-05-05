@@ -12,6 +12,10 @@ The music module contains libraries that help you make a music player.
 This is the base library. It contains classes you can use to configure the entire music collection of libraries. It also includes the base media objects: `Song`, `Album`, `Playlist`, and `Artist`.
 ######Tags
 This library is used to edit your media tags. It can also control your playlists.
+###Dynamic Colors
+A simple library that wraps around `Palette` and has the best possible color extraction system. Straight from GEM Player.
+###Permissions
+A simple permissions helper library.
 ###More coming in the future!
 
 
