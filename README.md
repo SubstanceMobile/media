@@ -1,6 +1,7 @@
 #Substance SDK (Pre-Alpha)
 Project Managed by the entire Substance team.
 
+[![Version](https://jitpack.io/v/SubstanceMobile/SDK.svg)](https://jitpack.io/#SubstanceMobile/SDK)
 
 Substance SDK is a collection of libraries ddesigned to make developers' lives easier. It is extremely modular; you can go by individual libraries, packages, and even the entire SDK.
 
@@ -15,14 +16,16 @@ The music module contains libraries that help you make a music player. To use, a
 
 ##Structure
 * SDK
-    * Music Library
+    * music
+       * music-core
        * Data Loading Library
-       * Tag Editing Library
        * Playback Library
-       * Base (Shared elements) Library
+       * tags
     * Plugin API
-       * For Plugins
-       * For Apps
-    * Theme Engine (fork of app-theme-engine by @afollestad)
-       * Manual (Just the core of TE. It will give you methods to easily theme individual views)
-    * Etc
+       * App Communication
+       * Library Communication
+       * Remote Views
+    * theme-engine (fork of app-theme-engine by @afollestad)
+       * core
+    * dynamic-colors
+    * permissions
