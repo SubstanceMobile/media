@@ -26,6 +26,8 @@ To add the entire SDK to your app, just add this line to the `dependencies` of y
 The music package contains the entire playback engine from GEM Player. It will help you make an extremely functional music player with very little code.
 ######Core
 This is the base library. It contains classes you can use to configure the entire music package. It also includes the base media objects: `Song`, `Album`, `Playlist`, and `Artist`.
+######Loading
+THis library is used to load the data from your mediastore into lists of the core objects.
 ######Tags
 This library is used to edit your media tags. It can also control your playlists.
 ###Dynamic Colors
