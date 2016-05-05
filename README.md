@@ -7,10 +7,11 @@ Substance SDK is a collection of libraries ddesigned to make developers' lives e
 
 ##Modules
 ###Music
-The music module contains libraries that help you make a music player. To use, add `COMING SOON` to your `build.gradle ` file.
-###Plugin Support
-######For Plugins
-######For Receivers
+The music module contains libraries that help you make a music player.
+#####Core
+This is the base library. It contains classes you can use to configure the entire music collection of libraries. It also includes the base media objects: `Song`, `Album`, `Playlist`, and `Artist`.
+#####Tags
+This library is used to edit your media tags. It can also control your playlists.
 ###More coming in the future!
 
 
