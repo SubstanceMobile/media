@@ -5,6 +5,22 @@ Project Managed by the entire Substance team.
 
 Substance SDK is a collection of libraries ddesigned to make developers' lives easier. It is extremely modular; you can go by individual libraries, packages, and even the entire SDK.
 
+##Using
+To use the SDK (or any of it's modules) you will need to do some things. First, add this to your project root:
+```
+allprojects {
+		repositories {
+			...
+			maven { url "https://jitpack.io" }
+		}
+	}
+```
+Next, make sure you have the "Kotlin" plugin installed in Android Studio. Finally, pick a library and add it to your `build.gradle`.
+
+To add the entire SDK to your app, just add this line to the `dependencies` of your module's `build.gradle`:
+
+`compile 'com.github.SubstanceMobile:SDK:-SNAPSHOT'`
+
 ##Modules
 ###Music
 The music package contains the entire playback engine from GEM Player. It will help you make an extremely functional music player with very little code.
