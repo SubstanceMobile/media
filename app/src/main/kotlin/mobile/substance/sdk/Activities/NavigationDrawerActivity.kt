@@ -1,6 +1,7 @@
 package mobile.substance.sdk.Activities
 
 import android.support.v4.app.Fragment
+import android.support.v4.widget.DrawerLayout
 import android.util.Log
 import android.view.MenuItem
 import mobile.substance.sdk.Fragments.HomeFragment
@@ -13,7 +14,6 @@ open class NavigationDrawerActivity : BaseActivity() {
     private fun handleLaunch() {
         fragment = HomeFragment()
         supportFragmentManager.beginTransaction().add(R.id.activity_main_fragment_placeholder, fragment, "SubstanceSDk").commit()
-        updateTitle(getFragmentTitle()!!)
     }
 
     override fun init() {
@@ -23,7 +23,6 @@ open class NavigationDrawerActivity : BaseActivity() {
     private fun commitFragment() {
         Log.d("LOG", "fragment is HomeFragment => " + (fragment is HomeFragment).toString())
         supportFragmentManager.beginTransaction().replace(R.id.activity_main_fragment_placeholder, fragment, "SubstanceSDK").commit()
-        updateTitle(getFragmentTitle()!!)
         Log.d("LOG", supportFragmentManager.fragments.size.toString())
     }
 
@@ -49,10 +48,7 @@ open class NavigationDrawerActivity : BaseActivity() {
         return fragment!!
     }
 
-    open fun updateTitle(title: String) {
-    }
-
-    open fun getFragmentTitle(): String? {
+    open fun getDrawer(): DrawerLayout? {
         return null
     }
 

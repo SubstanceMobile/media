@@ -11,7 +11,7 @@ import mobile.substance.sdk.music.core.objects.Song;
 /**
  * Created by Julian Os on 05.05.2016.
  */
-public interface LibraryCallbacks {
+public interface LibraryListener {
 
     void onSongLoaded(Song item, int pos);
 

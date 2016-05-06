@@ -1,56 +1,109 @@
 package mobile.substance.sdk.Fragments
 
-import android.support.v4.widget.SwipeRefreshLayout
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
+import android.content.Context
+import android.support.design.widget.TabLayout
+import android.support.v4.app.Fragment
+import android.support.v4.app.FragmentManager
+import android.support.v4.app.FragmentPagerAdapter
+import android.support.v4.view.ViewPager
+import android.support.v7.widget.Toolbar
 import android.view.View
-import mobile.substance.sdk.Adapters.MusicAdapter
+import mobile.substance.sdk.Helpers.NavigationHelper
 import mobile.substance.sdk.R
-import mobile.substance.sdk.music.core.objects.MediaObject
-import mobile.substance.sdk.music.core.objects.Song
-import mobile.substance.sdk.music.loading.Library
-import mobile.substance.sdk.music.loading.tasks.Loader
-import java.util.*
+import mobile.substance.sdk.music.core.objects.*
+import mobile.substance.sdk.music.loading.LibraryData
+import mobile.substance.sdk.music.loading.LibraryListener
 
 /**
  * Created by Julian Os on 03.05.2016.
  */
-class MusicFragment : BaseFragment(), Loader.TaskListener<Song> {
-    override fun onOneLoaded(item: Song?, pos: Int) {
-
-    }
-
-    override fun onCompleted(result: MutableList<Song>?) {
-        list!!.layoutManager = LinearLayoutManager(activity)
-        val mediaObjects = ArrayList<MediaObject>()
-        for (song: Song in result!!) {
-            mediaObjects.add(song)
-        }
-        list!!.adapter = MusicAdapter(mediaObjects)
-    }
-
-    var list: RecyclerView? = null
-    var swiprefresh: SwipeRefreshLayout? = null
+class MusicFragment : NavigationDrawerFragment() {
+    private var tabs: TabLayout? = null
+    private var pager: ViewPager? = null
+    private var toolbar: Toolbar? = null
 
     override fun init() {
-        swiprefresh!!.isRefreshing = true
-        initList()
+        pager!!.adapter = MusicPagerAdapter(activity, activity.supportFragmentManager)
+        tabs!!.setupWithViewPager(pager)
+        NavigationHelper.setupNavigation(getDrawerLayout(), toolbar!!)
         super.init()
     }
 
     override fun initViews(root: View) {
-        list = root.findViewById(R.id.fragment_music_recyclerview) as RecyclerView
-        swiprefresh = root.findViewById(R.id.fragment_music_swiperefresh) as SwipeRefreshLayout
+        tabs = root.findViewById(R.id.fragment_music_tabs) as TabLayout
+        pager = root.findViewById(R.id.fragment_music_viewpager) as ViewPager
+        toolbar = root.findViewById(R.id.fragment_music_toolbar) as Toolbar
     }
 
     override fun getLayoutResId(): Int {
         return R.layout.fragment_music
     }
 
-    private fun initList() {
-        Library.registerSongListener(this)
-        Library.build()
-    }
+    class MusicPagerAdapter(context: Context, fm: FragmentManager) : FragmentPagerAdapter(fm), LibraryListener {
 
+        override fun onSongLoaded(item: Song?, pos: Int) {
+
+        }
+
+        override fun onSongsCompleted(result: MutableList<Song>?) {
+
+        }
+
+        override fun onAlbumLoaded(item: Album?, pos: Int) {
+
+        }
+
+        override fun onAlbumsCompleted(result: MutableList<Album>?) {
+
+        }
+
+        override fun onArtistLoaded(item: Artist?, pos: Int) {
+
+        }
+
+        override fun onArtistsCompleted(result: MutableList<Artist>?) {
+
+        }
+
+        override fun onPlaylistLoaded(item: Playlist?, pos: Int) {
+
+        }
+
+        override fun onPlaylistsCompleted(result: MutableList<Playlist>?) {
+
+        }
+
+        override fun onGenreLoaded(item: Genre?, pos: Int) {
+
+        }
+
+        override fun onGenresCompleted(result: MutableList<Genre>?) {
+
+        }
+
+        var context: Context? = context
+        val titleResIds: Array<Int> = arrayOf(R.string.songs, R.string.albums, R.string.artists, R.string.playlists, R.string.genres)
+
+        override fun getCount(): Int {
+            return 5
+        }
+
+        override fun getItem(position: Int): Fragment? {
+
+            when (position) {
+                0 -> return RecyclerViewFragment(LibraryData.SONGS)
+                1 -> return RecyclerViewFragment(LibraryData.ALBUMS)
+                2 -> return RecyclerViewFragment(LibraryData.ARTISTS)
+                3 -> return RecyclerViewFragment(LibraryData.PLAYLISTS)
+                4 -> return RecyclerViewFragment(LibraryData.GENRES)
+            }
+            return null
+        }
+
+        override fun getPageTitle(position: Int): CharSequence? {
+            return context!!.getString(titleResIds[position])
+        }
+
+    }
 
 }

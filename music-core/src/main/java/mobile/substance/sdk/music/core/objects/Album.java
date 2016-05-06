@@ -21,6 +21,7 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.support.v4.media.MediaMetadataCompat;
+import android.util.Log;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
@@ -84,6 +85,7 @@ public class Album extends MediaObject {
                 .crossFade()
                 .centerCrop()
                 .into(imageView);
+        Log.d("requestArt()", getAlbumArtworkPath());
     }
 
     public String getAlbumArtistName() {

@@ -10,8 +10,8 @@ import mobile.substance.sdk.ViewHolders.MusicViewHolder
 import mobile.substance.sdk.music.core.objects.*
 import mobile.substance.sdk.music.loading.Library
 
-class MusicAdapter(items: MutableList<MediaObject>) : RecyclerView.Adapter<MusicViewHolder>() {
-    var items: MutableList<MediaObject>? = null
+class MusicAdapter<T : MediaObject>(items: MutableList<T>) : RecyclerView.Adapter<MusicViewHolder>() {
+    var items: MutableList<T>? = null
     var context: Context? = null
 
     init {
@@ -21,21 +21,11 @@ class MusicAdapter(items: MutableList<MediaObject>) : RecyclerView.Adapter<Music
     override fun onBindViewHolder(holder: MusicViewHolder?, position: Int) {
         val item = items!!.get(position)
         when (item) {
-            is Song -> {
-                bindSong(item, holder!!)
-            }
-            is Album -> {
-                bindAlbum(item, holder!!)
-            }
-            is Artist -> {
-                bindArtist(item, holder!!)
-            }
-            is Genre -> {
-                bindGenre(item, holder!!)
-            }
-            is Playlist -> {
-                bindPlaylist(item, holder!!)
-            }
+            is Song -> bindSong(item, holder!!)
+            is Album -> bindAlbum(item, holder!!)
+            is Artist -> bindArtist(item, holder!!)
+            is Genre -> bindGenre(item, holder!!)
+            is Playlist -> bindPlaylist(item, holder!!)
         }
     }
 
@@ -67,13 +57,16 @@ class MusicAdapter(items: MutableList<MediaObject>) : RecyclerView.Adapter<Music
 
     private fun bindGenre(genre: Genre, holder: MusicViewHolder) {
         holder.title!!.text = genre.genreName
-        Glide.with(context).load(R.drawable.ic_library_music_black_24dp).into(holder.image)
+        Library.findSongsForGenreAsync(context, genre, Library.QueryResult { it ->
+            if (it.size > 0) Library.findAlbumById(it.first().songAlbumID)!!.requestArt(holder.image, context!!.resources.getDrawable(R.drawable.ic_library_music_black_24dp))
+        })
     }
 
     private fun bindPlaylist(playlist: Playlist, holder: MusicViewHolder) {
         holder.title!!.text = playlist.playlistName
-        val song = Library.findSongsForPlaylist(context, playlist).first()
-        Library.findAlbumById(song.songAlbumID)!!.requestArt(holder.image, context!!.resources.getDrawable(R.drawable.ic_library_music_black_24dp))
+        Library.findSongsForPlaylistAsync(context, playlist, Library.QueryResult { it ->
+            if (it.size > 0) Library.findAlbumById(it.first().songAlbumID)!!.requestArt(holder.image, context!!.resources.getDrawable(R.drawable.ic_library_music_black_24dp))
+        })
     }
 
 }

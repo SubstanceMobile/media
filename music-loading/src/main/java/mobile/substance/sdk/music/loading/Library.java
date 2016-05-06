@@ -19,12 +19,15 @@ package mobile.substance.sdk.music.loading;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.Callable;
 
 import mobile.substance.sdk.music.core.objects.Album;
 import mobile.substance.sdk.music.core.objects.Artist;
@@ -55,11 +58,9 @@ public class Library {
     // 4 = Genres
     private static volatile Loader[] mTasks = new Loader[5];
 
-    private LibraryCallbacks callbacks;
-    private LibraryConfig config;
+    private static volatile List<LibraryListener> listeners = new ArrayList<>();
 
     public Library(Context context, LibraryConfig config) {
-        this.config = config;
         Library.context = context.getApplicationContext();
 
         //Creates tasks
@@ -68,14 +69,16 @@ public class Library {
             mSongsTask.addListener(new Loader.TaskListener<Song>() {
                 @Override
                 public void onOneLoaded(Song item, int pos) {
-                    if (callbacks != null) callbacks.onSongLoaded(item, pos);
+                    for (LibraryListener listener : listeners)
+                        if (listener != null) listener.onSongLoaded(item, pos);
                     // updateLinks();
                 }
 
                 @Override
                 public void onCompleted(List<Song> result) {
                     mSongs = result;
-                    if (callbacks != null) callbacks.onSongsCompleted(result);
+                    for (LibraryListener listener : listeners)
+                        if (listener != null) listener.onSongsCompleted(result);
                 }
             });
             mTasks[0] = mSongsTask;
@@ -85,14 +88,16 @@ public class Library {
             mAlbumsTask.addListener(new Loader.TaskListener<Album>() {
                 @Override
                 public void onOneLoaded(Album item, int pos) {
-                    if (callbacks != null) callbacks.onAlbumLoaded(item, pos);
+                    for (LibraryListener listener : listeners)
+                        if (listener != null) listener.onAlbumLoaded(item, pos);
                     // updateLinks();
                 }
 
                 @Override
                 public void onCompleted(List<Album> result) {
                     mAlbums = result;
-                    if (callbacks != null) callbacks.onAlbumsCompleted(result);
+                    for (LibraryListener listener : listeners)
+                        if (listener != null) listener.onAlbumsCompleted(result);
                 }
             });
             mTasks[1] = mAlbumsTask;
@@ -102,14 +107,16 @@ public class Library {
             mPlaylistsTask.addListener(new Loader.TaskListener<Playlist>() {
                 @Override
                 public void onOneLoaded(Playlist item, int pos) {
-                    if (callbacks != null) callbacks.onPlaylistLoaded(item, pos);
+                    for (LibraryListener listener : listeners)
+                        if (listener != null) listener.onPlaylistLoaded(item, pos);
                     // updateLinks();
                 }
 
                 @Override
                 public void onCompleted(List<Playlist> result) {
                     mPlaylists = result;
-                    if (callbacks != null) callbacks.onPlaylistsCompleted(result);
+                    for (LibraryListener listener : listeners)
+                        if (listener != null) listener.onPlaylistsCompleted(result);
                 }
             });
             mTasks[2] = mPlaylistsTask;
@@ -119,14 +126,16 @@ public class Library {
             mArtistsTask.addListener(new Loader.TaskListener<Artist>() {
                 @Override
                 public void onOneLoaded(Artist item, int pos) {
-                    if (callbacks != null) callbacks.onArtistLoaded(item, pos);
+                    for (LibraryListener listener : listeners)
+                        if (listener != null) listener.onArtistLoaded(item, pos);
                     // updateLinks();
                 }
 
                 @Override
                 public void onCompleted(List<Artist> result) {
                     mArtists = result;
-                    if (callbacks != null) callbacks.onArtistsCompleted(result);
+                    for (LibraryListener listener : listeners)
+                        if (listener != null) listener.onArtistsCompleted(result);
                 }
             });
             mTasks[3] = mArtistsTask;
@@ -136,14 +145,16 @@ public class Library {
             mGenresTask.addListener(new Loader.TaskListener<Genre>() {
                 @Override
                 public void onOneLoaded(Genre item, int pos) {
-                    if (callbacks != null) callbacks.onGenreLoaded(item, pos);
+                    for (LibraryListener listener : listeners)
+                        if (listener != null) listener.onGenreLoaded(item, pos);
                     // updateLinks();
                 }
 
                 @Override
                 public void onCompleted(List<Genre> result) {
                     mGenres = result;
-                    if (callbacks != null) callbacks.onGenresCompleted(result);
+                    for (LibraryListener listener : listeners)
+                        if (listener != null) listener.onGenresCompleted(result);
                 }
             });
             mTasks[4] = mGenresTask;
@@ -156,21 +167,10 @@ public class Library {
 
     @SuppressWarnings("all")
     public static void build() {
-        if (LibraryLegacy.use()) {
-            LibraryLegacy.build(new LibraryLegacy.Data() {
-                @Override
-                public void done(List<Song> songs, List<Album> albums, List<Playlist> playlists) {
-                    mSongs = songs;
-                    mAlbums = albums;
-                    mPlaylists = playlists;
-                    mArtists = new ArrayList<>();
-                }
-            }, context);
-        } else {
-            for (Loader loader : mTasks) {
-                if (loader != null) loader.run();
-            }
+        for (Loader loader : mTasks) {
+            if (loader != null) loader.run();
         }
+
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -202,10 +202,6 @@ public class Library {
             mTasks[0].addListener(songListener);
     }
 
-    ///////////////////////////////////////////////////////////////////////////
-    // Helper methods for adding listeners to tasks
-    ///////////////////////////////////////////////////////////////////////////
-
     public static void registerAlbumListener(Loader.TaskListener<Album> albumListener) {
         if (mTasks[1] != null)
             mTasks[1].addListener(albumListener);
@@ -224,6 +220,39 @@ public class Library {
     public static void registerGenresListener(Loader.TaskListener<Genre> genreListener) {
         if (mTasks[4] != null)
             mTasks[4].addListener(genreListener);
+    }
+
+    public static void registerListener(LibraryListener listener) {
+        listeners.add(listener);
+    }
+
+    public static void unRegisterSongListener(Loader.TaskListener<Song> songListener) {
+        if (mTasks[0] != null)
+            mTasks[0].removeListener(songListener);
+    }
+
+    public static void unRegisterAlbumListener(Loader.TaskListener<Album> albumListener) {
+        if (mTasks[1] != null)
+            mTasks[1].removeListener(albumListener);
+    }
+
+    public static void unRegisterPlaylistListener(Loader.TaskListener<Playlist> playlistListener) {
+        if (mTasks[2] != null)
+            mTasks[2].removeListener(playlistListener);
+    }
+
+    public static void unRegisterArtistListener(Loader.TaskListener<Artist> artistListener) {
+        if (mTasks[3] != null)
+            mTasks[3].removeListener(artistListener);
+    }
+
+    public static void unRegisterGenresListener(Loader.TaskListener<Genre> genreListener) {
+        if (mTasks[4] != null)
+            mTasks[4].removeListener(genreListener);
+    }
+
+    public static void unRegisterListener(LibraryListener listener) {
+        listeners.remove(listener);
     }
 
     public static List<Song> getSongs() {
@@ -294,6 +323,15 @@ public class Library {
         return songs;
     }
 
+    public static void findSongsForArtistAsync(final Artist artist, QueryResult<List<Song>> callback) {
+        new QueryTask<List<Song>>(callback).execute(new Callable<List<Song>>() {
+            @Override
+            public List<Song> call() throws Exception {
+                return findSongsForArtist(artist);
+            }
+        });
+    }
+
     public static List<Album> findAlbumsForArtist(Artist artist) {
         List<Album> albums = new ArrayList<>();
         for (Album album : getAlbums()) {
@@ -301,6 +339,15 @@ public class Library {
                 albums.add(album);
         }
         return albums;
+    }
+
+    public static void findAlbumsForArtistAsync(final Artist artist, QueryResult<List<Album>> callback) {
+        new QueryTask<List<Album>>(callback).execute(new Callable<List<Album>>() {
+            @Override
+            public List<Album> call() throws Exception {
+                return findAlbumsForArtist(artist);
+            }
+        });
     }
 
     public static List<Song> findSongsForAlbum(Album album) {
@@ -312,6 +359,15 @@ public class Library {
         return songs;
     }
 
+    public static void findSongsForAlbumAsync(final Album album, QueryResult<List<Song>> callback) {
+        new QueryTask<List<Song>>(callback).execute(new Callable<List<Song>>() {
+            @Override
+            public List<Song> call() throws Exception {
+                return findSongsForAlbum(album);
+            }
+        });
+    }
+
     @Nullable
     public static Artist findArtistForAlbum(Album album) {
         for (Artist artist : getArtists()) {
@@ -319,6 +375,15 @@ public class Library {
                 return artist;
         }
         return null;
+    }
+
+    public static void findArtistForAlbumAsync(final Album album, QueryResult<Artist> callback) {
+        new QueryTask<Artist>(callback).execute(new Callable<Artist>() {
+            @Override
+            public Artist call() throws Exception {
+                return findArtistForAlbum(album);
+            }
+        });
     }
 
     public static List<Song> findSongsForPlaylist(Context context, Playlist playlist) throws NullPointerException {
@@ -330,7 +395,8 @@ public class Library {
             int idColumn = playlistSongsCursor.getColumnIndex(MediaStore.Audio.Playlists.Members.AUDIO_ID);
             playlistSongsCursor.moveToFirst();
             do {
-                songs.add(findSongById(playlistSongsCursor.getLong(idColumn)));
+                Song s = findSongById(playlistSongsCursor.getLong(idColumn));
+                if (s != null) songs.add(s);
             } while (playlistSongsCursor.moveToNext());
             playlistSongsCursor.close();
             return songs;
@@ -339,22 +405,43 @@ public class Library {
         }
     }
 
+    public static void findSongsForPlaylistAsync(final Context context, final Playlist playlist, QueryResult<List<Song>> callback) {
+        new QueryTask<List<Song>>(callback).execute(new Callable<List<Song>>() {
+            @Override
+            public List<Song> call() throws Exception {
+                return findSongsForPlaylist(context, playlist);
+            }
+        });
+    }
+
     public static List<Song> findSongsForGenre(Context context, Genre genre) throws NullPointerException {
         List<Song> songs = new ArrayList<>();
         try {
             Cursor genreSongsCursor = context.getContentResolver().query(MediaStore.Audio.Genres.Members.getContentUri("external", genre.getID()),
-                    null, null, null,
-                    MediaStore.Audio.Playlists.Members.PLAY_ORDER);
+                    null, null, null, null);
             int idColumn = genreSongsCursor.getColumnIndex(MediaStore.Audio.Genres.Members.AUDIO_ID);
             genreSongsCursor.moveToFirst();
             do {
-                songs.add(findSongById(genreSongsCursor.getLong(idColumn)));
+                Song s = findSongById(genreSongsCursor.getLong(idColumn));
+                if (s != null) {
+                    songs.add(s);
+                    Log.d("GENRE: " + genre.getGenreName(), "Found Song: " + s.getSongTitle());
+                }
             } while (genreSongsCursor.moveToNext());
             genreSongsCursor.close();
             return songs;
         } catch (IndexOutOfBoundsException e) {
             return Collections.emptyList();
         }
+    }
+
+    public static void findSongsForGenreAsync(final Context context, final Genre genre, QueryResult<List<Song>> callback) {
+        new QueryTask<List<Song>>(callback).execute(new Callable<List<Song>>() {
+            @Override
+            public List<Song> call() throws Exception {
+                return findSongsForGenre(context, genre);
+            }
+        });
     }
 
     public static SearchResult filterAlbums(String query) {
@@ -370,10 +457,6 @@ public class Library {
         }
         return new SearchResult(context.getString(R.string.albums), results);
     }
-
-    ///////////////////////////////////////////////////////////////////////////
-    // Search
-    ///////////////////////////////////////////////////////////////////////////
 
     public static SearchResult filterSongs(String query) {
         List<Song> results = new ArrayList<>();
@@ -399,6 +482,10 @@ public class Library {
         return new SearchResult(context.getString(R.string.playlists), results);
     }
 
+    ///////////////////////////////////////////////////////////////////////////
+    // Search
+    ///////////////////////////////////////////////////////////////////////////
+
     public static List<SearchResult> search(String query) {
         List<SearchResult> output = new ArrayList<>();
         filterAlbums(query).addIfNotEmpty(output);
@@ -407,8 +494,34 @@ public class Library {
         return Collections.unmodifiableList(output);
     }
 
-    public void registerCallbacks(LibraryCallbacks callbacks) {
-        this.callbacks = callbacks;
+    public interface QueryResult<T> {
+
+        void onQueryResult(T result);
+
     }
+
+    public static class QueryTask<Result> extends AsyncTask<Callable<Result>, Void, Result> {
+        private QueryResult<Result> callback;
+
+        public QueryTask(QueryResult<Result> callback) {
+            this.callback = callback;
+        }
+
+        @Override
+        protected Result doInBackground(Callable<Result>... params) {
+            try {
+                return params[0].call();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Result result) {
+            callback.onQueryResult(result);
+        }
+    }
+
 
 }

@@ -46,7 +46,7 @@ public class ArtistsTask extends Loader<Artist> {
                 .setId(id)
                 .build();
 
-        return null;
+        return artist;
     }
 
     @Override

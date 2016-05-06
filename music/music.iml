@@ -106,7 +106,7 @@
     <orderEntry type="library" exported="" name="glide-3.7.0" level="project" />
     <orderEntry type="library" exported="" name="support-annotations-23.3.0" level="project" />
     <orderEntry type="module" module-name="music-loading" exported="" />
-    <orderEntry type="module" module-name="music-tags" exported="" />
     <orderEntry type="module" module-name="music-core" exported="" />
+    <orderEntry type="module" module-name="music-tags" exported="" />
   </component>
 </module>

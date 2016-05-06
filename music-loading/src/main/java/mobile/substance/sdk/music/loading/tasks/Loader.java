@@ -186,6 +186,11 @@ public abstract class Loader<Return extends MediaObject> {
         mListeners.add(listener);
     }
 
+    @UiThread
+    public void removeListener(TaskListener<Return> listener) {
+        mListeners.remove(listener);
+    }
+
     /**
      * Wrapper method around {@link AsyncTask#publishProgress(Object[])}
      *
