@@ -13,6 +13,11 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.concurrent.Executor;
 
+import static mobile.substance.sdk.colors.DynamicColorsConstants.ICON_COLOR_ACTIVE_DARK_BG;
+import static mobile.substance.sdk.colors.DynamicColorsConstants.ICON_COLOR_ACTIVE_LIGHT_BG;
+import static mobile.substance.sdk.colors.DynamicColorsConstants.ICON_COLOR_INACTIVE_DARK_BG;
+import static mobile.substance.sdk.colors.DynamicColorsConstants.ICON_COLOR_INACTIVE_LIGHT_BG;
+
 public class DynamicColors {
     private Object from;
 
@@ -48,7 +53,7 @@ public class DynamicColors {
         exec(AsyncTask.THREAD_POOL_EXECUTOR, callback, true, useSmartTextPicking);
     }
 
-    public void generateOnExecutioner(Executor executor, DynamicColorsCallback callback, boolean useSmartTextPicking) {
+    public void generateOnExecutor(Executor executor, DynamicColorsCallback callback, boolean useSmartTextPicking) {
         exec(executor, callback, true, useSmartTextPicking);
     }
 
@@ -56,7 +61,7 @@ public class DynamicColors {
         exec(AsyncTask.THREAD_POOL_EXECUTOR, callback, false);
     }
 
-    public void generateSimpleOnExecutioner(Executor executor, DynamicColorsCallback callback) {
+    public void generateSimpleOnExecutor(Executor executor, DynamicColorsCallback callback) {
         exec(executor, callback, false);
     }
 
@@ -78,15 +83,8 @@ public class DynamicColors {
             if (params[0] instanceof String) bitmap = BitmapFactory.decodeFile((String) params[0]);
             if (bitmap == null) return null;
 
-            Boolean useSmartColor = false;
-            if (params[1] instanceof Boolean) useSmartColor = (Boolean) params[1];
-
             Palette palette = Palette.from(bitmap).generate();
-            if (useSmartColor) {
-                Boolean useSmartTextColors = false;
-                if (params[1] instanceof Boolean) useSmartTextColors = (Boolean) params[1];
-
-                //Gets main swatches
+            if (params[1] instanceof Boolean && (Boolean) params[1]) {
                 ArrayList<Palette.Swatch> sortedSwatches = new ArrayList<>(palette.getSwatches());
                 Collections.sort(sortedSwatches, new Comparator<Palette.Swatch>() {
                     @Override
@@ -95,43 +93,31 @@ public class DynamicColors {
                     }
                 });
 
-                //Applies swatches to album
                 try {
                     Palette.Swatch[] swatches = new Palette.Swatch[]{sortedSwatches.get(sortedSwatches.size() - 1), sortedSwatches.get(0)};
-
                     int primary = swatches[0].getRgb();
-                    boolean isPrimaryLight = DynamicColorsUtil.isColorLight(primary);
-                    int title = useSmartTextColors ? swatches[0].getBodyTextColor() :
-                            (isPrimaryLight ? DynamicColorsConstants.TEXT_COLOR_DARK : DynamicColorsConstants.TEXT_COLOR_LIGHT),
-                            subtitle = useSmartTextColors ? swatches[0].getTitleTextColor() :
-                                    (isPrimaryLight ? DynamicColorsConstants.TEXT_COLOR_SECONDARY_LIGHT : DynamicColorsConstants.TEXT_COLOR_SECONDARY_DARK);
-
                     int accent = swatches[1].getRgb();
-                    boolean isAccentLight = DynamicColorsUtil.isColorLight(accent);
-                    int accentIcon = useSmartTextColors ? swatches[1].getBodyTextColor() :
-                            (isAccentLight ? DynamicColorsConstants.ICON_COLOR_ACTIVE_LIGHT_BG : DynamicColorsConstants.ICON_COLOR_ACTIVE_DARK_BG),
-                            accentSubIcon = useSmartTextColors ? swatches[1].getTitleTextColor() :
-                                    (isAccentLight ? DynamicColorsConstants.ICON_COLOR_INACTIVE_LIGHT_BG : DynamicColorsConstants.ICON_COLOR_INACTIVE_DARK_BG);
 
-                    return new ColorPackage(primary, DynamicColorsUtil.generatePrimaryDark(primary), title, subtitle,
-                            accent, accentIcon, accentSubIcon);
+                    if (params[2] instanceof Boolean && (Boolean) params[2]) {
+                        return new ColorPackage(primary, accent);
+                    } else {
+                        int title = swatches[0].getTitleTextColor(),
+                                accentTitle = swatches[1].getTitleTextColor(),
+                                accentSubtitle = swatches[1].getBodyTextColor();
+                        return new ColorPackage(primary, DynamicColorsUtil.generatePrimaryDark(primary),
+                                title, swatches[0].getBodyTextColor(), DynamicColorsUtil.makeDisabledColor(title, DynamicColorsUtil.isColorLight(title)),
+                                accent, accentTitle, accentSubtitle, DynamicColorsUtil.makeDisabledColor(accentTitle, DynamicColorsUtil.isColorLight(accentTitle)),
+                                DynamicColorsUtil.isColorLight(primary) ? ICON_COLOR_ACTIVE_LIGHT_BG : ICON_COLOR_ACTIVE_DARK_BG,
+                                DynamicColorsUtil.isColorLight(primary) ? ICON_COLOR_INACTIVE_LIGHT_BG : ICON_COLOR_INACTIVE_DARK_BG,
+                                DynamicColorsUtil.isColorLight(accent) ? ICON_COLOR_ACTIVE_LIGHT_BG : ICON_COLOR_ACTIVE_DARK_BG,
+                                DynamicColorsUtil.isColorLight(accent) ? ICON_COLOR_INACTIVE_LIGHT_BG : ICON_COLOR_INACTIVE_DARK_BG);
+                    }
                 } catch (Exception e) {
                     return ColorsOptions.DEFAULT_COLORS;
                 }
             } else {
                 try {
-                    int primary = palette.getDarkVibrantColor(Color.BLACK),
-                            accent = palette.getVibrantColor(Color.BLACK);
-                    boolean isPrimaryLight = DynamicColorsUtil.isColorLight(primary),
-                            isAccentLight = DynamicColorsUtil.isColorLight(accent);
-
-                    int textColorPrimary = isPrimaryLight ? DynamicColorsConstants.TEXT_COLOR_DARK : DynamicColorsConstants.TEXT_COLOR_LIGHT,
-                            textColorSecondary = isPrimaryLight ? DynamicColorsConstants.TEXT_COLOR_SECONDARY_LIGHT : DynamicColorsConstants.TEXT_COLOR_SECONDARY_DARK;
-                    int accentIcon = isAccentLight ? DynamicColorsConstants.ICON_COLOR_ACTIVE_LIGHT_BG : DynamicColorsConstants.ICON_COLOR_ACTIVE_DARK_BG,
-                            accentSubIcon = isAccentLight ? DynamicColorsConstants.ICON_COLOR_INACTIVE_LIGHT_BG : DynamicColorsConstants.ICON_COLOR_INACTIVE_DARK_BG;
-
-                    return new ColorPackage(primary, DynamicColorsUtil.generatePrimaryDark(primary), textColorPrimary, textColorSecondary,
-                            accent, accentIcon, accentSubIcon);
+                    return new ColorPackage(palette.getDarkVibrantColor(Color.BLACK), palette.getVibrantColor(Color.BLACK));
                 } catch (Exception e) {
                     return ColorsOptions.DEFAULT_COLORS;
                 }

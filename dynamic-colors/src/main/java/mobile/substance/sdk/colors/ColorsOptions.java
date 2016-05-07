@@ -8,7 +8,7 @@ import android.graphics.Color;
  */
 public class ColorsOptions {
     static volatile ColorPackage DEFAULT_COLORS = new ColorPackage(Color.WHITE, DynamicColorsUtil.generatePrimaryDark(Color.WHITE),
-            Color.BLACK, DynamicColorsConstants.TEXT_COLOR_SECONDARY_DARK, Color.BLACK, Color.WHITE, DynamicColorsUtil.generatePrimaryDark(Color.WHITE));
+            Color.BLACK, DynamicColorsConstants.TEXT_COLOR_SECONDARY_DARK_BG, Color.BLACK, Color.WHITE, DynamicColorsUtil.generatePrimaryDark(Color.WHITE));
 
     /**
      * Set the {@link ColorPackage} used as a default

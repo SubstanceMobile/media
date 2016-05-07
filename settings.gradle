@@ -1,1 +1,1 @@
-include ':app', ':plugin-support', ':music', ':music-tags', ':music-core', ':permissions', ':dynamic-colors', ':music-loading'
+include ':app', ':plugin-support', ':music', ':music-tags', ':music-core', ':permissions', ':dynamic-colors', ':music-loading', ':theme-engine'
