@@ -1,4 +1,4 @@
-package mobile.substance.themes;
+package mobile.substance.theming;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;
