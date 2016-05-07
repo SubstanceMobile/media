@@ -1,6 +1,5 @@
 package mobile.substance.sdk.colors;
 
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -41,24 +40,24 @@ public class DynamicColors {
     // Methods for running.
     ///////////////////////////////////////////////////////////////////////////
 
-    public void runOnExecutor(Executor exec, DynamicColorsCallback callback, boolean... properties) {
+    public void exec(Executor exec, DynamicColorsCallback callback, boolean... properties) {
         new DynamicColorsGenerator(callback).executeOnExecutor(exec, from, properties);
     }
 
     public void generate(DynamicColorsCallback callback, boolean useSmartTextPicking) {
-        runOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, callback, true, useSmartTextPicking);
+        exec(AsyncTask.THREAD_POOL_EXECUTOR, callback, true, useSmartTextPicking);
     }
 
     public void generateOnExecutioner(Executor executor, DynamicColorsCallback callback, boolean useSmartTextPicking) {
-        runOnExecutor(executor, callback, true, useSmartTextPicking);
+        exec(executor, callback, true, useSmartTextPicking);
     }
 
     public void generateSimple(DynamicColorsCallback callback) {
-        runOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, callback, false);
+        exec(AsyncTask.THREAD_POOL_EXECUTOR, callback, false);
     }
 
     public void generateSimpleOnExecutioner(Executor executor, DynamicColorsCallback callback) {
-        runOnExecutor(executor, callback, false);
+        exec(executor, callback, false);
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -103,9 +102,9 @@ public class DynamicColors {
                     int primary = swatches[0].getRgb();
                     boolean isPrimaryLight = DynamicColorsUtil.isColorLight(primary);
                     int title = useSmartTextColors ? swatches[0].getBodyTextColor() :
-                            (isPrimaryLight ? DynamicColorsConstants.TEXT_COLOR_PRIMARY_LIGHT_BG : DynamicColorsConstants.TEXT_COLOR_PRIMARY_DARK_BG),
-                            subtitle = useSmartTextColors ?  swatches[0].getTitleTextColor() :
-                                    (isPrimaryLight ? DynamicColorsConstants.TEXT_COLOR_SECONDARY_LIGHT_BG : DynamicColorsConstants.TEXT_COLOR_SECONDARY_DARK_BG);
+                            (isPrimaryLight ? DynamicColorsConstants.TEXT_COLOR_DARK : DynamicColorsConstants.TEXT_COLOR_LIGHT),
+                            subtitle = useSmartTextColors ? swatches[0].getTitleTextColor() :
+                                    (isPrimaryLight ? DynamicColorsConstants.TEXT_COLOR_SECONDARY_LIGHT : DynamicColorsConstants.TEXT_COLOR_SECONDARY_DARK);
 
                     int accent = swatches[1].getRgb();
                     boolean isAccentLight = DynamicColorsUtil.isColorLight(accent);
@@ -126,10 +125,10 @@ public class DynamicColors {
                     boolean isPrimaryLight = DynamicColorsUtil.isColorLight(primary),
                             isAccentLight = DynamicColorsUtil.isColorLight(accent);
 
-                    int textColorPrimary = isPrimaryLight ? DynamicColorsConstants.TEXT_COLOR_PRIMARY_LIGHT_BG : DynamicColorsConstants.TEXT_COLOR_PRIMARY_DARK_BG,
-                            textColorSecondary = isPrimaryLight ? DynamicColorsConstants.TEXT_COLOR_SECONDARY_LIGHT_BG : DynamicColorsConstants.TEXT_COLOR_SECONDARY_DARK_BG;
+                    int textColorPrimary = isPrimaryLight ? DynamicColorsConstants.TEXT_COLOR_DARK : DynamicColorsConstants.TEXT_COLOR_LIGHT,
+                            textColorSecondary = isPrimaryLight ? DynamicColorsConstants.TEXT_COLOR_SECONDARY_LIGHT : DynamicColorsConstants.TEXT_COLOR_SECONDARY_DARK;
                     int accentIcon = isAccentLight ? DynamicColorsConstants.ICON_COLOR_ACTIVE_LIGHT_BG : DynamicColorsConstants.ICON_COLOR_ACTIVE_DARK_BG,
-                            accentSubIcon = isAccentLight ? DynamicColorsConstants.ICON_COLOR_INACTIVE_LIGHT_BG : DynamicColorsConstants.ICON_COLOR_INACTIVE_DARK_BG,
+                            accentSubIcon = isAccentLight ? DynamicColorsConstants.ICON_COLOR_INACTIVE_LIGHT_BG : DynamicColorsConstants.ICON_COLOR_INACTIVE_DARK_BG;
 
                     return new ColorPackage(primary, DynamicColorsUtil.generatePrimaryDark(primary), textColorPrimary, textColorSecondary,
                             accent, accentIcon, accentSubIcon);
@@ -142,18 +141,6 @@ public class DynamicColors {
         @Override
         protected void onPostExecute(ColorPackage colorPackage) {
             callback.onColorsReady(colorPackage);
-        }
-
-        private static class SmartPicking extends DynamicColorsGenerator {
-
-            SmartPicking(Context context, DynamicColorsCallback callback) {
-                super(callback);
-            }
-
-            @Override
-            protected ColorPackage doInBackground(Object... params) {
-                return null;
-            }
         }
 
     }
