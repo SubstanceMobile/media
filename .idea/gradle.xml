@@ -17,6 +17,7 @@
             <option value="$PROJECT_DIR$/music-tags" />
             <option value="$PROJECT_DIR$/permissions" />
             <option value="$PROJECT_DIR$/plugin-support" />
+            <option value="$PROJECT_DIR$/theme-engine" />
           </set>
         </option>
         <option name="myModules">
@@ -30,6 +31,7 @@
             <option value="$PROJECT_DIR$/music-tags" />
             <option value="$PROJECT_DIR$/permissions" />
             <option value="$PROJECT_DIR$/plugin-support" />
+            <option value="$PROJECT_DIR$/theme-engine" />
           </set>
         </option>
       </GradleProjectSettings>
