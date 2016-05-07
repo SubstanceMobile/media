@@ -4,18 +4,27 @@ package mobile.substance.sdk.colors;
  * Created by Julian Os on 04.05.2016.
  */
 public class ColorPackage {
-    private int primaryColor, primaryDarkColor, accentColor, primaryTextColor, secondaryTextColor, activeIconColor, inactiveIconColor, accentIconColor;
+    private int primaryColor, primaryDarkColor, textColor, secondaryTextColor,
+        accentColor, accentTextColor, accentSecondaryTextColor;
 
-    public ColorPackage(int primaryColor, int primaryDarkColor, int accentColor, int primaryTextColor, int secondaryTextColor, int activeIconColor, int inactiveIconColor, int accentIconColor) {
+    public ColorPackage(int primaryColor, int primaryDarkColor, int textColor, int secondaryTextColor,
+                        int accentColor, int accentTextColor, int accentSecondaryTextColor) {
+
+        //Main Colors
         this.primaryColor = primaryColor;
         this.primaryDarkColor = primaryDarkColor;
-        this.accentColor = accentColor;
-        this.primaryTextColor = primaryTextColor;
+        this.textColor = textColor;
         this.secondaryTextColor = secondaryTextColor;
-        this.activeIconColor = activeIconColor;
-        this.inactiveIconColor = inactiveIconColor;
-        this.accentIconColor = accentIconColor;
+
+        //Accent Colors
+        this.accentColor = accentColor;
+        this.accentTextColor = accentTextColor;
+        this.accentSecondaryTextColor = accentSecondaryTextColor;
     }
+
+    ///////////////////////////////////////////////////////////////////////////
+    // Primary Colors
+    ///////////////////////////////////////////////////////////////////////////
 
     public int getPrimaryColor() {
         return primaryColor;
@@ -25,27 +34,27 @@ public class ColorPackage {
         return primaryDarkColor;
     }
 
-    public int getAccentColor() {
-        return accentColor;
-    }
-
-    public int getPrimaryTextColor() {
-        return primaryTextColor;
+    public int getTextColor() {
+        return textColor;
     }
 
     public int getSecondaryTextColor() {
         return secondaryTextColor;
     }
 
-    public int getInactiveIconColor() {
-        return inactiveIconColor;
+    ///////////////////////////////////////////////////////////////////////////
+    // Accent Colors
+    ///////////////////////////////////////////////////////////////////////////
+
+    public int getAccentColor() {
+        return accentColor;
     }
 
-    public int getActiveIconColor() {
-        return activeIconColor;
+    public int getAccentSecondaryTextColor() {
+        return accentSecondaryTextColor;
     }
 
-    public int getAccentIconColor() {
-        return accentIconColor;
+    public int getAccentTextColor() {
+        return accentTextColor;
     }
 }
