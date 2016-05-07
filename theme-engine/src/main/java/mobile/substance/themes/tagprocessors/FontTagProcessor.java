@@ -6,7 +6,8 @@ import android.support.annotation.Nullable;
 import android.view.View;
 import android.widget.TextView;
 
-import com.afollestad.appthemeengine.util.TypefaceHelper;
+import mobile.substance.themes.util.TypefaceHelper;
+
 
 /**
  * @author Aidan Follestad (afollestad)

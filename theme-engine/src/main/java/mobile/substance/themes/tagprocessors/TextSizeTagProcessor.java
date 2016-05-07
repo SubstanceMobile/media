@@ -7,7 +7,8 @@ import android.util.TypedValue;
 import android.view.View;
 import android.widget.TextView;
 
-import com.afollestad.appthemeengine.Config;
+import mobile.substance.themes.Config;
+
 
 /**
  * @author Aidan Follestad (afollestad)

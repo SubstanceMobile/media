@@ -11,8 +11,9 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.afollestad.appthemeengine.util.ATEUtil;
-import com.afollestad.appthemeengine.util.TextInputLayoutUtil;
+import mobile.substance.themes.util.ATEUtil;
+import mobile.substance.themes.util.TextInputLayoutUtil;
+
 
 /**
  * @author Aidan Follestad (afollestad)

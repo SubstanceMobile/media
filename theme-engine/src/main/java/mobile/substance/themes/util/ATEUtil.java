@@ -23,13 +23,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 
-import com.afollestad.appthemeengine.ATE;
-import com.afollestad.appthemeengine.ATEActivity;
-import com.afollestad.appthemeengine.R;
-import mobile.substance.themes.inflation.InflationInterceptor;
-
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+
+import mobile.substance.themes.ATE;
+import mobile.substance.themes.ATEActivity;
+import mobile.substance.themes.R;
+import mobile.substance.themes.inflation.InflationInterceptor;
 
 /**
  * @author Aidan Follestad (afollestad)

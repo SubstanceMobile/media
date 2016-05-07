@@ -16,10 +16,10 @@ import android.widget.AbsListView;
 import android.widget.EdgeEffect;
 import android.widget.ScrollView;
 
-import com.afollestad.appthemeengine.BuildConfig;
-import mobile.substance.themes.tagprocessors.EdgeGlowTagProcessor;
-
 import java.lang.reflect.Field;
+
+import mobile.substance.themes.BuildConfig;
+import mobile.substance.themes.tagprocessors.EdgeGlowTagProcessor;
 
 public final class EdgeGlowUtil {
 

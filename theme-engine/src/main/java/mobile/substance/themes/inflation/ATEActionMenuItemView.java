@@ -8,13 +8,13 @@ import android.support.v7.view.menu.MenuItemImpl;
 import android.util.AttributeSet;
 import android.view.View;
 
-import com.afollestad.appthemeengine.ATE;
-import com.afollestad.appthemeengine.ATEActivity;
-import com.afollestad.appthemeengine.Config;
-import com.afollestad.appthemeengine.util.TintHelper;
-import com.afollestad.appthemeengine.viewprocessors.ViewProcessor;
-
 import java.lang.reflect.Field;
+
+import mobile.substance.themes.ATE;
+import mobile.substance.themes.ATEActivity;
+import mobile.substance.themes.Config;
+import mobile.substance.themes.util.TintHelper;
+import mobile.substance.themes.viewprocessors.ViewProcessor;
 
 /**
  * @author Aidan Follestad (afollestad)

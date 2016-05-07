@@ -5,7 +5,8 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
 import android.util.AttributeSet;
 
-import com.afollestad.appthemeengine.ATEActivity;
+import mobile.substance.themes.ATEActivity;
+
 
 /**
  * @author Aidan Follestad (afollestad)

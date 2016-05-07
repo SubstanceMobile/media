@@ -28,9 +28,9 @@ import android.widget.SeekBar;
 import android.widget.Switch;
 import android.widget.TextView;
 
-import com.afollestad.appthemeengine.R;
-
 import java.lang.reflect.Field;
+
+import mobile.substance.themes.R;
 
 /**
  * @author afollestad, plusCubed

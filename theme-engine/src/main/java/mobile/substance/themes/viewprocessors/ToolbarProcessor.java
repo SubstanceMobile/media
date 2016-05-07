@@ -27,16 +27,16 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
 
-import com.afollestad.appthemeengine.ATE;
-import com.afollestad.appthemeengine.Config;
-import com.afollestad.appthemeengine.R;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+
+import mobile.substance.themes.ATE;
+import mobile.substance.themes.Config;
+import mobile.substance.themes.R;
 import mobile.substance.themes.customizers.ATECollapsingTbCustomizer;
 import mobile.substance.themes.inflation.ViewInterface;
 import mobile.substance.themes.util.ATEUtil;
 import mobile.substance.themes.util.TintHelper;
-
-import java.lang.reflect.Field;
-import java.util.ArrayList;
 
 /**
  * @author Aidan Follestad (afollestad)

@@ -5,8 +5,9 @@ import android.support.annotation.Nullable;
 import android.support.v7.widget.AppCompatRadioButton;
 import android.util.AttributeSet;
 
-import com.afollestad.appthemeengine.ATEActivity;
-import com.afollestad.appthemeengine.tagprocessors.ATEDefaultTags;
+import mobile.substance.themes.ATEActivity;
+import mobile.substance.themes.tagprocessors.ATEDefaultTags;
+
 
 /**
  * @author Aidan Follestad (afollestad)

@@ -8,12 +8,12 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
 
-import com.afollestad.appthemeengine.Config;
-import com.afollestad.appthemeengine.R;
+import java.lang.reflect.Field;
+
+import mobile.substance.themes.Config;
+import mobile.substance.themes.R;
 import mobile.substance.themes.util.ATEUtil;
 import mobile.substance.themes.util.TintHelper;
-
-import java.lang.reflect.Field;
 
 /**
  * @author Aidan Follestad (afollestad)

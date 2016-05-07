@@ -10,10 +10,10 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.widget.CheckBox;
 
-import com.afollestad.appthemeengine.ATE;
-import com.afollestad.appthemeengine.R;
-
 import java.lang.reflect.Field;
+
+import mobile.substance.themes.ATE;
+import mobile.substance.themes.R;
 
 /**
  * @author Aidan Follestad (afollestad)

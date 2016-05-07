@@ -4,8 +4,8 @@ import android.content.Context;
 import android.support.annotation.Nullable;
 import android.view.View;
 
-import com.afollestad.appthemeengine.ATE;
-import com.afollestad.appthemeengine.ATEActivity;
+import mobile.substance.themes.ATE;
+import mobile.substance.themes.ATEActivity;
 
 /**
  * @author Aidan Follestad (afollestad)

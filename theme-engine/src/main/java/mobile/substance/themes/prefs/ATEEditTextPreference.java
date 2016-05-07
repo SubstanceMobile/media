@@ -5,9 +5,10 @@ import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.view.View;
 
-import com.afollestad.appthemeengine.ATE;
-import com.afollestad.appthemeengine.R;
 import com.afollestad.materialdialogs.prefs.MaterialEditTextPreference;
+
+import mobile.substance.themes.ATE;
+import mobile.substance.themes.R;
 
 /**
  * @author Aidan Follestad (afollestad)

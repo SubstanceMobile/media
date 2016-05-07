@@ -7,23 +7,23 @@ import android.util.Log;
 import android.view.View;
 import android.widget.SearchView;
 
-import com.afollestad.appthemeengine.tagprocessors.BackgroundTagProcessor;
-import com.afollestad.appthemeengine.tagprocessors.EdgeGlowTagProcessor;
-import com.afollestad.appthemeengine.tagprocessors.FontTagProcessor;
-import com.afollestad.appthemeengine.tagprocessors.TabLayoutTagProcessor;
-import com.afollestad.appthemeengine.tagprocessors.TagProcessor;
-import com.afollestad.appthemeengine.tagprocessors.TextColorTagProcessor;
-import com.afollestad.appthemeengine.tagprocessors.TextShadowColorTagProcessor;
-import com.afollestad.appthemeengine.tagprocessors.TextSizeTagProcessor;
-import com.afollestad.appthemeengine.tagprocessors.TintTagProcessor;
-import com.afollestad.appthemeengine.util.ATEUtil;
-import com.afollestad.appthemeengine.viewprocessors.DefaultProcessor;
-import com.afollestad.appthemeengine.viewprocessors.NavigationViewProcessor;
-import com.afollestad.appthemeengine.viewprocessors.SearchViewProcessor;
-import com.afollestad.appthemeengine.viewprocessors.ToolbarProcessor;
-import com.afollestad.appthemeengine.viewprocessors.ViewProcessor;
-
 import java.util.HashMap;
+
+import mobile.substance.themes.tagprocessors.BackgroundTagProcessor;
+import mobile.substance.themes.tagprocessors.EdgeGlowTagProcessor;
+import mobile.substance.themes.tagprocessors.FontTagProcessor;
+import mobile.substance.themes.tagprocessors.TabLayoutTagProcessor;
+import mobile.substance.themes.tagprocessors.TagProcessor;
+import mobile.substance.themes.tagprocessors.TextColorTagProcessor;
+import mobile.substance.themes.tagprocessors.TextShadowColorTagProcessor;
+import mobile.substance.themes.tagprocessors.TextSizeTagProcessor;
+import mobile.substance.themes.tagprocessors.TintTagProcessor;
+import mobile.substance.themes.util.ATEUtil;
+import mobile.substance.themes.viewprocessors.DefaultProcessor;
+import mobile.substance.themes.viewprocessors.NavigationViewProcessor;
+import mobile.substance.themes.viewprocessors.SearchViewProcessor;
+import mobile.substance.themes.viewprocessors.ToolbarProcessor;
+import mobile.substance.themes.viewprocessors.ViewProcessor;
 
 /**
  * @author Aidan Follestad (afollestad)

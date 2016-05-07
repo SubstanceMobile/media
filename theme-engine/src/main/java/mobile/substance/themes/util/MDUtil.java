@@ -5,8 +5,9 @@ import android.content.res.ColorStateList;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import com.afollestad.appthemeengine.Config;
 import com.afollestad.materialdialogs.internal.ThemeSingleton;
+
+import mobile.substance.themes.Config;
 
 /**
  * @author Aidan Follestad (afollestad)

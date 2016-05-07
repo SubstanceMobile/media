@@ -5,9 +5,8 @@ import android.support.annotation.Nullable;
 import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
 
-import com.afollestad.appthemeengine.ATEActivity;
-import com.afollestad.appthemeengine.tagprocessors.ATEDefaultTags;
-import com.afollestad.appthemeengine.viewprocessors.DefaultProcessor;
+import mobile.substance.themes.ATEActivity;
+import mobile.substance.themes.tagprocessors.ATEDefaultTags;
 
 /**
  * @author Aidan Follestad (afollestad)

@@ -8,7 +8,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
 
-import com.afollestad.appthemeengine.Config;
+import mobile.substance.themes.Config;
 import mobile.substance.themes.util.ATEUtil;
 
 /**

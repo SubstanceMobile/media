@@ -12,14 +12,14 @@ import android.widget.ProgressBar;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
-import com.afollestad.appthemeengine.util.ATEUtil;
-import com.afollestad.appthemeengine.util.NestedScrollViewUtil;
-import com.afollestad.appthemeengine.util.RecyclerViewUtil;
-import com.afollestad.appthemeengine.util.TabLayoutUtil;
-import com.afollestad.appthemeengine.util.ViewPagerUtil;
-
 import java.util.HashMap;
 import java.util.Locale;
+
+import mobile.substance.themes.util.ATEUtil;
+import mobile.substance.themes.util.NestedScrollViewUtil;
+import mobile.substance.themes.util.RecyclerViewUtil;
+import mobile.substance.themes.util.TabLayoutUtil;
+import mobile.substance.themes.util.ViewPagerUtil;
 
 /**
  * @author Aidan Follestad (afollestad)

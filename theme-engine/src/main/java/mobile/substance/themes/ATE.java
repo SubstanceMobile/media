@@ -22,17 +22,17 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 
-import com.afollestad.appthemeengine.customizers.ATEActivityThemeCustomizer;
-import com.afollestad.appthemeengine.customizers.ATETaskDescriptionCustomizer;
-import com.afollestad.appthemeengine.inflation.PostInflationApplier;
-import com.afollestad.appthemeengine.inflation.ViewInterface;
-import com.afollestad.appthemeengine.util.ATEUtil;
-import com.afollestad.appthemeengine.util.MDUtil;
-import com.afollestad.appthemeengine.util.TintHelper;
-import com.afollestad.appthemeengine.viewprocessors.ViewProcessor;
-
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+
+import mobile.substance.themes.customizers.ATEActivityThemeCustomizer;
+import mobile.substance.themes.customizers.ATETaskDescriptionCustomizer;
+import mobile.substance.themes.inflation.PostInflationApplier;
+import mobile.substance.themes.inflation.ViewInterface;
+import mobile.substance.themes.util.ATEUtil;
+import mobile.substance.themes.util.MDUtil;
+import mobile.substance.themes.util.TintHelper;
+import mobile.substance.themes.viewprocessors.ViewProcessor;
 
 /**
  * @author Aidan Follestad (afollestad)

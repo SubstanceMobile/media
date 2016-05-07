@@ -7,8 +7,9 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
 import android.view.View;
 
-import com.afollestad.appthemeengine.util.ATEUtil;
-import com.afollestad.appthemeengine.util.TintHelper;
+import mobile.substance.themes.util.ATEUtil;
+import mobile.substance.themes.util.TintHelper;
+
 
 /**
  * @author Aidan Follestad (afollestad)

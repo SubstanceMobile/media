@@ -5,7 +5,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.view.View;
 
-import com.afollestad.appthemeengine.ATE;
+import mobile.substance.themes.ATE;
 import mobile.substance.themes.tagprocessors.TagProcessor;
 
 /**

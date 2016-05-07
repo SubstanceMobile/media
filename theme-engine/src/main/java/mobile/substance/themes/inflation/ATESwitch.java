@@ -6,11 +6,9 @@ import android.support.v7.widget.SwitchCompat;
 import android.util.AttributeSet;
 import android.view.View;
 
-import com.afollestad.appthemeengine.ATE;
-import com.afollestad.appthemeengine.ATEActivity;
-import com.afollestad.appthemeengine.tagprocessors.ATEDefaultTags;
-import com.afollestad.appthemeengine.tagprocessors.TextColorTagProcessor;
-import com.afollestad.appthemeengine.tagprocessors.TintTagProcessor;
+import mobile.substance.themes.ATE;
+import mobile.substance.themes.ATEActivity;
+import mobile.substance.themes.tagprocessors.ATEDefaultTags;
 
 /**
  * @author Aidan Follestad (afollestad)

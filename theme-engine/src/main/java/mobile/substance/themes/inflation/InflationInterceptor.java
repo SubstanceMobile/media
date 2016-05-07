@@ -14,22 +14,22 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 
-import com.afollestad.appthemeengine.ATE;
-import com.afollestad.appthemeengine.ATEActivity;
-import com.afollestad.appthemeengine.tagprocessors.EdgeGlowTagProcessor;
-import com.afollestad.appthemeengine.tagprocessors.TabLayoutTagProcessor;
-import com.afollestad.appthemeengine.viewprocessors.NavigationViewProcessor;
-import com.afollestad.appthemeengine.viewprocessors.ToolbarProcessor;
-
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+
+import mobile.substance.themes.ATE;
+import mobile.substance.themes.ATEActivity;
+import mobile.substance.themes.tagprocessors.EdgeGlowTagProcessor;
+import mobile.substance.themes.tagprocessors.TabLayoutTagProcessor;
+import mobile.substance.themes.viewprocessors.NavigationViewProcessor;
+import mobile.substance.themes.viewprocessors.ToolbarProcessor;
 
 /**
  * @author Aidan Follestad (afollestad)
  */
 public final class InflationInterceptor implements LayoutInflaterFactory {
 
-    private static final boolean LOGGING_ENABLED = true;
+    private static final boolean LOGGING_ENABLED = false;
 
     private static void LOG(String msg, Object... args) {
         //noinspection PointlessBooleanExpression

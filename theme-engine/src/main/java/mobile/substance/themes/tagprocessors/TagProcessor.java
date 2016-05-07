@@ -9,9 +9,10 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.View;
 
-import com.afollestad.appthemeengine.ATE;
-import com.afollestad.appthemeengine.Config;
-import com.afollestad.appthemeengine.util.ATEUtil;
+import mobile.substance.themes.ATE;
+import mobile.substance.themes.Config;
+import mobile.substance.themes.util.ATEUtil;
+
 
 /**
  * @author Aidan Follestad (afollestad)

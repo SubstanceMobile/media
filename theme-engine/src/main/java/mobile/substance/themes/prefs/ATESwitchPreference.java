@@ -9,11 +9,11 @@ import android.preference.SwitchPreference;
 import android.util.AttributeSet;
 import android.view.View;
 
-import com.afollestad.appthemeengine.ATE;
-import com.afollestad.appthemeengine.R;
-import mobile.substance.themes.inflation.ATESwitch;
-
 import java.lang.reflect.Field;
+
+import mobile.substance.themes.ATE;
+import mobile.substance.themes.R;
+import mobile.substance.themes.inflation.ATESwitch;
 
 /**
  * @author Aidan Follestad (afollestad)

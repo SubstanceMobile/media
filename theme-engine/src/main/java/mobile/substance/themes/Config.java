@@ -22,13 +22,13 @@ import android.support.v7.widget.Toolbar;
 import android.util.TypedValue;
 import android.view.View;
 
-import com.afollestad.appthemeengine.customizers.ATENavigationBarCustomizer;
-import com.afollestad.appthemeengine.customizers.ATEStatusBarCustomizer;
-import com.afollestad.appthemeengine.customizers.ATEToolbarCustomizer;
-import com.afollestad.appthemeengine.util.ATEUtil;
-
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+
+import mobile.substance.themes.customizers.ATENavigationBarCustomizer;
+import mobile.substance.themes.customizers.ATEStatusBarCustomizer;
+import mobile.substance.themes.customizers.ATEToolbarCustomizer;
+import mobile.substance.themes.util.ATEUtil;
 
 /**
  * @author Aidan Follestad (afollestad)

@@ -5,8 +5,9 @@ import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.widget.ProgressBar;
 
-import com.afollestad.appthemeengine.ATEActivity;
-import com.afollestad.appthemeengine.tagprocessors.ATEDefaultTags;
+import mobile.substance.themes.ATEActivity;
+import mobile.substance.themes.tagprocessors.ATEDefaultTags;
+
 
 /**
  * @author Aidan Follestad (afollestad)

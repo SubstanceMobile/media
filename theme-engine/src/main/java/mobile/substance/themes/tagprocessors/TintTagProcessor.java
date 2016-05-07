@@ -15,9 +15,10 @@ import android.widget.RadioButton;
 import android.widget.Spinner;
 import android.widget.Switch;
 
-import com.afollestad.appthemeengine.Config;
-import com.afollestad.appthemeengine.util.TextInputLayoutUtil;
-import com.afollestad.appthemeengine.util.TintHelper;
+import mobile.substance.themes.Config;
+import mobile.substance.themes.util.TextInputLayoutUtil;
+import mobile.substance.themes.util.TintHelper;
+
 
 /**
  * @author Aidan Follestad (afollestad)

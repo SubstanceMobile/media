@@ -8,10 +8,11 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.widget.TextView;
 
-import com.afollestad.appthemeengine.ATE;
-import com.afollestad.appthemeengine.R;
-import com.afollestad.appthemeengine.tagprocessors.TextColorTagProcessor;
-import com.afollestad.appthemeengine.tagprocessors.TextSizeTagProcessor;
+import mobile.substance.themes.ATE;
+import mobile.substance.themes.R;
+import mobile.substance.themes.tagprocessors.TextColorTagProcessor;
+import mobile.substance.themes.tagprocessors.TextSizeTagProcessor;
+
 
 public class ATEPreferenceCategory extends PreferenceCategory {
 

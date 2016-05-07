@@ -11,7 +11,8 @@ import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
 import android.widget.FrameLayout;
 
-import com.afollestad.appthemeengine.R;
+import mobile.substance.themes.R;
+
 
 public class BorderCircleView extends FrameLayout {
 

@@ -4,7 +4,7 @@ import android.support.annotation.ColorInt;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.Toolbar;
 
-import com.afollestad.appthemeengine.Config;
+import mobile.substance.themes.Config;
 
 /**
  * @author Aidan Follestad (afollestad)

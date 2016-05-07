@@ -6,9 +6,10 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.widget.Switch;
 
-import com.afollestad.appthemeengine.ATE;
-import com.afollestad.appthemeengine.ATEActivity;
-import com.afollestad.appthemeengine.tagprocessors.ATEDefaultTags;
+import mobile.substance.themes.ATE;
+import mobile.substance.themes.ATEActivity;
+import mobile.substance.themes.tagprocessors.ATEDefaultTags;
+
 
 /**
  * @author Aidan Follestad (afollestad)

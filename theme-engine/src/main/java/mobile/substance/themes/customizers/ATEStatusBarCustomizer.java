@@ -2,7 +2,7 @@ package mobile.substance.themes.customizers;
 
 import android.support.annotation.ColorInt;
 
-import com.afollestad.appthemeengine.Config;
+import mobile.substance.themes.Config;
 
 /**
  * @author Aidan Follestad (afollestad)

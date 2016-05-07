@@ -8,8 +8,9 @@ import android.preference.Preference;
 import android.util.AttributeSet;
 import android.view.View;
 
-import com.afollestad.appthemeengine.ATE;
-import com.afollestad.appthemeengine.R;
+import mobile.substance.themes.ATE;
+import mobile.substance.themes.R;
+
 
 /**
  * @author Aidan Follestad (afollestad)
