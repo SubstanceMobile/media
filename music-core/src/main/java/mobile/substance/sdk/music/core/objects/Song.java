@@ -40,13 +40,9 @@ public class Song extends MediaObject {
         return MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
     }
 
-    public String getSongArtistName() {
-        return data.getString(METADATA_KEY_ARTIST);
-    }
-
-    public void setSongArtistName(String songArtist) {
-        putString(METADATA_KEY_ARTIST, songArtist);
-    }
+    ///////////////////////////////////////////////////////////////////////////
+    // Title
+    ///////////////////////////////////////////////////////////////////////////
 
     public String getSongTitle() {
         return data.getString(METADATA_KEY_TITLE);
@@ -56,9 +52,25 @@ public class Song extends MediaObject {
         putString(METADATA_KEY_TITLE, songTitle);
     }
 
+    ///////////////////////////////////////////////////////////////////////////
+    // Album
+    ///////////////////////////////////////////////////////////////////////////
+
     public void setSongAlbumName(String songAlbum) {
         putString(METADATA_KEY_ALBUM, songAlbum);
     }
+
+    public long getSongAlbumID() {
+        return songAlbumId;
+    }
+
+    public void setSongAlbumID(long albumID) {
+        this.songAlbumId = albumID;
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
+    // Duration
+    ///////////////////////////////////////////////////////////////////////////
 
     public long getSongDuration() {
         return data.getLong(METADATA_KEY_DURATION);
@@ -72,6 +84,10 @@ public class Song extends MediaObject {
         return CoreUtil.stringForTime(getSongDuration());
     }
 
+    ///////////////////////////////////////////////////////////////////////////
+    // Track number
+    ///////////////////////////////////////////////////////////////////////////
+
     public String getTrackNumberString() {
         long track = data.getLong(METADATA_KEY_TRACK_NUMBER);
         return track != 0 ? String.valueOf(track) : "-";
@@ -82,14 +98,9 @@ public class Song extends MediaObject {
         return this;
     }
 
-    public long getSongAlbumID() {
-        return songAlbumId;
-    }
-
-    public Song setSongAlbumID(long albumID) {
-        this.songAlbumId = albumID;
-        return this;
-    }
+    ///////////////////////////////////////////////////////////////////////////
+    // Year
+    ///////////////////////////////////////////////////////////////////////////
 
     public String getSongYear() {
         return String.valueOf(data.getLong(METADATA_KEY_YEAR));
@@ -99,9 +110,9 @@ public class Song extends MediaObject {
         putLong(METADATA_KEY_YEAR, Long.valueOf(year));
     }
 
-    public QueueItem toQueueItem() {
-        return new QueueItem(data.getDescription(), getID());
-    }
+    ///////////////////////////////////////////////////////////////////////////
+    // Artist
+    ///////////////////////////////////////////////////////////////////////////
 
     public long getSongArtistId() {
         return songArtistId;
@@ -111,11 +122,27 @@ public class Song extends MediaObject {
         this.songArtistId = songArtistId;
     }
 
+    public String getSongArtistName() {
+        return data.getString(METADATA_KEY_ARTIST);
+    }
+
+    public void setSongArtistName(String songArtist) {
+        putString(METADATA_KEY_ARTIST, songArtist);
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
+    // Builder and Other Classes
+    ///////////////////////////////////////////////////////////////////////////
+
     public static class Builder {
         private Song song;
 
         public Builder() {
-            this.song = new Song();
+            this(new Song());
+        }
+
+        public Builder(Song copy) {
+            this.song = copy;
         }
 
         public Builder setTitle(String title) {
@@ -162,8 +189,10 @@ public class Song extends MediaObject {
             return song;
         }
 
-
     }
 
+    public QueueItem toQueueItem() {
+        return new QueueItem(data.getDescription(), getID());
+    }
 
 }

@@ -24,6 +24,8 @@ import android.support.annotation.Nullable;
 import android.support.v4.media.MediaMetadataCompat;
 import android.util.Log;
 
+import java.util.HashMap;
+
 
 public class MediaObject {
     private static final MediaMetadataCompat.Builder builder = new MediaMetadataCompat.Builder();
@@ -116,6 +118,12 @@ public class MediaObject {
         data = builder.build();
     }
 
+    protected void putInteger(String key, int value) {
+        if (isLocked()) throw new Error("Object locked. Cannot edit");
+        builder.putLong(key, value);
+        data = builder.build();
+    }
+
 
     protected boolean isContextRequired() {
         //Override to change
@@ -151,4 +159,25 @@ public class MediaObject {
         this.posInList = posInList;
         return this;
     }
+
+    ///////////////////////////////////////////////////////////////////////////
+    // Extra Data Storage
+    ///////////////////////////////////////////////////////////////////////////
+
+    HashMap<String, Object> extraVars;
+
+    public void putData(String key, Object data) {
+        if (extraVars == null) extraVars = new HashMap<>();
+        extraVars.put(key, data);
+    }
+
+    public Object getData(String key) {
+        if (extraVars == null || !extraVars.containsKey(key)) return null;
+        return extraVars.get(key);
+    }
+
+    public boolean removeData(String key) {
+        return !(extraVars == null || !extraVars.containsKey(key)) && extraVars.remove(key) != null;
+    }
+
 }

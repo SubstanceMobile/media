@@ -36,23 +36,16 @@ public class AlbumsTask extends Loader<Album> {
 
     @Override
     protected Album buildObject(@NonNull Cursor cursor) {
-        String name = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Albums.ALBUM));
-        String artistName = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Albums.ARTIST));
-        String artworkPath = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Albums.ALBUM_ART));
-        int numberOfSongs = cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Albums.NUMBER_OF_SONGS));
-        String year = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Albums.LAST_YEAR));
-        long id = cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Albums._ID));
-
         Album album = new Album.Builder()
-                .setName(name)
-                .setAlbumId(id)
-                .setArtistName(artistName)
-                .setNumberOfSongs(numberOfSongs)
-                .setYear(year)
-                .setArtworkPath(artworkPath)
+                .setName(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Albums.ALBUM)))
+                .setAlbumId(cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Albums._ID)))
+                .setArtistName(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Albums.ARTIST)))
+                .setNumberOfSongs(cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Albums.NUMBER_OF_SONGS)))
+                .setYear(cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Albums.LAST_YEAR)))
+                .setArtworkPath(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Albums.ALBUM_ART)))
                 .build();
 
-        Log.i("AlbumsTask", "Loaded ID " + id);
+        Log.i("AlbumsTask", "Loaded ID " + album.getID());
         return album;
     }
 

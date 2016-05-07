@@ -17,7 +17,6 @@
 package mobile.substance.sdk.music.core.objects;
 
 import android.graphics.Bitmap;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.support.v4.media.MediaMetadataCompat;
@@ -29,32 +28,34 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
 
-/**
- * Created by Adrian on 7/5/2015.
- */
+import mobile.substance.sdk.music.core.MusicOptions;
+
 public class Album extends MediaObject {
-    private String albumName, albumGenreName, albumYear, albumArtistName, albumArtworkPath;
-    private int albumDefaultArtworkResId, albumNumberOfSongs;
 
     @Override
     protected Uri getBaseUri() {
         return MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI;
     }
 
-    public int getAlbumDefaultArtworkResId() {
-        return albumDefaultArtworkResId;
+    ///////////////////////////////////////////////////////////////////////////
+    // Title
+    ///////////////////////////////////////////////////////////////////////////
+
+    public String getAlbumName() {
+        return data.getString(MediaMetadataCompat.METADATA_KEY_TITLE);
     }
 
-    public void setAlbumDefaultArtworkResId(int albumDefaultArtworkResId) {
-        this.albumDefaultArtworkResId = albumDefaultArtworkResId;
+    public void setAlbumName(String albumName) {
+        putString(MediaMetadataCompat.METADATA_KEY_TITLE, albumName);
     }
 
-    public String getAlbumArtworkPath() {
-        return albumArtworkPath;
-    }
+    ///////////////////////////////////////////////////////////////////////////
+    // Album Art
+    ///////////////////////////////////////////////////////////////////////////
+
+    String albumArtworkPath = "";
 
     public void setAlbumArtworkPath(String albumArtworkPath) {
-
         this.albumArtworkPath = "file://" + albumArtworkPath;
         if (albumArtworkPath != null) {
             setAnimated(false);
@@ -63,10 +64,18 @@ public class Album extends MediaObject {
         }
     }
 
-    public void requestArt(final ArtRequest request) { // <- Not sure about this one
+    public String getAlbumArtworkPath() {
+        return albumArtworkPath;
+    }
+
+    public interface ArtRequest {
+        void respond(Bitmap albumArt);
+    }
+
+    public void requestArt(final ArtRequest request) {
         Glide.with(getContext()).load(getAlbumArtworkPath())
                 .asBitmap()
-                //.placeholder(!Options.isLightTheme() ? R.drawable.art_dark : R.drawable.art_light)
+                .placeholder(MusicOptions.getDefaultArt())
                 .diskCacheStrategy(DiskCacheStrategy.SOURCE)
                 .animate(android.R.anim.fade_in)
                 .centerCrop()
@@ -76,78 +85,101 @@ public class Album extends MediaObject {
                         request.respond(resource);
                     }
                 });
+        Log.d("requestArt(ArtRequest)", getAlbumArtworkPath());
     }
 
-    public void requestArt(ImageView imageView, Drawable placeholder) {
-        Glide.with(imageView.getContext()).load(getAlbumArtworkPath())
-                .placeholder(placeholder)
+    public void requestArt(ImageView imageView) {
+        Glide.with(getContext()).load(getAlbumArtworkPath())
+                .placeholder(MusicOptions.getDefaultArt())
                 .diskCacheStrategy(DiskCacheStrategy.SOURCE)
                 .crossFade()
                 .centerCrop()
                 .into(imageView);
-        Log.d("requestArt()", getAlbumArtworkPath());
+        Log.d("requestArt(ImageView)", getAlbumArtworkPath());
     }
 
+    ///////////////////////////////////////////////////////////////////////////
+    // Artist
+    ///////////////////////////////////////////////////////////////////////////
+
     public String getAlbumArtistName() {
-        return albumArtistName;
+        return data.getString(MediaMetadataCompat.METADATA_KEY_ALBUM_ARTIST);
     }
 
     public void setAlbumArtistName(String albumArtistName) {
-        this.albumArtistName = albumArtistName;
-        putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_SUBTITLE, albumArtistName);
+        putString(MediaMetadataCompat.METADATA_KEY_ALBUM_ARTIST, albumArtistName);
     }
 
-    @Override
-    protected boolean isContextRequired() {
-        return true;
-    }
-
-    public String getAlbumName() {
-        return albumName;
-    }
-
-    public void setAlbumName(String albumName) {
-        this.albumName = albumName;
-        putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_TITLE, albumName);
-    }
+    ///////////////////////////////////////////////////////////////////////////
+    // Genre
+    ///////////////////////////////////////////////////////////////////////////
 
     public String getAlbumGenreName() {
-        return albumGenreName;
+        return data.getString(MediaMetadataCompat.METADATA_KEY_GENRE);
     }
 
     public void setAlbumGenreName(String albumGenreName) {
-        this.albumGenreName = albumGenreName;
+        putString(MediaMetadataCompat.METADATA_KEY_GENRE, albumGenreName);
     }
 
-    public String getAlbumYear() {
-        return albumYear;
+    ///////////////////////////////////////////////////////////////////////////
+    // Year
+    ///////////////////////////////////////////////////////////////////////////
+
+    public long getAlbumYear() {
+        return data.getLong(MediaMetadataCompat.METADATA_KEY_YEAR);
     }
 
-    public void setAlbumYear(String albumYear) {
-        this.albumYear = albumYear;
+    public void setAlbumYear(long albumYear) {
+        putLong(MediaMetadataCompat.METADATA_KEY_YEAR, albumYear);
     }
 
-    public int getAlbumNumberOfSongs() {
-        return albumNumberOfSongs;
+    ///////////////////////////////////////////////////////////////////////////
+    // Number Of Songs
+    ///////////////////////////////////////////////////////////////////////////
+
+    public long getAlbumNumberOfSongs() {
+        return data.getLong(MediaMetadataCompat.METADATA_KEY_NUM_TRACKS);
     }
 
-    public void setAlbumNumberOfSongs(int albumNumberOfSongs) {
-        this.albumNumberOfSongs = albumNumberOfSongs;
+    public void setAlbumNumberOfSongs(long albumNumberOfSongs) {
+        putLong(MediaMetadataCompat.METADATA_KEY_NUM_TRACKS, albumNumberOfSongs);
     }
 
     ///////////////////////////////////////////////////////////////////////////
     // Context behavior
     ///////////////////////////////////////////////////////////////////////////
 
-    public interface ArtRequest {
-        void respond(Bitmap albumArt);
+    @Override
+    protected boolean isContextRequired() {
+        return true;
     }
+
+    ///////////////////////////////////////////////////////////////////////////
+    // Color Holding
+    ///////////////////////////////////////////////////////////////////////////
+
+    public void setColors(Object colors) {
+        putData("album_color", colors);
+    }
+
+    public Object getColors() {
+        return getData("album_color");
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
+    // Builder
+    ///////////////////////////////////////////////////////////////////////////
 
     public static class Builder {
         private Album album;
 
         public Builder() {
-            this.album = new Album();
+            this(new Album());
+        }
+
+        public Builder(Album copy) {
+            this.album = copy;
         }
 
         public Builder setName(String name) {
@@ -165,7 +197,7 @@ public class Album extends MediaObject {
             return this;
         }
 
-        public Builder setYear(String year) {
+        public Builder setYear(long year) {
             this.album.setAlbumYear(year);
             return this;
         }
@@ -189,22 +221,5 @@ public class Album extends MediaObject {
             return album;
         }
     }
-
-    public static class WithColors<ColorContainer> extends Album {
-        private ColorContainer container;
-
-        public WithColors(ColorContainer container) {
-            this.container = container;
-        }
-
-        public ColorContainer getContainer() {
-            return container;
-        }
-
-        public void setContainer(ColorContainer container) {
-            this.container = container;
-        }
-    }
-
 }
 

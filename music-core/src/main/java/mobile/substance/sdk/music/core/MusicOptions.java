@@ -14,14 +14,20 @@
  * limitations under the License.
  */
 
-package mobile.substance.sdk.music.tags;
+package mobile.substance.sdk.music.core;
 
-import android.net.Uri;
+/**
+ * Created by Adrian on 07/05/2016.
+ */
+public class MusicOptions {
 
-public interface MediaStoreCallbacks {
+    private static volatile int DEFAULT_ART = 0;
 
-    void onScanFinished(String path, Uri uri);
+    public static void setDefaultArt(int defaultArt) {
+        DEFAULT_ART = defaultArt;
+    }
 
-    void onAllFinished();
-
+    public static int getDefaultArt() {
+        return DEFAULT_ART;
+    }
 }

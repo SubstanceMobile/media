@@ -42,6 +42,7 @@ import mobile.substance.sdk.music.loading.tasks.Loader;
 import mobile.substance.sdk.music.loading.tasks.PlaylistsTask;
 import mobile.substance.sdk.music.loading.tasks.SongsTask;
 
+@SuppressWarnings("unused")
 public class Library {
     public static volatile Context context;
     private static volatile List<Song> mSongs = new ArrayList<>();
@@ -161,29 +162,13 @@ public class Library {
         }
     }
 
-    public static void setContext(Context cxt) {
-        context = cxt;
-    }
-
-    @SuppressWarnings("all")
-    public static void build() {
-        for (Loader loader : mTasks) {
-            if (loader != null) loader.run();
-        }
-
-    }
-
     ///////////////////////////////////////////////////////////////////////////
     // Builds the media library
     ///////////////////////////////////////////////////////////////////////////
 
-    private static void updateLinks() {
-        //TODO
-    }
-
-    public static void registerMediaStoreListeners() {
+    public static void build() {
         for (Loader loader : mTasks) {
-            loader.registerMediaStoreListener();
+            if (loader != null) loader.run();
         }
     }
 
@@ -191,83 +176,111 @@ public class Library {
     // Update Listener from MediaStore
     ///////////////////////////////////////////////////////////////////////////
 
+    /////////////
+    // Library //
+    /////////////
+
+    public static void registerListener(LibraryListener listener) {
+        listeners.add(listener);
+    }
+
+    public static void unregisterListener(LibraryListener listener) {
+        listeners.remove(listener);
+    }
+
+    /////////////////
+    // Media Store //
+    /////////////////
+
+    public static void registerMediaStoreListeners() {
+        for (Loader loader : mTasks) {
+            loader.registerMediaStoreListener();
+        }
+    }
+
     public static void unregisterMediaStoreListeners() {
         for (Loader loader : mTasks) {
             loader.unregisterMediaStoreListener();
         }
     }
 
+    //////////
+    // Song //
+    //////////
+
     public static void registerSongListener(Loader.TaskListener<Song> songListener) {
         if (mTasks[0] != null)
             mTasks[0].addListener(songListener);
     }
+
+    public static void unregisterSongListener(Loader.TaskListener<Song> songListener) {
+        if (mTasks[0] != null)
+            mTasks[0].removeListener(songListener);
+    }
+
+    ///////////
+    // Album //
+    ///////////
 
     public static void registerAlbumListener(Loader.TaskListener<Album> albumListener) {
         if (mTasks[1] != null)
             mTasks[1].addListener(albumListener);
     }
 
+    public static void unregisterAlbumListener(Loader.TaskListener<Album> albumListener) {
+        if (mTasks[1] != null)
+            mTasks[1].removeListener(albumListener);
+    }
+
+    //////////////
+    // Playlist //
+    //////////////
+
     public static void registerPlaylistListener(Loader.TaskListener<Playlist> playlistListener) {
         if (mTasks[2] != null)
             mTasks[2].addListener(playlistListener);
     }
+
+    public static void unregisterPlaylistListener(Loader.TaskListener<Playlist> playlistListener) {
+        if (mTasks[2] != null)
+            mTasks[2].removeListener(playlistListener);
+    }
+
+    ////////////
+    // Artist //
+    ////////////
 
     public static void registerArtistListener(Loader.TaskListener<Artist> artistListener) {
         if (mTasks[3] != null)
             mTasks[3].addListener(artistListener);
     }
 
+    public static void unregisterArtistListener(Loader.TaskListener<Artist> artistListener) {
+        if (mTasks[3] != null)
+            mTasks[3].removeListener(artistListener);
+    }
+
+    ////////////
+    // Genres //
+    ////////////
+
     public static void registerGenresListener(Loader.TaskListener<Genre> genreListener) {
         if (mTasks[4] != null)
             mTasks[4].addListener(genreListener);
     }
 
-    public static void registerListener(LibraryListener listener) {
-        listeners.add(listener);
-    }
-
-    public static void unRegisterSongListener(Loader.TaskListener<Song> songListener) {
-        if (mTasks[0] != null)
-            mTasks[0].removeListener(songListener);
-    }
-
-    public static void unRegisterAlbumListener(Loader.TaskListener<Album> albumListener) {
-        if (mTasks[1] != null)
-            mTasks[1].removeListener(albumListener);
-    }
-
-    public static void unRegisterPlaylistListener(Loader.TaskListener<Playlist> playlistListener) {
-        if (mTasks[2] != null)
-            mTasks[2].removeListener(playlistListener);
-    }
-
-    public static void unRegisterArtistListener(Loader.TaskListener<Artist> artistListener) {
-        if (mTasks[3] != null)
-            mTasks[3].removeListener(artistListener);
-    }
-
-    public static void unRegisterGenresListener(Loader.TaskListener<Genre> genreListener) {
+    public static void unregisterGenresListener(Loader.TaskListener<Genre> genreListener) {
         if (mTasks[4] != null)
             mTasks[4].removeListener(genreListener);
     }
 
-    public static void unRegisterListener(LibraryListener listener) {
-        listeners.remove(listener);
-    }
+    ///////////////////////////////////////////////////////////////////////////
+    // Getters
+    ///////////////////////////////////////////////////////////////////////////
 
     public static List<Song> getSongs() {
         return mSongs;
     }
-
-    ///////////////////////////////////////////////////////////////////////////
-    // Playlist Management
-    ///////////////////////////////////////////////////////////////////////////
-
-    //TODO
-
-    ///////////////////////////////////////////////////////////////////////////
-    // Getters
-    ///////////////////////////////////////////////////////////////////////////
 
     public static List<Album> getAlbums() {
         return mAlbums;
@@ -285,15 +298,15 @@ public class Library {
         return mGenres;
     }
 
+    ///////////////////////////////////////////////////////////////////////////
+    // Methods for finding a media object by ID
+    ///////////////////////////////////////////////////////////////////////////
+
     @Nullable
     public static Song findSongById(long id) {
         for (Song song : getSongs()) if (song.getID() == id) return song;
         return null;
     }
-
-    ///////////////////////////////////////////////////////////////////////////
-    // Methods for finding a media object by ID
-    ///////////////////////////////////////////////////////////////////////////
 
     @Nullable
     public static Song findSongByUri(Uri uri) {
@@ -314,6 +327,40 @@ public class Library {
         return null;
     }
 
+    ///////////////////////////////////////////////////////////////////////////
+    // Find X for Y
+    ///////////////////////////////////////////////////////////////////////////
+
+    public interface QueryResult<T> {
+
+        void onQueryResult(T result);
+
+    }
+
+    public static class QueryTask<Result> extends AsyncTask<Callable<Result>, Void, Result> {
+        private QueryResult<Result> callback;
+
+        public QueryTask(QueryResult<Result> callback) {
+            this.callback = callback;
+        }
+
+        @SafeVarargs
+        @Override
+        protected final Result doInBackground(Callable<Result>... params) {
+            try {
+                return params[0].call();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Result result) {
+            callback.onQueryResult(result);
+        }
+    }
+
     public static List<Song> findSongsForArtist(Artist artist) {
         List<Song> songs = new ArrayList<>();
         for (Song song : getSongs()) {
@@ -323,8 +370,9 @@ public class Library {
         return songs;
     }
 
+    @SuppressWarnings("unchecked")
     public static void findSongsForArtistAsync(final Artist artist, QueryResult<List<Song>> callback) {
-        new QueryTask<List<Song>>(callback).execute(new Callable<List<Song>>() {
+        new QueryTask<>(callback).execute(new Callable<List<Song>>() {
             @Override
             public List<Song> call() throws Exception {
                 return findSongsForArtist(artist);
@@ -335,14 +383,15 @@ public class Library {
     public static List<Album> findAlbumsForArtist(Artist artist) {
         List<Album> albums = new ArrayList<>();
         for (Album album : getAlbums()) {
-            if (album.getAlbumArtistName() == artist.getArtistName())
+            if (album.getAlbumArtistName().equals(artist.getArtistName()))
                 albums.add(album);
         }
         return albums;
     }
 
+    @SuppressWarnings("unchecked")
     public static void findAlbumsForArtistAsync(final Artist artist, QueryResult<List<Album>> callback) {
-        new QueryTask<List<Album>>(callback).execute(new Callable<List<Album>>() {
+        new QueryTask<>(callback).execute(new Callable<List<Album>>() {
             @Override
             public List<Album> call() throws Exception {
                 return findAlbumsForArtist(artist);
@@ -359,8 +408,9 @@ public class Library {
         return songs;
     }
 
+    @SuppressWarnings("unchecked")
     public static void findSongsForAlbumAsync(final Album album, QueryResult<List<Song>> callback) {
-        new QueryTask<List<Song>>(callback).execute(new Callable<List<Song>>() {
+        new QueryTask<>(callback).execute(new Callable<List<Song>>() {
             @Override
             public List<Song> call() throws Exception {
                 return findSongsForAlbum(album);
@@ -371,14 +421,15 @@ public class Library {
     @Nullable
     public static Artist findArtistForAlbum(Album album) {
         for (Artist artist : getArtists()) {
-            if (artist.getArtistName() == album.getAlbumArtistName())
+            if (artist.getArtistName().equals(album.getAlbumArtistName()))
                 return artist;
         }
         return null;
     }
 
+    @SuppressWarnings("unchecked")
     public static void findArtistForAlbumAsync(final Album album, QueryResult<Artist> callback) {
-        new QueryTask<Artist>(callback).execute(new Callable<Artist>() {
+        new QueryTask<>(callback).execute(new Callable<Artist>() {
             @Override
             public Artist call() throws Exception {
                 return findArtistForAlbum(album);
@@ -405,8 +456,9 @@ public class Library {
         }
     }
 
+    @SuppressWarnings("unchecked")
     public static void findSongsForPlaylistAsync(final Context context, final Playlist playlist, QueryResult<List<Song>> callback) {
-        new QueryTask<List<Song>>(callback).execute(new Callable<List<Song>>() {
+        new QueryTask<>(callback).execute(new Callable<List<Song>>() {
             @Override
             public List<Song> call() throws Exception {
                 return findSongsForPlaylist(context, playlist);
@@ -435,14 +487,19 @@ public class Library {
         }
     }
 
+    @SuppressWarnings("unchecked")
     public static void findSongsForGenreAsync(final Context context, final Genre genre, QueryResult<List<Song>> callback) {
-        new QueryTask<List<Song>>(callback).execute(new Callable<List<Song>>() {
+        new QueryTask<>(callback).execute(new Callable<List<Song>>() {
             @Override
             public List<Song> call() throws Exception {
                 return findSongsForGenre(context, genre);
             }
         });
     }
+
+    ///////////////////////////////////////////////////////////////////////////
+    // Search
+    ///////////////////////////////////////////////////////////////////////////
 
     public static SearchResult filterAlbums(String query) {
         List<Album> results = new ArrayList<>();
@@ -482,45 +539,12 @@ public class Library {
         return new SearchResult(context.getString(R.string.playlists), results);
     }
 
-    ///////////////////////////////////////////////////////////////////////////
-    // Search
-    ///////////////////////////////////////////////////////////////////////////
-
     public static List<SearchResult> search(String query) {
         List<SearchResult> output = new ArrayList<>();
         filterAlbums(query).addIfNotEmpty(output);
         filterSongs(query).addIfNotEmpty(output);
         filterPlaylists(query).addIfNotEmpty(output);
         return Collections.unmodifiableList(output);
-    }
-
-    public interface QueryResult<T> {
-
-        void onQueryResult(T result);
-
-    }
-
-    public static class QueryTask<Result> extends AsyncTask<Callable<Result>, Void, Result> {
-        private QueryResult<Result> callback;
-
-        public QueryTask(QueryResult<Result> callback) {
-            this.callback = callback;
-        }
-
-        @Override
-        protected Result doInBackground(Callable<Result>... params) {
-            try {
-                return params[0].call();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Result result) {
-            callback.onQueryResult(result);
-        }
     }
 
 

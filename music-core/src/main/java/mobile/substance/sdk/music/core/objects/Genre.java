@@ -20,25 +20,28 @@ import android.net.Uri;
 import android.provider.MediaStore;
 import android.support.v4.media.MediaMetadataCompat;
 
-/**
- * Created by Adrian on 7/5/2015.
- */
 public class Genre extends MediaObject {
-    String genreName;
-
-    public String getGenreName() {
-        return genreName;
-    }
-
-    public void setGenreName(String genreName) {
-        this.genreName = genreName;
-        putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_TITLE, genreName);
-    }
 
     @Override
     protected Uri getBaseUri() {
         return MediaStore.Audio.Genres.EXTERNAL_CONTENT_URI;
     }
+
+    ///////////////////////////////////////////////////////////////////////////
+    // Name
+    ///////////////////////////////////////////////////////////////////////////
+
+    public String getGenreName() {
+        return data.getString(MediaMetadataCompat.METADATA_KEY_TITLE);
+    }
+
+    public void setGenreName(String genreName) {
+        putString(MediaMetadataCompat.METADATA_KEY_TITLE, genreName);
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
+    // Builder
+    ///////////////////////////////////////////////////////////////////////////
 
     public static class Builder {
         private Genre genre;

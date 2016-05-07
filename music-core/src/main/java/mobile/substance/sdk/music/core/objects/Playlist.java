@@ -24,11 +24,6 @@ import android.support.v4.media.MediaMetadataCompat;
  * Created by Adrian on 7/5/2015.
  */
 public class Playlist extends MediaObject {
-    private String playlistName;
-    private int playlistType;
-
-    public Playlist() {
-    }
 
     @Override
     protected Uri getBaseUri() {
@@ -36,29 +31,20 @@ public class Playlist extends MediaObject {
     }
 
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    //Manages the title of the playlist
+    // Title
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     public String getPlaylistName() {
-        return playlistName;
+        return data.getString(MediaMetadataCompat.METADATA_KEY_TITLE);
     }
 
     public void setPlaylistName(String playlistName) {
-        this.playlistName = playlistName;
-        putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_TITLE, playlistName);
+        putString(MediaMetadataCompat.METADATA_KEY_TITLE, playlistName);
     }
 
     ///////////////////////////////////////////////////////////////////////////
-    // Order
+    // Builder
     ///////////////////////////////////////////////////////////////////////////
-
-    public int getPlaylistType() {
-        return playlistType;
-    }
-
-    public void setPlaylistType(int playlistType) {
-        this.playlistType = playlistType;
-    }
 
     public static class Builder {
         private Playlist playlist;
@@ -72,13 +58,8 @@ public class Playlist extends MediaObject {
             return this;
         }
 
-        public Builder setId(long id) {
+        public Builder setID(long id) {
             this.playlist.setID(id);
-            return this;
-        }
-
-        public Builder setType(int type) {
-            this.playlist.setPlaylistType(type);
             return this;
         }
 
