@@ -18,21 +18,38 @@ allprojects {
 Next, make sure you have the "Kotlin" plugin installed in Android Studio. Finally, pick a library and add it to your `build.gradle`.
 
 To add the entire SDK to your app, just add this line to the `dependencies` of your module's `build.gradle` file:
-```compile 'com.github.SubstanceMobile:SDK:-SNAPSHOT'```
+```
+compile 'com.github.SubstanceMobile:SDK:-SNAPSHOT'
+``` 
 
-##Modules
+## Module
+Click "Read More" on the corresponding section for a description of features, installation instructions, and API tutorials.
 ###Music
-The music package contains the entire playback engine from GEM Player. It will help you make an extremely functional music player with very little code. [Read More](music/README.md)
+The music package contains the entire playback engine from [GEM Player](https://github.com/SubstanceMobile/GEM). It will help you make an extremely functional music player with very little code. To install, follow the instructions above and then add this to your `build.gradle` file:
+```
+compile('com.github.SubstanceMobile.SDK:Music:-SNAPSHOT'@aar){
+    transitive = true
+}
+```
+This package contains the following libraries:
 ######Core
-This is the base library. It contains classes you can use to configure the entire music package. It also includes the base media objects: `Song`, `Album`, `Playlist`, and `Artist`. [Read More](music-core/README.md)
-#####Loading
-This library is used to load the data from your mediastore into lists of the core objects. [Read More](music-loading/README.md)
-#####Tags
-This library is used to edit your media tags. It can also control your playlists. [Read More](music-tags/README.md)
+This is the base library. It contains classes you can use to configure the entire music package. It also includes the base media objects: `Song`, `Album`, `Playlist`, and `Artist`. **COMING SOON**
+######Loading
+This library is used to load the data from your mediastore into lists of the core objects. **COMING SOON**
+######Playback
+This library is used to play back the core objects. **COMING SOON**
+######Tags
+This library is used to edit your media tags. It can also control your playlists. **COMING SOON**
+
 ###Dynamic Colors
 A simple library that wraps around `Palette` and has the best possible color extraction system. Straight from GEM Player. [Read More](dynamic-colors/README.md)
+
 ###Permissions
-A simple permissions helper library. [Read More](permissions/README.md)
+A simple permissions helper library. **COMING SOON**
+
+### Theme Engine
+This library is used to theme views. Based on `app-theme-engine` by [@afollestad](https://github.com/afollestad). [Read More](theme-engine/README.md)
+
 ###More coming in the future!
 
 
@@ -40,14 +57,14 @@ A simple permissions helper library. [Read More](permissions/README.md)
 * SDK
     * music
        * music-core
-       * Data Loading Library
+       * loading
        * Playback Library
        * tags
     * Plugin API
        * App Communication
        * Library Communication
        * Remote Views
-    * theme-engine (fork of app-theme-engine by @afollestad)
+    * theme-engine
        * core
     * dynamic-colors
     * permissions

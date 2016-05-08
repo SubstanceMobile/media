@@ -129,13 +129,13 @@ public class DynamicColors {
                                 DynamicColorsUtil.isColorLight(accent) ? ICON_COLOR_INACTIVE_LIGHT_BG : ICON_COLOR_INACTIVE_DARK_BG);
                     }
                 } catch (Exception e) {
-                    return ColorsOptions.DEFAULT_COLORS;
+                    return DynamicColorsOptions.DEFAULT_COLORS;
                 }
             } else {
                 try {
                     return new ColorPackage(palette.getDarkVibrantColor(Color.BLACK), palette.getVibrantColor(Color.BLACK));
                 } catch (Exception e) {
-                    return ColorsOptions.DEFAULT_COLORS;
+                    return DynamicColorsOptions.DEFAULT_COLORS;
                 }
             }
         }
