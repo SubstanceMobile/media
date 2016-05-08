@@ -23,12 +23,18 @@ DynamicColors.from(bitmap).generate(new DynamicColorsCallback() {
 
 Once you get a `DynamicColors` instance, you can start generating images with the following methods:
 `generate(DynamicColorsCallback, Boolean)` The default generator. It uses smart picking (more on that later) and it has the option to use smart text picking (again, more on that later)
+`generate(Boolean)` Calls the above method with the default callback you set.
 `generateOnExecutor(Executor, DynamicColorsCallback, Boolean)` Same as above. It just gives you the option to use your own executor.
 `generateSimple(DynamicColorsCallback)` This generator uses simple picking. It grabs the dark vibrant color as primary and vibrant as accent.
+`generateSimple()` Calls the above method with the default callback.
 `generateSimpleOnExecutor(Executor, DynamicColorsCallback)` Same as above. It just gives you the option to use your own executor.
 
 Your data will be returned in the form of a `ColorPackage`. This class is pretty self-explanatory. It has simple getters containing color values. The color values contained are:
 Primary Color, Main Primary Text Color, Main Secondary Text Color, Main Disabled Text Color, Main Active Icon Color, Main Inactive Icon Color, Accent Color, Accent Primary Text Color, Accent Secondary Text Color, Accent Disabled Text Color, Accent Active Icon Color, and Accent Inactive Icon Color
+
+---
+
+For configuration it is pretty simple. To set default colors, call `DynamicColorsOptions.setDefaultColors(ColorPackage);`. You can also set a default callback using `DynamicColorsOptions.setDefaultCallback(DynamicColorsCallback);`
 
 ### Features
 ###### Smart Picking

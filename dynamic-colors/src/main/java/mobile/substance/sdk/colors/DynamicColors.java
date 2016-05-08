@@ -65,12 +65,20 @@ public class DynamicColors {
         new DynamicColorsGenerator(callback).executeOnExecutor(exec, from, properties);
     }
 
+    public void generate(boolean useSmartTextPicking) {
+        generate(DynamicColorsOptions.getDefaultCallback(), useSmartTextPicking);
+    }
+
     public void generate(DynamicColorsCallback callback, boolean useSmartTextPicking) {
         exec(AsyncTask.THREAD_POOL_EXECUTOR, callback, true, useSmartTextPicking);
     }
 
     public void generateOnExecutor(Executor executor, DynamicColorsCallback callback, boolean useSmartTextPicking) {
         exec(executor, callback, true, useSmartTextPicking);
+    }
+
+    public void generateSimple() {
+        generateSimple(DynamicColorsOptions.getDefaultCallback());
     }
 
     public void generateSimple(DynamicColorsCallback callback) {
@@ -129,13 +137,13 @@ public class DynamicColors {
                                 DynamicColorsUtil.isColorLight(accent) ? ICON_COLOR_INACTIVE_LIGHT_BG : ICON_COLOR_INACTIVE_DARK_BG);
                     }
                 } catch (Exception e) {
-                    return DynamicColorsOptions.DEFAULT_COLORS;
+                    return DynamicColorsOptions.getDefaultColors();
                 }
             } else {
                 try {
                     return new ColorPackage(palette.getDarkVibrantColor(Color.BLACK), palette.getVibrantColor(Color.BLACK));
                 } catch (Exception e) {
-                    return DynamicColorsOptions.DEFAULT_COLORS;
+                    return DynamicColorsOptions.getDefaultColors();
                 }
             }
         }

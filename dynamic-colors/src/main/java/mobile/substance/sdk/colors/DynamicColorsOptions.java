@@ -23,12 +23,26 @@ import android.graphics.Color;
  */
 public class DynamicColorsOptions {
     static volatile ColorPackage DEFAULT_COLORS = new ColorPackage(Color.WHITE, Color.BLACK);
+    static volatile DynamicColorsCallback DEFAULT_CALLBACK = new DynamicColorsCallback() {
+        @Override
+        public void onColorsReady(ColorPackage colors) {
+            //Do nothing.
+        }
+    };
 
-    /**
-     * Set the {@link ColorPackage} used as a default
-     */
     public static void setDefaultColors(ColorPackage defaultColors) {
         DEFAULT_COLORS = defaultColors;
     }
 
+    public static ColorPackage getDefaultColors() {
+        return DEFAULT_COLORS;
+    }
+
+    public static DynamicColorsCallback getDefaultCallback() {
+        return DEFAULT_CALLBACK;
+    }
+
+    public static void setDefaultCallback(DynamicColorsCallback defaultCallback) {
+        DEFAULT_CALLBACK = defaultCallback;
+    }
 }
