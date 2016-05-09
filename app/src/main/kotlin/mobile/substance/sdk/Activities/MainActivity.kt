@@ -19,12 +19,16 @@ package mobile.substance.sdk.Activities
 import android.support.design.widget.NavigationView
 import android.support.v4.view.GravityCompat
 import android.support.v4.widget.DrawerLayout
+import android.support.v7.widget.CardView
+import android.widget.ImageView
+import android.widget.TextView
 import mobile.substance.sdk.R
 import mobile.substance.sdk.music.core.objects.Song
 import mobile.substance.sdk.music.loading.Library
 import mobile.substance.sdk.music.loading.LibraryConfig
 import mobile.substance.sdk.music.loading.LibraryData
 import mobile.substance.sdk.music.playback.PlaybackRemote
+import mobile.substance.sdk.music.playback.PlaybackState
 
 class MainActivity : NavigationDrawerActivity(), PlaybackRemote.RemoteCallback {
 
@@ -37,10 +41,12 @@ class MainActivity : NavigationDrawerActivity(), PlaybackRemote.RemoteCallback {
     }
 
     override fun onSongChanged(song: Song) {
-
+        if (currentSongCard!!.translationY != 0.0f) currentSongCard!!.animate().translationY(0.0f).setDuration(200).start()
+        currentSongTitle!!.text = song.songTitle
+        Library.findAlbumById(song.songAlbumID)!!.requestArt(currentSongImage)
     }
 
-    override fun onStateChanged(state: Int, isRepeating: Boolean) {
+    override fun onStateChanged(state: PlaybackState, isRepeating: Boolean) {
 
     }
 
@@ -48,9 +54,11 @@ class MainActivity : NavigationDrawerActivity(), PlaybackRemote.RemoteCallback {
 
     }
 
-
     var drawerLayout: DrawerLayout? = null
     var navigationView: NavigationView? = null
+    var currentSongImage: ImageView? = null
+    var currentSongTitle: TextView? = null
+    var currentSongCard: CardView? = null
 
     override fun getLayoutResId(): Int {
         return R.layout.activity_main
@@ -75,6 +83,9 @@ class MainActivity : NavigationDrawerActivity(), PlaybackRemote.RemoteCallback {
     override fun initViews() {
         navigationView = findViewById(R.id.activity_main_navigationview) as NavigationView
         drawerLayout = findViewById(R.id.activity_main_drawerlayout) as DrawerLayout
+        currentSongImage = findViewById(R.id.activity_main_current_song_image) as ImageView
+        currentSongTitle = findViewById(R.id.activity_main_current_song_title) as TextView
+        currentSongCard = findViewById(R.id.activity_main_current_song_card) as CardView
     }
 
     override fun getDrawer(): DrawerLayout? {

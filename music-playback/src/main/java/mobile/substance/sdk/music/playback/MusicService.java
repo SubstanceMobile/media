@@ -48,6 +48,7 @@ public class MusicService extends MediaBrowserServiceCompat implements MediaPlay
         MediaPlayer.OnErrorListener,
         AudioManager.OnAudioFocusChangeListener,
         CastCallbacks {
+
     public static final int UNIQUE_ID = new Random().nextInt(1000000);
 
     // Log Tag
@@ -62,18 +63,30 @@ public class MusicService extends MediaBrowserServiceCompat implements MediaPlay
     // BroadCast Receivers
     HeadsetPlugReceiver plugReceiver = null;
     private Thread progressThread = null;
+
     // Local MediaPLayer
     private MediaPlayer localPlayer;
+
     // Media Session
     private MediaSessionCompat sessionCompat;
+
     // Playback State booleans
     private boolean wasPlayingBeforeAction = false;
     private boolean isRepeating = false;
+
     // PlaybackRemote Callbacks
     private volatile List<PlaybackRemote.RemoteCallback> CALLBACKS = new ArrayList<>();
+
     // Gooogle Cast
     private GoogleApiClient apiClient;
     private CastPlaybackHandler castPlaybackHandler;
+    private boolean isCastInitialized = false;
+    private String applicationId;
+    private volatile MediaRouter mediaRouter;
+    private volatile MediaRouteSelector routeSelector;
+    private ConnectionCallbacks connectionCallbacks;
+    private MediaRouterCallback routerCallback;
+
     // Playback Progress
     private Runnable progressUpdate = new Runnable() {
         @Override
@@ -84,12 +97,6 @@ public class MusicService extends MediaBrowserServiceCompat implements MediaPlay
             sessionCompat.setPlaybackState(getPlaybackState());
         }
     };
-    private volatile MediaRouter mediaRouter;
-    private volatile MediaRouteSelector routeSelector;
-    private ConnectionCallbacks connectionCallbacks;
-    private MediaRouterCallback routerCallback;
-    private boolean isCastInitialized = false;
-    private String applicationId;
 
     // Required empty constructor
     public MusicService() {
@@ -135,7 +142,7 @@ public class MusicService extends MediaBrowserServiceCompat implements MediaPlay
     ///////////////////////////////////////////////////////////////////////////
 
     private void updatePlaybackState() {
-        int state = 0;
+        PlaybackState state = null;
         if (isPlaying()) {
             state = PlaybackState.STATE_PLAYING;
         } else if (MusicQueue.INSTANCE.getCurrentSong() != null) {
@@ -184,11 +191,6 @@ public class MusicService extends MediaBrowserServiceCompat implements MediaPlay
         plugReceiver = new HeadsetPlugReceiver();
         notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         audioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
-
-        mediaRouter = MediaRouter.getInstance(getApplicationContext());
-        routeSelector = new MediaRouteSelector.Builder()
-                .addControlCategory(CastMediaControlIntent.categoryForCast(applicationId))
-                .build();
     }
 
     private void initMediaSession() {
@@ -208,42 +210,18 @@ public class MusicService extends MediaBrowserServiceCompat implements MediaPlay
     }
 
     public void initGoogleCast(MenuItem routeItem, String applicationId) {
-        MediaRouteActionProvider mRouteActionProvider =
-                (MediaRouteActionProvider) MenuItemCompat.getActionProvider(routeItem);
-        mRouteActionProvider.setRouteSelector(routeSelector);
+        this.applicationId = applicationId;
+
+        mediaRouter = MediaRouter.getInstance(getApplicationContext());
+        routeSelector = new MediaRouteSelector.Builder()
+                .addControlCategory(CastMediaControlIntent.categoryForCast(applicationId))
+                .build();
+
+        MediaRouteActionProvider routeActionProvider = (MediaRouteActionProvider) MenuItemCompat.getActionProvider(routeItem);
+        routeActionProvider.setRouteSelector(routeSelector);
         routerCallback = new MediaRouterCallback(this);
         mediaRouter.addCallback(routeSelector, routerCallback,
                 MediaRouter.CALLBACK_FLAG_REQUEST_DISCOVERY);
-    }
-
-    private void launchCast(CastDevice mDevice) {
-        localPlayer.pause();
-        Cast.Listener mListener = new Cast.Listener();
-        Cast.CastOptions.Builder apiOptionsBuilder = Cast.CastOptions
-                .builder(mDevice, mListener);
-
-        connectionCallbacks = new ConnectionCallbacks(routerCallback, new ConnectionResultListener() {
-            @Override
-            public void onApplicationConnected() {
-                castPlaybackHandler.load(getCurrentPosition());
-                Log.d(TAG, String.valueOf(localPlayer == null));
-                localPlayer = null;
-            }
-        });
-
-        apiClient = new GoogleApiClient.Builder(this)
-                .addApi(Cast.API, apiOptionsBuilder.build())
-                .addConnectionCallbacks(connectionCallbacks)
-                .addOnConnectionFailedListener(new GoogleApiClient.OnConnectionFailedListener() {
-                    @Override
-                    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-                        Toast.makeText(MusicService.this, "Connection failed", Toast.LENGTH_LONG).show();
-                    }
-                })
-                .build();
-        connectionCallbacks.setApiClient(apiClient);
-        castPlaybackHandler = new CastPlaybackHandler(this, apiClient);
-        apiClient.connect();
     }
 
     public boolean isCastPlaying() {
@@ -468,71 +446,10 @@ public class MusicService extends MediaBrowserServiceCompat implements MediaPlay
     // MediaSession
     ///////////////////////////////////////////////////////////////////////////
 
-    @Override
-    public void onCastDeviceSelected(CastDevice mDevice) {
-        launchCast(mDevice);
-    }
-
-    ///////////////////////////////////////////////////////////////////////////
-    // Google Cast functions
-    ///////////////////////////////////////////////////////////////////////////
-
-    @Override
-    public void onCastDeviceUnselected() {
-        progressThread.interrupt();
-        progressThread = null;
-    }
-
-    private boolean isCastConnected() {
-        return castPlaybackHandler != null && castPlaybackHandler.isConnected();
-    }
-
-    @Override
-    public void onCreate() {
-        super.onCreate();
-        Log.d("MusicService", "onCreate()");
-        init();
-        initMediaSession();
-    }
-
-    ///////////////////////////////////////////////////////////////////////////
-    // Lifecycle
-    ///////////////////////////////////////////////////////////////////////////
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        unregisterReceiver(plugReceiver);
-        destroySession();
-    }
-
     private void destroySession() {
         sessionCompat.setActive(false);
         sessionCompat.release();
         sessionCompat = null;
-    }
-
-    public void kill() {
-        destroySession();
-        stopForeground(true);
-        stopSelf();
-    }
-
-    @Override
-    public boolean onUnbind(Intent intent) {
-        return true;
-    }
-
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.d("MusicService", "onStartCommand()");
-        return START_STICKY;
-    }
-
-    @Override
-    public IBinder onBind(Intent intent) {
-        Log.d("MusicService", "onBind()");
-        return binder;
     }
 
     @Nullable
@@ -598,6 +515,97 @@ public class MusicService extends MediaBrowserServiceCompat implements MediaPlay
             super.onPlayFromUri(uri, extras);
         }
     }
+
+    ///////////////////////////////////////////////////////////////////////////
+    // Google Cast functions
+    ///////////////////////////////////////////////////////////////////////////
+
+    @Override
+    public void onCastDeviceSelected(CastDevice mDevice) {
+        launchCast(mDevice);
+    }
+
+    @Override
+    public void onCastDeviceUnselected() {
+        progressThread.interrupt();
+        progressThread = null;
+    }
+
+    private boolean isCastConnected() {
+        return castPlaybackHandler != null && castPlaybackHandler.isConnected();
+    }
+
+
+    private void launchCast(CastDevice device) {
+        Cast.Listener listener = new Cast.Listener();
+        Cast.CastOptions.Builder apiOptionsBuilder = new Cast.CastOptions.Builder(device, listener);
+
+        connectionCallbacks = new ConnectionCallbacks(routerCallback, new ConnectionResultListener() {
+            @Override
+            public void onApplicationConnected() {
+                castPlaybackHandler.load(getCurrentPosition());
+            }
+        });
+
+        apiClient = new GoogleApiClient.Builder(this)
+                .addApi(Cast.API, apiOptionsBuilder.build())
+                .addConnectionCallbacks(connectionCallbacks)
+                .addOnConnectionFailedListener(new GoogleApiClient.OnConnectionFailedListener() {
+                    @Override
+                    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+                        Toast.makeText(MusicService.this, "Connection failed", Toast.LENGTH_LONG).show();
+                    }
+                })
+                .build();
+        connectionCallbacks.setApiClient(apiClient);
+        castPlaybackHandler = new CastPlaybackHandler(this, apiClient);
+        apiClient.connect();
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
+    // Lifecycle
+    ///////////////////////////////////////////////////////////////////////////
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        Log.d("MusicService", "onCreate()");
+        init();
+        initMediaSession();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        unregisterReceiver(plugReceiver);
+        destroySession();
+    }
+
+
+    public void kill() {
+        destroySession();
+        stopForeground(true);
+        stopSelf();
+    }
+
+    @Override
+    public boolean onUnbind(Intent intent) {
+        return true;
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        Log.d("MusicService", "onStartCommand()");
+        return START_STICKY;
+    }
+
+    @Override
+    public IBinder onBind(Intent intent) {
+        Log.d("MusicService", "onBind()");
+        return binder;
+    }
+
+
 
     ///////////////////////////////////////////////////////////////////////////
     // Binder

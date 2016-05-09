@@ -179,6 +179,11 @@ public class Song extends MediaObject {
             this.song = copy;
         }
 
+        public Builder setId(long id) {
+            this.song.setID(id);
+            return this;
+        }
+
         public Builder setTitle(String title) {
             this.song.setSongTitle(title);
             return this;

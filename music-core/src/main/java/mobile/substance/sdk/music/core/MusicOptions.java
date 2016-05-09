@@ -22,6 +22,7 @@ package mobile.substance.sdk.music.core;
 public class MusicOptions {
 
     private static volatile int DEFAULT_ART, STATUSBAR_ICON_RESID = 0;
+    private static volatile String CAST_APPLICATION_ID;
 
     public static int getDefaultArt() {
         return DEFAULT_ART;
@@ -37,5 +38,14 @@ public class MusicOptions {
 
     public static void setStatusbarIconResId(int resid) {
         STATUSBAR_ICON_RESID = resid;
+    }
+
+    public static void setCastApplicationId(String applicationId) {
+        CAST_APPLICATION_ID = applicationId;
+
+    }
+
+    public static String getCastApplicationId() {
+        return CAST_APPLICATION_ID;
     }
 }

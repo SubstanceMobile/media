@@ -25,9 +25,41 @@
     tools:openDrawer="start">
 
     <FrameLayout
-        android:id="@+id/activity_main_fragment_placeholder"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent">
+
+        <FrameLayout
+            android:id="@+id/activity_main_fragment_placeholder"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <android.support.v7.widget.CardView
+            android:translationY="56dp"
+            android:layout_gravity="bottom"
+            android:id="@+id/activity_main_current_song_card"
+            android:layout_width="match_parent"
+            android:layout_height="56dp">
+
+            <ImageView
+                android:id="@+id/activity_main_current_song_image"
+                android:adjustViewBounds="true"
+                android:layout_width="56dp"
+                android:layout_height="56dp" />
+
+            <TextView
+                android:id="@+id/activity_main_current_song_title"
+                android:textSize="16sp"
+                android:fontFamily="sans-serif-medium"
+                android:paddingStart="72dp"
+                android:paddingEnd="16dp"
+                android:singleLine="true"
+                android:layout_gravity="center_vertical"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+        </android.support.v7.widget.CardView>
+
+    </FrameLayout>
 
     <android.support.design.widget.NavigationView
         android:id="@+id/activity_main_navigationview"

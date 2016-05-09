@@ -8,42 +8,42 @@ import com.google.android.gms.cast.CastDevice;
  * Created by Julian Os on 27.03.2016.
  */
 public class MediaRouterCallback extends MediaRouter.Callback {
-    private CastDevice mSelectedDevice;
-    private String mRouteID;
-    private CastCallbacks mCallbacks;
-    private RouteListener mRouteListener;
+    private CastDevice selectedDevice;
+    private String routeId;
+    private CastCallbacks callbacks;
+    private RouteListener routeListener;
 
-    public MediaRouterCallback(CastCallbacks mCallbacks) {
-        this.mCallbacks = mCallbacks;
+    public MediaRouterCallback(CastCallbacks callbacks) {
+        this.callbacks = callbacks;
     }
 
     public CastDevice getSelectedDevice() {
-        return mSelectedDevice;
+        return selectedDevice;
     }
 
     public void nullDevice() {
-        mSelectedDevice = null;
+        selectedDevice = null;
     }
 
-    public String getRouteID() {
-        return mRouteID;
+    public String getRouteId() {
+        return routeId;
     }
 
     public void setRouteListener(RouteListener mRouteListener) {
-        this.mRouteListener = mRouteListener;
+        this.routeListener = mRouteListener;
     }
 
     @Override
-    public void onRouteSelected(MediaRouter mRouter, MediaRouter.RouteInfo mRoute) {
-        mSelectedDevice = CastDevice.getFromBundle(mRoute.getExtras());
-        mRouteID = mRoute.getId();
-        mCallbacks.onCastDeviceSelected(mSelectedDevice);
+    public void onRouteSelected(MediaRouter router, MediaRouter.RouteInfo routeInfo) {
+        selectedDevice = CastDevice.getFromBundle(routeInfo.getExtras());
+        routeId = routeInfo.getId();
+        callbacks.onCastDeviceSelected(selectedDevice);
     }
 
     @Override
-    public void onRouteUnselected(MediaRouter mRouter, MediaRouter.RouteInfo mRoute) {
-        if (mRouteListener != null)
-            mRouteListener.onRouteUnselected();
-        mSelectedDevice = null;
+    public void onRouteUnselected(MediaRouter router, MediaRouter.RouteInfo route) {
+        if (routeListener != null)
+            routeListener.onRouteUnselected();
+        selectedDevice = null;
     }
 }

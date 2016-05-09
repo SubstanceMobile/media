@@ -10,47 +10,52 @@ import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
 
 public class ConnectionCallbacks implements GoogleApiClient.ConnectionCallbacks, RouteListener {
-    private GoogleApiClient mApiClient;
-    private boolean mWaitingForReconnect = false;
-    private boolean mApplicationStarted = false;
-    private String mSessionID;
-    private MediaRouterCallback mCallback;
-    private ConnectionResultListener mListener;
+    private GoogleApiClient apiClient;
+    private boolean isWaitingForReconnect = false;
+    private boolean isApplicationStarted = false;
+    private String sessionId;
+    private String applicationId;
+    private MediaRouterCallback callback;
+    private ConnectionResultListener listener;
     private boolean isConnected = false;
 
-    public ConnectionCallbacks(MediaRouterCallback mCallback, ConnectionResultListener mListener) {
-        this.mCallback = mCallback;
-        this.mListener = mListener;
+    public ConnectionCallbacks(MediaRouterCallback mCallback, ConnectionResultListener listener) {
+        this.callback = mCallback;
+        this.listener = listener;
         mCallback.setRouteListener(this);
     }
 
     public void setApiClient(GoogleApiClient mApiClient) {
-        this.mApiClient = mApiClient;
+        this.apiClient = mApiClient;
+    }
+
+    public void setApplicationid(String applicationId) {
+        this.applicationId = applicationId;
     }
 
     @Override
     public void onConnected(Bundle connectionHint) {
         isConnected = true;
-        if (mWaitingForReconnect) {
-            mWaitingForReconnect = false;
+        if (isWaitingForReconnect) {
+            isWaitingForReconnect = false;
             Log.d(ConnectionCallbacks.class.getSimpleName(), "Waiting for Reconnect...");
         } else {
             try {
-                Cast.CastApi.launchApplication(mApiClient, "FF7DFFB0")
+                if (applicationId != null)
+                    Cast.CastApi.launchApplication(apiClient, applicationId)
                         .setResultCallback(
                                 new ResultCallback<Cast.ApplicationConnectionResult>() {
                                     @Override
-                                    public void onResult(Cast.ApplicationConnectionResult mResult) {
-                                        Status mStatus = mResult.getStatus();
-                                        if (mStatus.isSuccess()) {
-                                            mApplicationStarted = true;
-                                            ApplicationMetadata applicationMetadata =
-                                                    mResult.getApplicationMetadata();
-                                            mSessionID = mResult.getSessionId();
-                                            if (mResult.getWasLaunched())
-                                                mListener.onApplicationConnected();
+                                    public void onResult(Cast.ApplicationConnectionResult result) {
+                                        Status status = result.getStatus();
+                                        if (status.isSuccess()) {
+                                            isApplicationStarted = true;
+                                            ApplicationMetadata applicationMetadata = result.getApplicationMetadata();
+                                            sessionId = result.getSessionId();
+                                            if (result.getWasLaunched())
+                                                listener.onApplicationConnected();
                                         } else {
-                                            mApplicationStarted = false;
+                                            isApplicationStarted = false;
                                             teardown();
                                         }
                                     }
@@ -65,7 +70,7 @@ public class ConnectionCallbacks implements GoogleApiClient.ConnectionCallbacks,
     @Override
     public void onConnectionSuspended(int cause) {
         isConnected = false;
-        mWaitingForReconnect = true;
+        isWaitingForReconnect = true;
     }
 
     public boolean isConnected() {
@@ -73,19 +78,19 @@ public class ConnectionCallbacks implements GoogleApiClient.ConnectionCallbacks,
     }
 
     private void teardown() {
-        if (mApiClient != null) {
-            if (mApplicationStarted) {
-                if (mApiClient.isConnected() || mApiClient.isConnecting()) {
-                    Cast.CastApi.stopApplication(mApiClient, mSessionID);
-                    mApiClient.disconnect();
+        if (apiClient != null) {
+            if (isApplicationStarted) {
+                if (apiClient.isConnected() || apiClient.isConnecting()) {
+                    Cast.CastApi.stopApplication(apiClient, sessionId);
+                    apiClient.disconnect();
                 }
-                mApplicationStarted = false;
+                isApplicationStarted = false;
             }
-            mApiClient = null;
+            apiClient = null;
         }
-        mCallback.nullDevice();
-        mWaitingForReconnect = false;
-        mSessionID = null;
+        callback.nullDevice();
+        isWaitingForReconnect = false;
+        sessionId = null;
     }
 
     @Override

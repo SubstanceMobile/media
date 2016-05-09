@@ -15,7 +15,7 @@
   -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="mobile.substance.sdk.music.base">
+    package="mobile.substance.sdk.music.core">
 
     <application
         android:allowBackup="true"

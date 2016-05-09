@@ -50,6 +50,7 @@ public class SongsTask extends Loader<Song> {
         String year = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.YEAR));
 
         Song s = new Song.Builder()
+                .setId(id)
                 .setTitle(title)
                 .setArtistName(artist)
                 .setArtistId(artistId)

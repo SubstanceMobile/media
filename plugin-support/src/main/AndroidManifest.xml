@@ -15,7 +15,7 @@
   -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="mobile.substance.pluginsupport">
+    package="mobile.substance.sdk.pluginsupport">
 
     <application
         android:allowBackup="true"

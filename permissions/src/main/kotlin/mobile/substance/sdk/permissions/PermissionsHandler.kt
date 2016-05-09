@@ -23,42 +23,46 @@ import android.support.v4.content.ContextCompat
 import java.util.*
 
 class PermissionsHandler(activity: Activity, permissions: Array<String>?, callbacks: PermissionsCallbacks) {
-    var activity: Activity? = null
-    var permissions: Array<String>? = null
-    var callbacks: PermissionsCallbacks? = null
-    val requestCode = Random().nextInt(100)
-    var granted: Array<Boolean>? = null
-    var showedRationale: Array<Boolean>? = null
+    private var activity: Activity = activity
+    private var permissions: Array<String>? = permissions
+    private var callbacks: PermissionsCallbacks = callbacks
+    private val requestCode = Random().nextInt(100)
+    private var granted: Array<Boolean>? = null
+    private var showedRationale: Array<Boolean>? = null
 
     var allGranted: Boolean = false
 
     init {
-        this.activity = activity
-        this.permissions = permissions
-        this.callbacks = callbacks;
         this.granted = Array(permissions!!.size, { false })
         this.showedRationale = Array(permissions.size, { false })
     }
 
     fun handlePermissions(): Boolean {
         if (permissions == null) {
-            callbacks!!.onAllGranted()
+            allGranted = true
+            callbacks.onAllGranted()
             return true
         }
 
         val permissionsToCheck = ArrayList<String>()
 
         for (i in permissions!!.indices) {
-            if (ContextCompat.checkSelfPermission(activity!!, permissions!![i]) != PackageManager.PERMISSION_GRANTED) {
+            if (ContextCompat.checkSelfPermission(activity, permissions!![i]) != PackageManager.PERMISSION_GRANTED) {
                 permissionsToCheck.add(permissions!![i])
             } else if (granted!![i] != true) {
                 granted!![i] = true
-                callbacks!!.onPermissionGranted(permissions!![i])
+                callbacks.onPermissionGranted(permissions!![i])
                 permissionsToCheck.add(permissions!![i])
             }
         }
 
-        ActivityCompat.requestPermissions(activity!!, permissionsToCheck.toTypedArray(), requestCode)
+        if (granted!!.all { true }) {
+            allGranted = true
+            callbacks.onAllGranted()
+            return true
+        }
+
+        ActivityCompat.requestPermissions(activity, permissionsToCheck.toTypedArray(), requestCode)
         return false
     }
 

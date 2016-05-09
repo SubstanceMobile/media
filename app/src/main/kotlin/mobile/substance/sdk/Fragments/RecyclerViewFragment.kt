@@ -80,8 +80,8 @@ class RecyclerViewFragment : BaseFragment(), LibraryListener {
 
     override fun init() {
         recyclerview!!.layoutManager = LinearLayoutManager(activity)
-        Library.registerListener(this)
         setAdapter()
+        Library.registerListener(this)
     }
 
     private fun setAdapter() {
@@ -92,7 +92,6 @@ class RecyclerViewFragment : BaseFragment(), LibraryListener {
             LibraryData.PLAYLISTS -> recyclerview!!.adapter = MusicAdapter<Playlist>(Library.getPlaylists())
             LibraryData.GENRES -> recyclerview!!.adapter = MusicAdapter<Genre>(Library.getGenres())
         }
-
     }
 
     override fun initViews(root: View) {

@@ -2,9 +2,9 @@ package mobile.substance.sdk.music.playback
 
 import android.content.*
 import android.os.IBinder
-import android.support.v4.content.LocalBroadcastManager
 import android.util.Log
 import android.view.MenuItem
+import mobile.substance.sdk.music.core.MusicOptions
 import mobile.substance.sdk.music.core.objects.Song
 import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
@@ -15,9 +15,8 @@ import java.util.concurrent.atomic.AtomicBoolean
 object PlaybackRemote : ServiceConnection, BroadcastReceiver() {
 
     override fun onReceive(context: Context?, intent: Intent?) {
-        val packageName = context!!.applicationContext.packageName
-        if (!intent!!.action.startsWith(packageName))
-            return
+        if (intent == null || context == null) return
+        Log.d(PlaybackRemote::class.java.simpleName, "onReceive()")
         when {
             intent.action.endsWith(".RESUME") -> resume()
             intent.action.endsWith(".PAUSE") -> pause()
@@ -36,6 +35,7 @@ object PlaybackRemote : ServiceConnection, BroadcastReceiver() {
     override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
         SERVICE = (service as MusicService.ServiceBinder).service
         SERVICE!!.registerCallback(CALLBACK)
+        initReceiver()
         isBound!!.set(true)
     }
 
@@ -43,7 +43,6 @@ object PlaybackRemote : ServiceConnection, BroadcastReceiver() {
     private var CALLBACK: RemoteCallback? = null
     private var SERVICE: MusicService? = null
     private var isBound: AtomicBoolean? = AtomicBoolean(false)
-    private var BROADCAST_MANAGER: LocalBroadcastManager? = null
 
     fun registerActivity(context: Context, callback: RemoteCallback) {
         this.CONTEXT = context
@@ -54,25 +53,31 @@ object PlaybackRemote : ServiceConnection, BroadcastReceiver() {
         }
         if (!MusicUtil.isServiceRunning(context)) context.startService(Intent(context, MusicService::class.java))
         context.bindService(Intent(context, MusicService::class.java), this, Context.BIND_ADJUST_WITH_ACTIVITY)
-        initReceiver()
     }
 
     private fun initReceiver() {
-        BROADCAST_MANAGER = LocalBroadcastManager.getInstance(CONTEXT!!)
-        BROADCAST_MANAGER!!.registerReceiver(this, IntentFilter(CONTEXT!!.applicationContext.packageName))
-    }
-
-    private fun deinitReceiver() {
-        BROADCAST_MANAGER!!.unregisterReceiver(this)
+        Thread() {
+            run {
+                val filter: IntentFilter = IntentFilter()
+                filter.addAction(MusicUtil.getAction(CONTEXT!!, MusicUtil.PAUSE))
+                filter.addAction(MusicUtil.getAction(CONTEXT!!, MusicUtil.PLAY))
+                filter.addAction(MusicUtil.getAction(CONTEXT!!, MusicUtil.RESUME))
+                filter.addAction(MusicUtil.getAction(CONTEXT!!, MusicUtil.STOP))
+                filter.addAction(MusicUtil.getAction(CONTEXT!!, MusicUtil.SKIP_FORWARD))
+                filter.addAction(MusicUtil.getAction(CONTEXT!!, MusicUtil.SKIP_BACKWARD))
+                filter.addAction(MusicUtil.getAction(CONTEXT!!, MusicUtil.SEEK))
+                filter.addAction(MusicUtil.getAction(CONTEXT!!, MusicUtil.NOTIFICATION))
+                SERVICE!!.registerReceiver(this, filter)
+            }
+        }.start()
     }
 
     fun unregisterActivity() {
-        if (isBound!!.get()) CONTEXT!!.unbindService(this)
         try {
-            BROADCAST_MANAGER!!.unregisterReceiver(this)
+            SERVICE!!.unregisterReceiver(this)
         } catch(e: Exception) {
-            e.printStackTrace()
         }
+        if (isBound!!.get()) CONTEXT!!.unbindService(this)
     }
 
     fun resume() {
@@ -141,6 +146,10 @@ object PlaybackRemote : ServiceConnection, BroadcastReceiver() {
         return isBound!!.get() && CALLBACK != null
     }
 
+    fun initGoogleCast(item: MenuItem) {
+        SERVICE!!.initGoogleCast(item, MusicOptions.getCastApplicationId())
+    }
+
     interface RemoteCallback {
 
         fun onProgressChanged(progress: Int)
@@ -149,7 +158,7 @@ object PlaybackRemote : ServiceConnection, BroadcastReceiver() {
 
         fun onSongChanged(song: Song)
 
-        fun onStateChanged(state: Int, isRepeating: Boolean)
+        fun onStateChanged(state: PlaybackState, isRepeating: Boolean)
 
         fun onQueueChanged(queue: List<Song>)
 

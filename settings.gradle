@@ -14,4 +14,4 @@
  * limitations under the License.
  */
 
-include ':app', ':plugin-support', ':music', ':music-tags', ':music-core', ':permissions', ':dynamic-colors', ':music-loading', ':theme-engine', ':music-playback'
+include ':app', ':plugin-support', ':music', ':music-core', ':music-loading', ':music-playback', ':music-tags', ':permissions', ':dynamic-colors', ':theme-engine'

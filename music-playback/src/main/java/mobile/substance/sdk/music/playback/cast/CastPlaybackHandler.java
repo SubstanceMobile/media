@@ -17,7 +17,6 @@ import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.images.WebImage;
 
 import java.io.IOException;
-import java.util.Random;
 
 import mobile.substance.sdk.music.playback.MusicQueue;
 import mobile.substance.sdk.music.playback.MusicUtil;
@@ -43,13 +42,13 @@ public class CastPlaybackHandler implements RemoteMediaPlayer.OnStatusUpdatedLis
         remotePlayer.setOnStatusUpdatedListener(this);
         this.context = context;
         this.apiClient = apiClient;
-        songServer = new FileServer(new Random().nextInt(MusicUtil.FILE_PORT), 1);
-        artworkServer = new FileServer(new Random().nextInt(MusicUtil.ARTWORK_PORT), 2);
+        songServer = new FileServer(MusicUtil.FILE_PORT, 1);
+        artworkServer = new FileServer(MusicUtil.ARTWORK_PORT, 2);
         try {
             songServer.start();
             artworkServer.start();
         } catch (IOException e) {
-            Log.d(TAG, "exception while starting FileServers");
+            Log.d(TAG, "Exception while starting FileServers");
         }
     }
 

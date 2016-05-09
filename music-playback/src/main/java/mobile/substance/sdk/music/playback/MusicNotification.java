@@ -4,11 +4,14 @@ import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.net.Uri;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v7.app.NotificationCompat;
 
+import mobile.substance.sdk.music.core.MusicOptions;
 import mobile.substance.sdk.music.core.objects.Song;
 import mobile.substance.sdk.music.loading.Library;
 
@@ -17,29 +20,33 @@ import mobile.substance.sdk.music.loading.Library;
  */
 public class MusicNotification {
 
-    public static Notification create(Context context, boolean pauseTruePlayFalse, MediaSessionCompat sessionCompat) {
+    public static Notification create(final Context context, boolean pauseTruePlayFalse, MediaSessionCompat sessionCompat) {
         Song song = MusicQueue.INSTANCE.getCurrentSong();
 
-        PendingIntent content = PendingIntent.getBroadcast(context, 0, new Intent(context, MusicService.class).setAction(MusicUtil.getAction(context, MusicUtil.NOTIFICATION)), 0);
-        PendingIntent skipBackward = PendingIntent.getBroadcast(context, 0, new Intent(context, MusicService.class).setAction(MusicUtil.getAction(context, MusicUtil.SKIP_BACKWARD)), 0);
-        PendingIntent skipForward = PendingIntent.getBroadcast(context, 0, new Intent(context, MusicService.class).setAction(MusicUtil.getAction(context, MusicUtil.SKIP_FORWARD)), 0);
+        int REQUEST_CODE = MusicService.UNIQUE_ID;
 
-        PendingIntent close = PendingIntent.getBroadcast(context, 0, new Intent(context, MusicService.class).setAction(MusicUtil.getAction(context, MusicUtil.STOP)), 0);
+        final PendingIntent content = PendingIntent.getBroadcast(context, REQUEST_CODE, new Intent(context.getApplicationContext(), PlaybackRemote.class).setAction(MusicUtil.getAction(context, MusicUtil.NOTIFICATION)), PendingIntent.FLAG_CANCEL_CURRENT);
+        PendingIntent skipBackward = PendingIntent.getBroadcast(context, REQUEST_CODE, new Intent(context.getApplicationContext(), PlaybackRemote.class).setAction(MusicUtil.getAction(context, MusicUtil.SKIP_BACKWARD)), PendingIntent.FLAG_CANCEL_CURRENT);
+        PendingIntent skipForward = PendingIntent.getBroadcast(context, REQUEST_CODE, new Intent(context.getApplicationContext(), PlaybackRemote.class).setAction(MusicUtil.getAction(context, MusicUtil.SKIP_FORWARD)), PendingIntent.FLAG_CANCEL_CURRENT);
+
+        PendingIntent close = PendingIntent.getBroadcast(context, REQUEST_CODE, new Intent(context, PlaybackRemote.class).setAction(MusicUtil.getAction(context, MusicUtil.STOP)), PendingIntent.FLAG_CANCEL_CURRENT);
         String playPauseString = pauseTruePlayFalse ? "Pause Playback" : "Resume Playback";
         int playPauseResId = pauseTruePlayFalse ? R.drawable.ic_pause_white_24dp : R.drawable.ic_play_arrow_white_24dp;
-        PendingIntent playPause = pauseTruePlayFalse ? PendingIntent.getBroadcast(context, 0, new Intent(context, MusicService.class).setAction(MusicUtil.getAction(context, MusicUtil.PAUSE)), 0) : PendingIntent.getService(context, 0, new Intent(context, MusicService.class).setAction(MusicUtil.getAction(context, MusicUtil.RESUME)), 0);
+        PendingIntent playPause = pauseTruePlayFalse ? PendingIntent.getBroadcast(context, REQUEST_CODE, new Intent(context, PlaybackRemote.class).setAction(MusicUtil.getAction(context, MusicUtil.PAUSE)), PendingIntent.FLAG_CANCEL_CURRENT) : PendingIntent.getBroadcast(context, REQUEST_CODE, new Intent(context, PlaybackRemote.class).setAction(MusicUtil.getAction(context, MusicUtil.RESUME)), PendingIntent.FLAG_CANCEL_CURRENT);
 
         NotificationCompat.MediaStyle style = new NotificationCompat.MediaStyle();
-        style.setShowActionsInCompactView(2);
+        style.setShowActionsInCompactView(1);
         style.setMediaSession(sessionCompat.getSessionToken());
 
+        Bitmap artwork = BitmapFactory.decodeFile(Uri.parse(Library.findAlbumById(song.getSongAlbumID()).getAlbumArtworkPath()).getPath());
+        if (artwork == null)
+            artwork = BitmapFactory.decodeResource(context.getResources(), MusicOptions.getDefaultArt());
+
         return new NotificationCompat.Builder(context)
-                .setStyle(style)
                 .setContentTitle(song.getSongTitle())
                 .setContentText(song.getSongArtistName())
                 .setSubText(song.getSongAlbumName())
-                .setSmallIcon(R.drawable.ic_media_play)
-                .setLargeIcon(BitmapFactory.decodeFile(Library.findAlbumById(song.getSongAlbumID()).getAlbumArtworkPath()))
+                .setSmallIcon(MusicOptions.getStatusbarIconResId())
                 .setPriority(Notification.PRIORITY_MAX)
                 .setOngoing(false)
                 .setColor(Color.GRAY)
@@ -48,6 +55,8 @@ public class MusicNotification {
                 .addAction(R.drawable.ic_skip_previous_white_24dp, "Skip Backward", skipBackward)
                 .addAction(playPauseResId, playPauseString, playPause)
                 .addAction(R.drawable.ic_skip_next_white_24dp, "Skip Forward", skipForward)
+                .setStyle(style)
+                .setLargeIcon(artwork)
                 .build();
     }
 }
