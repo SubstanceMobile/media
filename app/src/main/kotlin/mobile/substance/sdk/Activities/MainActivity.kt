@@ -20,11 +20,35 @@ import android.support.design.widget.NavigationView
 import android.support.v4.view.GravityCompat
 import android.support.v4.widget.DrawerLayout
 import mobile.substance.sdk.R
+import mobile.substance.sdk.music.core.objects.Song
 import mobile.substance.sdk.music.loading.Library
 import mobile.substance.sdk.music.loading.LibraryConfig
 import mobile.substance.sdk.music.loading.LibraryData
+import mobile.substance.sdk.music.playback.PlaybackRemote
 
-class MainActivity : NavigationDrawerActivity() {
+class MainActivity : NavigationDrawerActivity(), PlaybackRemote.RemoteCallback {
+
+    override fun onProgressChanged(progress: Int) {
+
+    }
+
+    override fun onDurationChanged(duration: Int) {
+
+    }
+
+    override fun onSongChanged(song: Song) {
+
+    }
+
+    override fun onStateChanged(state: Int, isRepeating: Boolean) {
+
+    }
+
+    override fun onQueueChanged(queue: List<Song>) {
+
+    }
+
+
     var drawerLayout: DrawerLayout? = null
     var navigationView: NavigationView? = null
 
@@ -55,6 +79,16 @@ class MainActivity : NavigationDrawerActivity() {
 
     override fun getDrawer(): DrawerLayout? {
         return drawerLayout
+    }
+
+    override fun onStart() {
+        super.onStart()
+        PlaybackRemote.registerActivity(this, this)
+    }
+
+    override fun onStop() {
+        super.onStop()
+        PlaybackRemote.unregisterActivity()
     }
 
 }

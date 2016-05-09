@@ -107,11 +107,11 @@ class MusicFragment : NavigationDrawerFragment() {
         override fun getItem(position: Int): Fragment? {
 
             when (position) {
-                0 -> return RecyclerViewFragment(LibraryData.SONGS)
-                1 -> return RecyclerViewFragment(LibraryData.ALBUMS)
-                2 -> return RecyclerViewFragment(LibraryData.ARTISTS)
-                3 -> return RecyclerViewFragment(LibraryData.PLAYLISTS)
-                4 -> return RecyclerViewFragment(LibraryData.GENRES)
+                0 -> return RecyclerViewFragment().setType(LibraryData.SONGS)
+                1 -> return RecyclerViewFragment().setType(LibraryData.ALBUMS)
+                2 -> return RecyclerViewFragment().setType(LibraryData.ARTISTS)
+                3 -> return RecyclerViewFragment().setType(LibraryData.PLAYLISTS)
+                4 -> return RecyclerViewFragment().setType(LibraryData.GENRES)
             }
             return null
         }

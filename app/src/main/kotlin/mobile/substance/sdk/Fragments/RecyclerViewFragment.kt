@@ -29,7 +29,12 @@ import mobile.substance.sdk.music.loading.LibraryListener
 /**
  * Created by Julian on 06/05/16.
  */
-class RecyclerViewFragment(type: LibraryData) : BaseFragment(), LibraryListener {
+class RecyclerViewFragment : BaseFragment(), LibraryListener {
+
+    fun setType(data: LibraryData): RecyclerViewFragment {
+        this.type = data
+        return this
+    }
 
     override fun onSongLoaded(item: Song?, pos: Int) {
     }
@@ -67,7 +72,7 @@ class RecyclerViewFragment(type: LibraryData) : BaseFragment(), LibraryListener 
     }
 
     private var recyclerview: RecyclerView? = null
-    private val type: LibraryData = type
+    private var type: LibraryData? = null
 
     override fun getLayoutResId(): Int {
         return R.layout.fragment_recyclerview

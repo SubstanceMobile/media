@@ -21,13 +21,21 @@ package mobile.substance.sdk.music.core;
  */
 public class MusicOptions {
 
-    private static volatile int DEFAULT_ART = 0;
+    private static volatile int DEFAULT_ART, STATUSBAR_ICON_RESID = 0;
+
+    public static int getDefaultArt() {
+        return DEFAULT_ART;
+    }
 
     public static void setDefaultArt(int defaultArt) {
         DEFAULT_ART = defaultArt;
     }
 
-    public static int getDefaultArt() {
-        return DEFAULT_ART;
+    public static int getStatusbarIconResId() {
+        return STATUSBAR_ICON_RESID;
+    }
+
+    public static void setStatusbarIconResId(int resid) {
+        STATUSBAR_ICON_RESID = resid;
     }
 }

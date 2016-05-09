@@ -25,6 +25,7 @@ import mobile.substance.sdk.R
 import mobile.substance.sdk.ViewHolders.MusicViewHolder
 import mobile.substance.sdk.music.core.objects.*
 import mobile.substance.sdk.music.loading.Library
+import mobile.substance.sdk.music.playback.PlaybackRemote
 
 class MusicAdapter<T : MediaObject>(items: MutableList<T>) : RecyclerView.Adapter<MusicViewHolder>() {
     var items: MutableList<T>? = null
@@ -57,13 +58,16 @@ class MusicAdapter<T : MediaObject>(items: MutableList<T>) : RecyclerView.Adapte
     private fun bindAlbum(album: Album, holder: MusicViewHolder) {
         holder.title!!.text = album.albumName
         holder.subtitle!!.text = album.albumArtistName
-        album.requestArt(holder.image!!, context!!.resources.getDrawable(R.drawable.ic_library_music_black_24dp))
+        album.requestArt(holder.image!!)
     }
 
     private fun bindSong(song: Song, holder: MusicViewHolder) {
         holder.title!!.text = song.songTitle
         holder.subtitle!!.text = song.songArtistName
-        Library.findAlbumById(song.songAlbumID)!!.requestArt(holder.image!!, context!!.resources.getDrawable(R.drawable.ic_library_music_black_24dp))
+        Library.findAlbumById(song.songAlbumID)!!.requestArt(holder.image!!)
+        holder.itemView.setOnClickListener { it ->
+            PlaybackRemote.play(song)
+        }
     }
 
     private fun bindArtist(artist: Artist, holder: MusicViewHolder) {
@@ -74,14 +78,14 @@ class MusicAdapter<T : MediaObject>(items: MutableList<T>) : RecyclerView.Adapte
     private fun bindGenre(genre: Genre, holder: MusicViewHolder) {
         holder.title!!.text = genre.genreName
         Library.findSongsForGenreAsync(context, genre, Library.QueryResult { it ->
-            if (it.size > 0) Library.findAlbumById(it.first().songAlbumID)!!.requestArt(holder.image, context!!.resources.getDrawable(R.drawable.ic_library_music_black_24dp))
+            if (it.size > 0) Library.findAlbumById(it.first().songAlbumID)!!.requestArt(holder.image)
         })
     }
 
     private fun bindPlaylist(playlist: Playlist, holder: MusicViewHolder) {
         holder.title!!.text = playlist.playlistName
         Library.findSongsForPlaylistAsync(context, playlist, Library.QueryResult { it ->
-            if (it.size > 0) Library.findAlbumById(it.first().songAlbumID)!!.requestArt(holder.image, context!!.resources.getDrawable(R.drawable.ic_library_music_black_24dp))
+            if (it.size > 0) Library.findAlbumById(it.first().songAlbumID)!!.requestArt(holder.image)
         })
     }
 

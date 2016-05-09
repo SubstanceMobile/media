@@ -26,22 +26,24 @@ import android.util.Log;
 
 import java.util.HashMap;
 
+import mobile.substance.sdk.music.core.CoreUtil;
+
 
 public class MediaObject {
-    private static final MediaMetadataCompat.Builder builder = new MediaMetadataCompat.Builder();
+    static final MediaMetadataCompat.Builder builder = new MediaMetadataCompat.Builder();
     MediaMetadataCompat data;
+    HashMap<String, Object> extraVars;
     private long id, TIME_LOADED = 0;
     private boolean isLocked, isAnimated = false;
-
     ///////////////////////////////////////////////////////////////////////////
     // Uri
     ///////////////////////////////////////////////////////////////////////////
     private int posInList;
-    private Context context;
 
     ///////////////////////////////////////////////////////////////////////////
     //Title
     ///////////////////////////////////////////////////////////////////////////
+    private Context context;
 
     protected Uri getBaseUri() {
         return null;
@@ -54,6 +56,10 @@ public class MediaObject {
     ///////////////////////////////////////////////////////////////////////////
     // Handles time data
     ///////////////////////////////////////////////////////////////////////////
+
+    public String getFilePath() {
+        return CoreUtil.getFilePath(context, getUri());
+    }
 
     public long getID() {
         return id;
@@ -70,15 +76,15 @@ public class MediaObject {
         return this;
     }
 
+    ///////////////////////////////////////////////////////////////////////////
+    // Context
+    ///////////////////////////////////////////////////////////////////////////
+
     public MediaObject unlock() {
         TIME_LOADED = 0;
         isLocked = false;
         return this;
     }
-
-    ///////////////////////////////////////////////////////////////////////////
-    // Context
-    ///////////////////////////////////////////////////////////////////////////
 
     public boolean isLocked() {
         return isLocked;
@@ -124,20 +130,19 @@ public class MediaObject {
         data = builder.build();
     }
 
-
     protected boolean isContextRequired() {
         //Override to change
         return false;
     }
 
+    ///////////////////////////////////////////////////////////////////////////
+    // Position in list
+    ///////////////////////////////////////////////////////////////////////////
+
     @Nullable
     public Context getContext() {
         return context.getApplicationContext();
     }
-
-    ///////////////////////////////////////////////////////////////////////////
-    // Position in list
-    ///////////////////////////////////////////////////////////////////////////
 
     public MediaObject setContext(Context context) {
         if (isContextRequired()) {
@@ -155,16 +160,14 @@ public class MediaObject {
         return posInList;
     }
 
-    public MediaObject setPosInList(int posInList) {
-        this.posInList = posInList;
-        return this;
-    }
-
     ///////////////////////////////////////////////////////////////////////////
     // Extra Data Storage
     ///////////////////////////////////////////////////////////////////////////
 
-    HashMap<String, Object> extraVars;
+    public MediaObject setPosInList(int posInList) {
+        this.posInList = posInList;
+        return this;
+    }
 
     public void putData(String key, Object data) {
         if (extraVars == null) extraVars = new HashMap<>();

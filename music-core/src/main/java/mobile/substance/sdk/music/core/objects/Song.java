@@ -16,13 +16,15 @@
 
 package mobile.substance.sdk.music.core.objects;
 
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.provider.MediaStore;
-import android.support.v4.media.session.MediaSessionCompat.QueueItem;
+import android.support.v4.media.MediaBrowserCompat;
 
 import mobile.substance.sdk.music.core.CoreUtil;
 
 import static android.support.v4.media.MediaMetadataCompat.METADATA_KEY_ALBUM;
+import static android.support.v4.media.MediaMetadataCompat.METADATA_KEY_ALBUM_ART;
 import static android.support.v4.media.MediaMetadataCompat.METADATA_KEY_ARTIST;
 import static android.support.v4.media.MediaMetadataCompat.METADATA_KEY_DURATION;
 import static android.support.v4.media.MediaMetadataCompat.METADATA_KEY_TITLE;
@@ -34,6 +36,7 @@ import static android.support.v4.media.MediaMetadataCompat.METADATA_KEY_YEAR;
  */
 public class Song extends MediaObject {
     private long songAlbumId, songArtistId;
+    private String additionalPath;
 
     @Override
     protected Uri getBaseUri() {
@@ -56,6 +59,10 @@ public class Song extends MediaObject {
     // Album
     ///////////////////////////////////////////////////////////////////////////
 
+    public String getSongAlbumName() {
+        return data.getString(METADATA_KEY_ALBUM);
+    }
+
     public void setSongAlbumName(String songAlbum) {
         putString(METADATA_KEY_ALBUM, songAlbum);
     }
@@ -66,6 +73,10 @@ public class Song extends MediaObject {
 
     public void setSongAlbumID(long albumID) {
         this.songAlbumId = albumID;
+    }
+
+    public void embedArtwork(Bitmap bitmap) {
+        putBitmap(METADATA_KEY_ALBUM_ART, bitmap);
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -131,8 +142,31 @@ public class Song extends MediaObject {
     }
 
     ///////////////////////////////////////////////////////////////////////////
+    // Additional Song path
+    ///////////////////////////////////////////////////////////////////////////
+
+
+    @Override
+    public String getFilePath() {
+        return additionalPath == null ? super.getFilePath() : additionalPath;
+    }
+
+    public void setAdditionalPath(String additionalPath) {
+        this.additionalPath = additionalPath;
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
     // Builder and Other Classes
     ///////////////////////////////////////////////////////////////////////////
+
+    @Override
+    protected boolean isContextRequired() {
+        return true;
+    }
+
+    public MediaBrowserCompat.MediaItem toMediaItem() {
+        return new MediaBrowserCompat.MediaItem(data.getDescription(), MediaBrowserCompat.MediaItem.FLAG_PLAYABLE);
+    }
 
     public static class Builder {
         private Song song;
@@ -189,10 +223,6 @@ public class Song extends MediaObject {
             return song;
         }
 
-    }
-
-    public QueueItem toQueueItem() {
-        return new QueueItem(data.getDescription(), getID());
     }
 
 }
