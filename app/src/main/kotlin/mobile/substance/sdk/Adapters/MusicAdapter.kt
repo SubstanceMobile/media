@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package mobile.substance.sdk.Adapters
+package mobile.substance.sdk.adapters
 
 import android.content.Context
 import android.support.v7.widget.RecyclerView
@@ -22,10 +22,10 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import com.bumptech.glide.Glide
 import mobile.substance.sdk.R
-import mobile.substance.sdk.ViewHolders.MusicViewHolder
 import mobile.substance.sdk.music.core.objects.*
 import mobile.substance.sdk.music.loading.Library
 import mobile.substance.sdk.music.playback.PlaybackRemote
+import mobile.substance.sdk.viewholders.MusicViewHolder
 
 class MusicAdapter<T : MediaObject>(items: MutableList<T>) : RecyclerView.Adapter<MusicViewHolder>() {
     var items: MutableList<T>? = null
@@ -72,7 +72,11 @@ class MusicAdapter<T : MediaObject>(items: MutableList<T>) : RecyclerView.Adapte
 
     private fun bindArtist(artist: Artist, holder: MusicViewHolder) {
         holder.title!!.text = artist.artistName
-        Glide.with(context).load(R.drawable.ic_library_music_black_24dp).into(holder.image)
+        Glide.with(context)
+                .load(R.drawable.ic_person_black_24dp)
+                .crossFade()
+                .centerCrop()
+                .into(holder.image)
     }
 
     private fun bindGenre(genre: Genre, holder: MusicViewHolder) {

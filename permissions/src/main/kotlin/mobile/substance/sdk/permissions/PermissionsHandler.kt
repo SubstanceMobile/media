@@ -20,25 +20,23 @@ import android.app.Activity
 import android.content.pm.PackageManager
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
+import android.util.Log
+import java.io.File
 import java.util.*
 
 class PermissionsHandler(activity: Activity, permissions: Array<String>?, callbacks: PermissionsCallbacks) {
     private var activity: Activity = activity
     private var permissions: Array<String>? = permissions
-    private var callbacks: PermissionsCallbacks = callbacks
+    @Volatile private var callbacks: PermissionsCallbacks = callbacks
     private val requestCode = Random().nextInt(100)
-    private var granted: Array<Boolean>? = null
-    private var showedRationale: Array<Boolean>? = null
+    private var granted: Array<Boolean> = Array(permissions!!.size, { false })
+    private var showedRationale: Array<Boolean> = Array(permissions!!.size, { false })
 
     var allGranted: Boolean = false
 
-    init {
-        this.granted = Array(permissions!!.size, { false })
-        this.showedRationale = Array(permissions.size, { false })
-    }
-
     fun handlePermissions(): Boolean {
         if (permissions == null) {
+            Log.d(PermissionsHandler::class.java.simpleName, "permissions == null, returning")
             allGranted = true
             callbacks.onAllGranted()
             return true
@@ -49,14 +47,23 @@ class PermissionsHandler(activity: Activity, permissions: Array<String>?, callba
         for (i in permissions!!.indices) {
             if (ContextCompat.checkSelfPermission(activity, permissions!![i]) != PackageManager.PERMISSION_GRANTED) {
                 permissionsToCheck.add(permissions!![i])
-            } else if (granted!![i] != true) {
-                granted!![i] = true
+                granted[i] = false
+            } else if (granted[i] != true) {
+                granted[i] = true
                 callbacks.onPermissionGranted(permissions!![i])
                 permissionsToCheck.add(permissions!![i])
             }
         }
 
-        if (granted!!.all { true }) {
+        val builder = StringBuilder()
+        for(i in granted.indices) {
+            builder.append(granted[i].toString() + File.separator)
+        }
+
+        Log.d(PermissionsHandler::class.java.simpleName, builder.toString())
+
+        if (granted.all { it == true }) {
+            Log.d(PermissionsHandler::class.java.simpleName, "All indices are granted, returning")
             allGranted = true
             callbacks.onAllGranted()
             return true
@@ -71,21 +78,20 @@ class PermissionsHandler(activity: Activity, permissions: Array<String>?, callba
 
         for (i in permissions.indices) {
             if (grantResults[i] == PackageManager.PERMISSION_GRANTED) {
-                if (granted!![i] == true)
+                if (granted[i] == true)
                     continue
-                granted!![i] = true
-                callbacks!!.onPermissionGranted(permissions[i])
-            } else if (showedRationale!![i] != true) {
-                showedRationale!![i] = true
-                callbacks!!.onShouldShowRationale(permissions[i])
-            } else callbacks!!.onPermissionUnavailable(permissions[i])
+                granted[i] = true
+                callbacks.onPermissionGranted(permissions[i])
+            } else if (showedRationale[i] != true) {
+                showedRationale[i] = true
+                callbacks.onShouldShowRationale(permissions[i])
+            } else callbacks.onPermissionUnavailable(permissions[i])
         }
 
-        if (granted!!.all { true }) {
-            callbacks!!.onAllGranted()
+        if (granted.all { it == true }) {
+            callbacks.onAllGranted()
             allGranted = true
         }
-
 
         return true
     }

@@ -40,4 +40,8 @@ public class DynamicColorsUtil {
         return Color.argb(alpha, red, green, blue);
     }
 
+    public static String hexStringForInt(int color) {
+        return String.format("#%06X", (0xFFFFFF & color));
+    }
+
 }

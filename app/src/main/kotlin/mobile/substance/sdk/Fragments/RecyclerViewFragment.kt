@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package mobile.substance.sdk.Fragments
+package mobile.substance.sdk.fragments
 
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.view.View
-import mobile.substance.sdk.Adapters.MusicAdapter
 import mobile.substance.sdk.R
+import mobile.substance.sdk.adapters.MusicAdapter
 import mobile.substance.sdk.music.core.objects.*
 import mobile.substance.sdk.music.loading.Library
 import mobile.substance.sdk.music.loading.LibraryData
@@ -98,8 +98,8 @@ class RecyclerViewFragment : BaseFragment(), LibraryListener {
         recyclerview = root.findViewById(R.id.fragment_recyclerview) as RecyclerView
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
+    override fun onDetach() {
+        super.onDetach()
         Library.unregisterListener(this)
     }
 

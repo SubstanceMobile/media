@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package mobile.substance.sdk.Fragments
+package mobile.substance.sdk.fragments
 
 import android.support.v4.widget.DrawerLayout
-import mobile.substance.sdk.Activities.NavigationDrawerActivity
+import mobile.substance.sdk.activities.NavigationDrawerActivity
 
 /**
  * Created by Julian on 06/05/16.

@@ -14,23 +14,28 @@
  * limitations under the License.
  */
 
-package mobile.substance.sdk.Activities
+package mobile.substance.sdk.activities
 
+import android.graphics.BitmapFactory
+import android.graphics.drawable.BitmapDrawable
 import android.support.design.widget.NavigationView
 import android.support.v4.view.GravityCompat
 import android.support.v4.widget.DrawerLayout
 import android.support.v7.widget.CardView
 import android.widget.ImageView
 import android.widget.TextView
+import com.afollestad.materialdialogs.MaterialDialog
+import com.github.javiersantos.materialstyleddialogs.MaterialStyledDialog
 import mobile.substance.sdk.R
 import mobile.substance.sdk.music.core.objects.Song
 import mobile.substance.sdk.music.loading.Library
 import mobile.substance.sdk.music.loading.LibraryConfig
 import mobile.substance.sdk.music.loading.LibraryData
+import mobile.substance.sdk.music.playback.MusicQueue
 import mobile.substance.sdk.music.playback.PlaybackRemote
 import mobile.substance.sdk.music.playback.PlaybackState
 
-class MainActivity : NavigationDrawerActivity(), PlaybackRemote.RemoteCallback {
+class MainActivity : NavigationDrawerActivity(), PlaybackRemote.RemoteCallback, PlaybackRemote.NotificationCallback {
 
     override fun onProgressChanged(progress: Int) {
 
@@ -65,17 +70,31 @@ class MainActivity : NavigationDrawerActivity(), PlaybackRemote.RemoteCallback {
     }
 
     override fun init() {
+        PlaybackRemote.setNotificationCallback(this)
         navigationView!!.setNavigationItemSelectedListener { it ->
             drawerLayout!!.closeDrawer(GravityCompat.START)
             handleNavigationClick(it)
         }
-        Library(this, LibraryConfig()
+        Library.init(this, LibraryConfig()
                 .put(LibraryData.SONGS)
                 .put(LibraryData.ALBUMS)
                 .put(LibraryData.ARTISTS)
                 .put(LibraryData.PLAYLISTS)
                 .put(LibraryData.GENRES))
         Library.build()
+        currentSongCard!!.setOnClickListener {
+            val dialog = MaterialStyledDialog(this)
+                    .setTitle(MusicQueue.getCurrentSong()!!.songTitle)
+                    .setDescription(MusicQueue.getCurrentSong()!!.songArtistName + "\n" + MusicQueue.getCurrentSong()!!.songAlbumName)
+                    .setPositive("Ok", MaterialDialog.SingleButtonCallback { materialDialog, dialogAction ->
+                        materialDialog.dismiss()
+                    })
+
+            try {
+                dialog.setHeaderDrawable(BitmapDrawable(resources, BitmapFactory.decodeFile(Library.findAlbumById(MusicQueue.getCurrentSong()!!.songAlbumID)!!.albumArtworkPath)))
+            } catch(e: NullPointerException) {}
+            dialog.show()
+        }
         super.init()
     }
 

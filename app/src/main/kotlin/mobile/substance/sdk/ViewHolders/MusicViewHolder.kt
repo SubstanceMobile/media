@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package mobile.substance.sdk.ViewHolders
+package mobile.substance.sdk.viewholders
 
 import android.support.v7.widget.RecyclerView
 import android.view.View

@@ -31,6 +31,11 @@
             android:title="Music" />
 
         <item
+            android:id="@+id/drawer_dynamic_colors"
+            android:icon="@drawable/ic_color_lens_black_24dp"
+            android:title="Dynamic Colors" />
+
+        <item
             android:id="@+id/drawer_api"
             android:icon="@drawable/ic_code_black_24dp"
             android:title="API" />

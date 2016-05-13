@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package mobile.substance.sdk.Fragments
+package mobile.substance.sdk.fragments
 
 import android.os.Bundle
 import android.support.v4.app.Fragment
@@ -34,11 +34,9 @@ open class BaseFragment : Fragment() {
         return view
     }
 
-    open fun initViews(root: View) {
-    }
+    open fun initViews(root: View) {}
 
-    open fun init() {
-    }
+    open fun init() {}
 
     open fun getLayoutResId(): Int {
         return 0

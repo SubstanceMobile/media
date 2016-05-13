@@ -53,11 +53,13 @@ public class Album extends MediaObject {
     // Album Art
     ///////////////////////////////////////////////////////////////////////////
 
-    String albumArtworkPath = "";
+    private String albumArtworkPath;
+    private Uri albumArtworkUri;
 
-    public void setAlbumArtworkPath(String albumArtworkPath) {
-        this.albumArtworkPath = "file://" + albumArtworkPath;
-        if (albumArtworkPath != null) {
+    public void setAlbumArtworkPath(String artworkPath) {
+        this.albumArtworkPath = artworkPath;
+        this.albumArtworkUri = Uri.parse("file://" + artworkPath);
+        if (artworkPath != null) {
             setAnimated(false);
         } else {
             setAnimated(true);
@@ -65,7 +67,11 @@ public class Album extends MediaObject {
     }
 
     public String getAlbumArtworkPath() {
-        return albumArtworkPath;
+        return albumArtworkPath == null ? "" : albumArtworkPath;
+    }
+
+    public Uri getAlbumArtworkUri() {
+        return albumArtworkUri;
     }
 
     public interface ArtRequest {

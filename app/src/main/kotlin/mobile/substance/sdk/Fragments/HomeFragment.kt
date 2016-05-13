@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package mobile.substance.sdk.Fragments
+package mobile.substance.sdk.fragments
 
 import android.support.v7.widget.Toolbar
 import android.view.View
-import mobile.substance.sdk.Helpers.NavigationHelper
 import mobile.substance.sdk.R
+import mobile.substance.sdk.helpers.NavigationHelper
 
 /**
  * Created by Julian Os on 03.05.2016.

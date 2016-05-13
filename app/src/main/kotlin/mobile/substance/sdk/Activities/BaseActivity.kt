@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package mobile.substance.sdk.Activities
+package mobile.substance.sdk.activities
 
 import android.Manifest
 import android.os.Bundle
@@ -35,17 +35,14 @@ open class BaseActivity : AppCompatActivity(), PermissionsCallbacks {
             super.onSaveInstanceState(outState)
     }
 
-    override fun onShouldShowRationale(permission: String) {
-        android.os.Process.killProcess(android.os.Process.myPid())
-    }
+    override fun onShouldShowRationale(permission: String) {}
 
     override fun onAllGranted() {
-        init()
+        Log.d(BaseActivity::class.java.simpleName, "onAllGranted()")
+        runOnUiThread { init() }
     }
 
-    override fun onPermissionUnavailable(permission: String) {
-        onShouldShowRationale(permission)
-    }
+    override fun onPermissionUnavailable(permission: String) {}
 
 
 
@@ -53,7 +50,9 @@ open class BaseActivity : AppCompatActivity(), PermissionsCallbacks {
         super.onCreate(savedInstanceState)
         setContentView(getLayoutResId())
         initViews()
-        permissionHandler.handlePermissions()
+        Thread() {
+            run { permissionHandler.handlePermissions() }
+        }.start()
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {

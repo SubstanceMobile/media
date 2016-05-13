@@ -61,7 +61,7 @@ public class Library {
 
     private static volatile List<LibraryListener> listeners = new ArrayList<>();
 
-    public Library(Context context, LibraryConfig config) {
+    public static void init(Context context, LibraryConfig config) {
         Library.context = context.getApplicationContext();
 
         //Creates tasks

@@ -458,6 +458,10 @@ public class MusicService extends MediaBrowserServiceCompat implements MediaPlay
         return null;
     }
 
+    public MediaSessionCompat getSession() {
+        return sessionCompat;
+    }
+
     @Override
     public void onLoadChildren(@NonNull String parentId, @NonNull Result<List<MediaBrowserCompat.MediaItem>> result) { // We don't use this
 
@@ -596,6 +600,10 @@ public class MusicService extends MediaBrowserServiceCompat implements MediaPlay
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.d("MusicService", "onStartCommand()");
+        for (PlaybackRemote.RemoteCallback callback : CALLBACKS) {
+            if (callback != null)
+                callback.onReceivedIntent(intent);
+        }
         return START_STICKY;
     }
 

@@ -7,7 +7,7 @@ import mobile.substance.sdk.music.core.MusicOptions
  * Created by Julian Os on 09.05.2016.
  */
 
-class SDKApplication : Application() {
+class SDKApp : Application() {
 
 
     override fun onCreate() {

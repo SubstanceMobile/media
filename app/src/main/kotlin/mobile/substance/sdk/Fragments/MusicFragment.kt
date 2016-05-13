@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package mobile.substance.sdk.Fragments
+package mobile.substance.sdk.fragments
 
 import android.content.Context
 import android.support.design.widget.TabLayout
@@ -24,11 +24,9 @@ import android.support.v4.app.FragmentPagerAdapter
 import android.support.v4.view.ViewPager
 import android.support.v7.widget.Toolbar
 import android.view.View
-import mobile.substance.sdk.Helpers.NavigationHelper
 import mobile.substance.sdk.R
-import mobile.substance.sdk.music.core.objects.*
+import mobile.substance.sdk.helpers.NavigationHelper
 import mobile.substance.sdk.music.loading.LibraryData
-import mobile.substance.sdk.music.loading.LibraryListener
 
 /**
  * Created by Julian Os on 03.05.2016.
@@ -55,47 +53,7 @@ class MusicFragment : NavigationDrawerFragment() {
         return R.layout.fragment_music
     }
 
-    class MusicPagerAdapter(context: Context, fm: FragmentManager) : FragmentPagerAdapter(fm), LibraryListener {
-
-        override fun onSongLoaded(item: Song?, pos: Int) {
-
-        }
-
-        override fun onSongsCompleted(result: MutableList<Song>?) {
-
-        }
-
-        override fun onAlbumLoaded(item: Album?, pos: Int) {
-
-        }
-
-        override fun onAlbumsCompleted(result: MutableList<Album>?) {
-
-        }
-
-        override fun onArtistLoaded(item: Artist?, pos: Int) {
-
-        }
-
-        override fun onArtistsCompleted(result: MutableList<Artist>?) {
-
-        }
-
-        override fun onPlaylistLoaded(item: Playlist?, pos: Int) {
-
-        }
-
-        override fun onPlaylistsCompleted(result: MutableList<Playlist>?) {
-
-        }
-
-        override fun onGenreLoaded(item: Genre?, pos: Int) {
-
-        }
-
-        override fun onGenresCompleted(result: MutableList<Genre>?) {
-
-        }
+    class MusicPagerAdapter(context: Context, fm: FragmentManager) : FragmentPagerAdapter(fm) {
 
         var context: Context? = context
         val titleResIds: Array<Int> = arrayOf(R.string.songs, R.string.albums, R.string.artists, R.string.playlists, R.string.genres)

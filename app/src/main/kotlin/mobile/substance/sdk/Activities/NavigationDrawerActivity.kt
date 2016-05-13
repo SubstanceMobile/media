@@ -14,22 +14,27 @@
  * limitations under the License.
  */
 
-package mobile.substance.sdk.Activities
+package mobile.substance.sdk.activities
 
 import android.support.v4.app.Fragment
 import android.support.v4.widget.DrawerLayout
 import android.util.Log
 import android.view.MenuItem
-import mobile.substance.sdk.Fragments.HomeFragment
-import mobile.substance.sdk.Fragments.MusicFragment
 import mobile.substance.sdk.R
+import mobile.substance.sdk.fragments.DynamicColorsFragment
+import mobile.substance.sdk.fragments.HomeFragment
+import mobile.substance.sdk.fragments.MusicFragment
 
 open class NavigationDrawerActivity : BaseActivity() {
     private var fragment: Fragment? = null
 
     private fun handleLaunch() {
         fragment = HomeFragment()
-        supportFragmentManager.beginTransaction().add(R.id.activity_main_fragment_placeholder, fragment, "SubstanceSDk").commit()
+        supportFragmentManager
+                .beginTransaction()
+                .replace(R.id.activity_main_fragment_placeholder, fragment, "SubstanceSDK")
+                .addToBackStack("SubstanceSDK")
+                .commit()
     }
 
     override fun init() {
@@ -37,9 +42,11 @@ open class NavigationDrawerActivity : BaseActivity() {
     }
 
     private fun commitFragment() {
-        Log.d("LOG", "fragment is HomeFragment => " + (fragment is HomeFragment).toString())
-        supportFragmentManager.beginTransaction().replace(R.id.activity_main_fragment_placeholder, fragment, "SubstanceSDK").commit()
-        Log.d("LOG", supportFragmentManager.fragments.size.toString())
+         supportFragmentManager
+                 .beginTransaction()
+                 .replace(R.id.activity_main_fragment_placeholder, fragment, "SubstanceSDK")
+                 .addToBackStack("SubstanceSDK")
+                 .commit()
     }
 
     fun handleNavigationClick(item: MenuItem): Boolean {
@@ -53,6 +60,11 @@ open class NavigationDrawerActivity : BaseActivity() {
             }
             R.id.drawer_music -> {
                 fragment = MusicFragment()
+                commitFragment()
+                return true
+            }
+            R.id.drawer_dynamic_colors -> {
+                fragment = DynamicColorsFragment()
                 commitFragment()
                 return true
             }

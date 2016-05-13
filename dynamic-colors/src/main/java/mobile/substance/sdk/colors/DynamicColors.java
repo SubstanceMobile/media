@@ -16,11 +16,12 @@
 
 package mobile.substance.sdk.colors;
 
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Color;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.support.v4.util.Pair;
 import android.support.v7.graphics.Palette;
 
 import java.io.File;
@@ -57,11 +58,13 @@ public class DynamicColors {
         return new DynamicColors(image.getPath());
     }
 
+    public static DynamicColors from(Resources res, int resId) { return new DynamicColors(new Pair<Resources, Integer>(res, Integer.valueOf(resId)) ); }
+
     ///////////////////////////////////////////////////////////////////////////
     // Methods for running.
     ///////////////////////////////////////////////////////////////////////////
 
-    public void exec(Executor exec, DynamicColorsCallback callback, boolean... properties) {
+    private void exec(Executor exec, DynamicColorsCallback callback, boolean... properties) {
         new DynamicColorsGenerator(callback).executeOnExecutor(exec, from, properties);
     }
 
@@ -105,6 +108,8 @@ public class DynamicColors {
             Bitmap bitmap = null;
             if (params[0] instanceof Bitmap) bitmap = (Bitmap) params[0];
             if (params[0] instanceof String) bitmap = BitmapFactory.decodeFile((String) params[0]);
+            if (params[0] instanceof Pair) bitmap = BitmapFactory.decodeResource(((Pair<Resources, Integer>) params[0]).first, ((Pair<Resources, Integer>) params[0]).second);
+
             if (bitmap == null) return null;
 
             Palette palette = Palette.from(bitmap).generate();
@@ -141,7 +146,7 @@ public class DynamicColors {
                 }
             } else {
                 try {
-                    return new ColorPackage(palette.getDarkVibrantColor(Color.BLACK), palette.getVibrantColor(Color.BLACK));
+                    return new ColorPackage(palette.getDarkVibrantColor(DynamicColorsOptions.getDefaultColors().getPrimaryColor()), palette.getVibrantColor(DynamicColorsOptions.getDefaultColors().getAccentColor()));
                 } catch (Exception e) {
                     return DynamicColorsOptions.getDefaultColors();
                 }

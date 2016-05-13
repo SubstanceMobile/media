@@ -16,6 +16,7 @@
   -->
 
 <resources>
+    <dimen name="statusbar_height">0dp</dimen>
     <dimen name="text_size_headline">24sp</dimen>
     <dimen name="text_size_title">20sp</dimen>
     <dimen name="text_size_default">16sp</dimen>
