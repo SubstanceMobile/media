@@ -2,7 +2,7 @@
 *.apk
 *.ap_
 
-# Files for the Dalvik VM
+# Files for the Dalvik/ART VM
 *.dex
 
 # Java class files
