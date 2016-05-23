@@ -1,3 +1,19 @@
+/*
+ * Copyright 2016 Substance Mobile
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package mobile.substance.sdk.music.playback
 
 import android.app.Notification
@@ -6,12 +22,16 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
+import android.graphics.Bitmap
 import android.os.IBinder
 import android.support.v4.media.session.MediaSessionCompat
+import android.support.v7.app.NotificationCompat
 import android.util.Log
 import android.view.MenuItem
-import mobile.substance.sdk.music.core.MusicOptions
+import mobile.substance.sdk.music.core.MusicCoreOptions
 import mobile.substance.sdk.music.core.objects.Song
+import mobile.substance.sdk.music.playback.notification.DefaultMediaNotification
+import mobile.substance.sdk.music.playback.notification.MediaNotification
 import java.util.*
 import java.util.concurrent.Callable
 import java.util.concurrent.atomic.AtomicBoolean
@@ -20,123 +40,71 @@ import java.util.concurrent.atomic.AtomicBoolean
  * Created by Julian Os on 07.05.2016.
  */
 object PlaybackRemote : ServiceConnection {
+    private var context: Context? = null
+    private var service: MusicService? = null
+    private var isBound = false
 
-    override fun onServiceDisconnected(name: ComponentName?) {
-        SERVICE = null
-        isBound!!.set(false)
+    ///////////////////////////////////////////////////////////////////////////
+    // Manages Connections
+    ///////////////////////////////////////////////////////////////////////////
+
+    private val SERVICE_BOUND_LISTENERS: MutableList<ServiceLoadListener> = ArrayList();
+    private interface ServiceLoadListener {
+        fun respond(service: MusicService?);
+    }
+
+    private fun getService(listener: ServiceLoadListener) {
+        val running = MusicPlaybackUtil.isServiceRunning(context)
+        if (running && isBound) {
+            listener.respond(service)
+            return
+        }
+        if (!running) context?.startService(Intent(context, MusicService::class.java))
+        if (!isBound) context?.bindService(Intent(context, MusicService::class.java), this, Context.BIND_IMPORTANT)
+        SERVICE_BOUND_LISTENERS.add(listener)
     }
 
     override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
-        SERVICE = (service as MusicService.ServiceBinder).service
-        SERVICE!!.registerCallback(REMOTE_CALLBACK)
-        isBound!!.set(true)
+        service = (service as MusicService.ServiceBinder).service
+        service!!.registerCallback(REMOTE_CALLBACK)
+        isBound = true
+        for (listener in SERVICE_BOUND_LISTENERS) listener.respond(service)
     }
 
-    private var CONTEXT: Context? = null
+    override fun onServiceDisconnected(name: ComponentName?) {
+        service = null
+        isBound = false
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
+    // Main
+    ///////////////////////////////////////////////////////////////////////////
+
     private var REMOTE_CALLBACK: RemoteCallback? = null
-    private var NOTIFICATION_COLOR_CALLBACK: NotificationCallback? = null
-    private var SERVICE: MusicService? = null
-    private var isBound: AtomicBoolean? = AtomicBoolean(false)
 
-    fun registerActivity(context: Context, callback: RemoteCallback?) {
-        this.CONTEXT = context
+    fun setup(context: Context, callback: RemoteCallback?) {
+        this.context = context
         this.REMOTE_CALLBACK = callback
-        if (isBound!!.get()) {
-            isBound!!.set(false)
-            SERVICE = null
-        }
-        if (!MusicUtil.isServiceRunning(context)) context.startService(Intent(context, MusicService::class.java))
-        context.bindService(Intent(context, MusicService::class.java), this, Context.BIND_ADJUST_WITH_ACTIVITY)
     }
 
-    fun unregisterActivity() {
-        if (isBound!!.get()) CONTEXT!!.unbindService(this)
-    }
-
-    fun resume() {
-        SERVICE!!.resume()
-    }
-
-    fun pause() {
-        SERVICE!!.pause()
-    }
-
-    fun registerCallback(callback: RemoteCallback) {
-        SERVICE!!.registerCallback(callback)
-    }
-
-    fun unregisterCallback(callback: RemoteCallback) {
-        SERVICE!!.unregisterCallback(callback)
-    }
-
-    fun getNotificationCallable(song: Song): Callable<Notification> {
-        return NOTIFICATION_COLOR_CALLBACK!!.getNotification(song)
-    }
-
-    fun setNotificationCallback(callback: NotificationCallback) {
-        NOTIFICATION_COLOR_CALLBACK = callback
-    }
-
-    internal fun play() {
-        SERVICE!!.play()
-    }
-
-    fun play(songs: MutableList<Song>, position: Int) {
-        var play = true
-        if (MusicQueue.getCurrentSong() != null)
-            play = songs.first().id != MusicQueue.getCurrentSong()?.id
-        Log.d(PlaybackRemote::class.java.simpleName, "play(${songs.size}, $position)")
-        MusicQueue.set(songs, position)
-        if (play)
-            play()
-    }
-
-    fun play(song: Song) {
-        var songs: MutableList<Song> = ArrayList<Song>()
-        songs.add(song)
-        play(songs, 0)
-    }
-
-    fun skipForward() {
-        MusicQueue.moveForward(1)
-        play()
-    }
-
-    fun skipBackward() {
-        MusicQueue.moveBackward(1)
-        play()
-    }
-
-    fun getMediaSession(): MediaSessionCompat {
-        return SERVICE!!.getSession()
-    }
-
-    fun seekTo(progress: Int) {
-        SERVICE!!.seekTo(progress)
-    }
-
-    fun shuffle() {
-        MusicQueue.set(MusicQueue.getMutableQueue(true)!!, 0)
+    fun cleanup() {
+        if (isBound) context!!.unbindService(this)
     }
 
     fun requestUpdate() {
-        SERVICE!!.requestUpdate()
+        service!!.requestUpdate()
     }
 
-    fun isReady(): Boolean {
-        return isBound!!.get() && REMOTE_CALLBACK != null
+    ///////////////////////////////////////////////////////////////////////////
+    // Callback
+    ///////////////////////////////////////////////////////////////////////////
+
+    fun registerCallback(callback: RemoteCallback) {
+        service!!.registerCallback(callback)
     }
 
-    fun isPlaying(): Boolean {
-        return SERVICE!!.isPlaying
-    }
-
-    fun initGoogleCast(item: MenuItem) {
-        SERVICE!!.initGoogleCast(item, MusicOptions.getCastApplicationId())
-    }
-
-    fun getPendingIntent(action: String): PendingIntent {
-        return PendingIntent.getService(CONTEXT!!, MusicService.UNIQUE_ID, Intent(CONTEXT!!, MusicService::class.java).setAction(action), PendingIntent.FLAG_CANCEL_CURRENT)
+    fun unregisterCallback(callback: RemoteCallback) {
+        service!!.unregisterCallback(callback)
     }
 
     interface RemoteCallback {
@@ -145,9 +113,9 @@ object PlaybackRemote : ServiceConnection {
             when {
                 intent.action.endsWith(".RESUME") -> resume()
                 intent.action.endsWith(".PAUSE") -> pause()
-                intent.action.endsWith(".skip.FORWARD") -> skipForward()
-                intent.action.endsWith(".skip.BACKWARD") -> skipBackward()
-                intent.action.endsWith(".NOTIFICATION") -> CONTEXT!!.startActivity(CONTEXT!!.packageManager.getLaunchIntentForPackage(CONTEXT!!.applicationContext.packageName))
+                intent.action.endsWith(".skip.FORWARD") -> playNext()
+                intent.action.endsWith(".skip.BACKWARD") -> playPrevious()
+                intent.action.endsWith(".NOTIFICATION") -> context!!.startActivity(context!!.packageManager.getLaunchIntentForPackage(context!!.applicationContext.packageName))
                 intent.action.endsWith(".SEEK") -> seekTo(intent.getIntExtra("progress", 0))
             }
         }
@@ -164,12 +132,119 @@ object PlaybackRemote : ServiceConnection {
 
     }
 
-    interface NotificationCallback {
+    ///////////////////////////////////////////////////////////////////////////
+    // Controls
+    ///////////////////////////////////////////////////////////////////////////
 
-        fun getNotification(song: Song): Callable<Notification> = Callable<Notification> {
-            MusicNotification.create(CONTEXT!!, isPlaying(), getMediaSession())
-        }
-
+    internal fun play() {
+        getService(object : ServiceLoadListener {
+            override fun respond(service: MusicService?) {
+                service!!.play()
+            }
+        })
     }
+
+    fun resume() {
+        getService(object : ServiceLoadListener {
+            override fun respond(service: MusicService?) {
+                service!!.resume()
+            }
+        })
+    }
+
+    fun pause() {
+        getService(object : ServiceLoadListener {
+            override fun respond(service: MusicService?) {
+                service!!.pause()
+            }
+        })
+    }
+
+    fun play(songs: MutableList<Song>, position: Int) {
+        var play = true
+        if (getCurrentSong() != null)
+            play = songs.first().id != getCurrentSong()?.id
+        Log.d(PlaybackRemote::class.java.simpleName, "play(${songs.size}, $position)")
+        MusicQueue.set(songs, position)
+        if (play) play()
+    }
+
+    fun play(song: Song) {
+        val songs: MutableList<Song> = ArrayList()
+        songs.add(song)
+        play(songs, 0)
+    }
+
+    fun playNext() {
+        MusicQueue.moveForward(1)
+        play()
+    }
+
+    fun playPrevious() {
+        MusicQueue.moveBackward(1)
+        play()
+    }
+
+    fun seekTo(progress: Int) {
+        getService(object : ServiceLoadListener {
+            override fun respond(service: MusicService?) {
+                service!!.seekTo(progress)
+            }
+        })
+    }
+
+    fun shuffle() {
+        //TODO
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
+    // Queue
+    ///////////////////////////////////////////////////////////////////////////
+
+    fun getCurrentSong(): Song? = MusicQueue.getCurrentSong()
+
+    fun getQueue(): List<Song>? = MusicQueue.getMutableQueue(false)
+
+    fun getQueue(startAtPosition: Boolean): List<Song>? = MusicQueue.getMutableQueue(startAtPosition)
+
+    fun setQueue(queue: MutableList<Song>, position: Int) = MusicQueue.set(queue, position)
+
+    ///////////////////////////////////////////////////////////////////////////
+    // Notification
+    ///////////////////////////////////////////////////////////////////////////
+
+    private var notificationCreator: MediaNotification = DefaultMediaNotification()
+    private var notificationBuilder: NotificationCompat.Builder? = null;
+
+    fun setNotification(notification: MediaNotification) {
+        this.notificationCreator = notification
+    }
+
+    internal fun makeNotification(albumArt: Bitmap): Notification {
+        if (notificationBuilder != null) notificationBuilder = notificationCreator.createNotification(context!!, getMediaSession(),
+                MusicPlaybackUtil.getPendingIntent(context!!, MusicPlaybackUtil.Action.PLAY),
+                MusicPlaybackUtil.getPendingIntent(context!!, MusicPlaybackUtil.Action.PAUSE),
+                MusicPlaybackUtil.getPendingIntent(context!!, MusicPlaybackUtil.Action.SKIP_FORWARD),
+                MusicPlaybackUtil.getPendingIntent(context!!, MusicPlaybackUtil.Action.SKIP_BACKWARD),
+                MusicPlaybackUtil.getPendingIntent(context!!, MusicPlaybackUtil.Action.NOTIFICATION),
+                MusicPlaybackUtil.getPendingIntent(context!!, MusicPlaybackUtil.Action.STOP));
+        notificationCreator.populate(getCurrentSong()!!, notificationBuilder!!)
+        notificationCreator.loadArt(albumArt, notificationBuilder!!)
+        return notificationCreator.buildNotif(notificationBuilder!!)
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
+    // Other
+    ///////////////////////////////////////////////////////////////////////////
+
+    fun initGoogleCast(item: MenuItem) {
+        service!!.initGoogleCast(item, MusicPlaybackOptions.castApplicationId)
+    }
+
+    fun getMediaSession(): MediaSessionCompat = service!!.session!!
+
+    fun isReady() = isBound && REMOTE_CALLBACK != null
+
+    fun isPlaying() = service!!.playback.isPlaying()
 
 }

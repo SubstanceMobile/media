@@ -1,3 +1,19 @@
+/*
+ * Copyright 2016 Substance Mobile
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package mobile.substance.sdk.music.playback.cast;
 
 import android.content.Context;
@@ -19,7 +35,7 @@ import com.google.android.gms.common.images.WebImage;
 import java.io.IOException;
 
 import mobile.substance.sdk.music.playback.MusicQueue;
-import mobile.substance.sdk.music.playback.MusicUtil;
+import mobile.substance.sdk.music.playback.MusicPlaybackUtil;
 import mobile.substance.sdk.music.playback.PlaybackRemote;
 
 /**
@@ -42,8 +58,8 @@ public class CastPlaybackHandler implements RemoteMediaPlayer.OnStatusUpdatedLis
         remotePlayer.setOnStatusUpdatedListener(this);
         this.context = context;
         this.apiClient = apiClient;
-        songServer = new FileServer(MusicUtil.FILE_PORT, 1);
-        artworkServer = new FileServer(MusicUtil.ARTWORK_PORT, 2);
+        songServer = new FileServer(MusicPlaybackUtil.FILE_PORT, 1);
+        artworkServer = new FileServer(MusicPlaybackUtil.ARTWORK_PORT, 2);
         try {
             songServer.start();
             artworkServer.start();
@@ -170,7 +186,7 @@ public class CastPlaybackHandler implements RemoteMediaPlayer.OnStatusUpdatedLis
     public void onStatusUpdated() {
         currentStatus = remotePlayer.getMediaStatus();
         if (currentStatus != null && currentStatus.getPlayerState() == MediaStatus.PLAYER_STATE_IDLE && currentStatus.getIdleReason() == MediaStatus.IDLE_REASON_FINISHED)
-            PlaybackRemote.INSTANCE.skipForward();
+            PlaybackRemote.INSTANCE.playNext();
     }
 
     @Override
@@ -183,7 +199,7 @@ public class CastPlaybackHandler implements RemoteMediaPlayer.OnStatusUpdatedLis
     private MediaInfo createMediaInfo() {
         String finalUrl = null;
         songServer.serve(null);
-        finalUrl = "http://" + MusicUtil.getIP(context) + MusicUtil.FILE_PORT;
+        finalUrl = "http://" + MusicPlaybackUtil.getIP(context) + MusicPlaybackUtil.FILE_PORT;
         Toast.makeText(context, finalUrl, Toast.LENGTH_LONG).show();
         MediaInfo mInfo = new MediaInfo.Builder(finalUrl)
                 .setContentType("audio/*")
@@ -201,7 +217,7 @@ public class CastPlaybackHandler implements RemoteMediaPlayer.OnStatusUpdatedLis
         data.putString(MediaMetadata.KEY_ARTIST, base.getString(MediaMetadataCompat.METADATA_KEY_ARTIST));
         data.putString(MediaMetadata.KEY_ALBUM_TITLE, base.getString(MediaMetadataCompat.METADATA_KEY_ALBUM));
         artworkServer.serve(null);
-        data.addImage(new WebImage(Uri.parse("http://" + MusicUtil.getIP(context) + MusicUtil.ARTWORK_PORT)));
+        data.addImage(new WebImage(Uri.parse("http://" + MusicPlaybackUtil.getIP(context) + MusicPlaybackUtil.ARTWORK_PORT)));
         return data;
     }
 

@@ -98,7 +98,6 @@ class MainActivity : NavigationDrawerActivity(), PlaybackRemote.RemoteCallback, 
         super.init()
     }
 
-
     override fun initViews() {
         navigationView = findViewById(R.id.activity_main_navigationview) as NavigationView
         drawerLayout = findViewById(R.id.activity_main_drawerlayout) as DrawerLayout
@@ -113,12 +112,12 @@ class MainActivity : NavigationDrawerActivity(), PlaybackRemote.RemoteCallback, 
 
     override fun onStart() {
         super.onStart()
-        PlaybackRemote.registerActivity(this, this)
+        PlaybackRemote.setup(this, this)
     }
 
     override fun onStop() {
         super.onStop()
-        PlaybackRemote.unregisterActivity()
+        PlaybackRemote.cleanup()
     }
 
 }

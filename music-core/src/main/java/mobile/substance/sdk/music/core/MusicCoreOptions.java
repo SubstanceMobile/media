@@ -16,36 +16,21 @@
 
 package mobile.substance.sdk.music.core;
 
+import android.content.Context;
+import android.graphics.drawable.Drawable;
+
 /**
  * Created by Adrian on 07/05/2016.
  */
-public class MusicOptions {
+public class MusicCoreOptions {
 
-    private static volatile int DEFAULT_ART, STATUSBAR_ICON_RESID = 0;
-    private static volatile String CAST_APPLICATION_ID;
+    private static volatile Drawable DEFAULT_ART;
 
-    public static int getDefaultArt() {
+    public static Drawable getDefaultArt() {
         return DEFAULT_ART;
     }
 
-    public static void setDefaultArt(int defaultArt) {
+    public static void setDefaultArt(Drawable defaultArt) {
         DEFAULT_ART = defaultArt;
-    }
-
-    public static int getStatusbarIconResId() {
-        return STATUSBAR_ICON_RESID;
-    }
-
-    public static void setStatusbarIconResId(int resid) {
-        STATUSBAR_ICON_RESID = resid;
-    }
-
-    public static void setCastApplicationId(String applicationId) {
-        CAST_APPLICATION_ID = applicationId;
-
-    }
-
-    public static String getCastApplicationId() {
-        return CAST_APPLICATION_ID;
     }
 }

@@ -28,7 +28,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
 
-import mobile.substance.sdk.music.core.MusicOptions;
+import mobile.substance.sdk.music.core.MusicCoreOptions;
 
 public class Album extends MediaObject {
 
@@ -81,7 +81,7 @@ public class Album extends MediaObject {
     public void requestArt(final ArtRequest request) {
         Glide.with(getContext()).load(getAlbumArtworkPath())
                 .asBitmap()
-                .placeholder(MusicOptions.getDefaultArt())
+                .placeholder(MusicCoreOptions.getDefaultArt())
                 .diskCacheStrategy(DiskCacheStrategy.SOURCE)
                 .animate(android.R.anim.fade_in)
                 .centerCrop()
@@ -96,7 +96,7 @@ public class Album extends MediaObject {
 
     public void requestArt(ImageView imageView) {
         Glide.with(getContext()).load(getAlbumArtworkPath())
-                .placeholder(MusicOptions.getDefaultArt())
+                .placeholder(MusicCoreOptions.getDefaultArt())
                 .diskCacheStrategy(DiskCacheStrategy.SOURCE)
                 .crossFade()
                 .centerCrop()

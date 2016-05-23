@@ -15,45 +15,71 @@
   ~ limitations under the License.
   -->
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingTop="@dimen/statusbar_height"
     android:gravity="top"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    tools:layout_editor_absoluteX="0dp"
+    tools:layout_editor_absoluteY="25dp"
+    android:id="@+id/constraintLayout">
 
-    <android.support.design.widget.AppBarLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
 
-        <android.support.v7.widget.Toolbar
-            android:id="@+id/fragment_home_toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?actionBarSize"
-            app:title="Home" />
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/fragment_home_toolbar"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:title="Home"
+        tools:layout_editor_absoluteX="0dp"
+        tools:layout_editor_absoluteY="0dp"
+        app:layout_constraintLeft_toLeftOf="@+id/constraintLayout"
+        tools:layout_constraintLeft_creator="1"
+        app:layout_constraintTop_toTopOf="@+id/constraintLayout"
+        tools:layout_constraintTop_creator="1"
+        app:layout_constraintRight_toLeftOf="@+id/constraintLayout"
+        tools:layout_constraintRight_creator="1"
+        app:layout_constraintBottom_toTopOf="@+id/constraintLayout"
+        tools:layout_constraintBottom_creator="1" />
 
-    </android.support.design.widget.AppBarLayout>
 
     <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
         android:fontFamily="sans-serif-medium"
         android:gravity="bottom|center_horizontal"
         android:text="@string/welcome_desc"
         android:textColor="@color/primary_text_color_light"
-        android:textSize="@dimen/text_size_title" />
+        android:textSize="@dimen/text_size_title"
+        tools:layout_editor_absoluteX="0dp"
+        tools:layout_editor_absoluteY="0dp"
+        app:layout_constraintLeft_toLeftOf="@+id/constraintLayout"
+        tools:layout_constraintLeft_creator="1"
+        app:layout_constraintTop_toTopOf="@+id/constraintLayout"
+        tools:layout_constraintTop_creator="1"
+        app:layout_constraintRight_toLeftOf="@+id/constraintLayout"
+        tools:layout_constraintRight_creator="1"
+        app:layout_constraintBottom_toTopOf="@+id/constraintLayout"
+        tools:layout_constraintBottom_creator="1" />
 
     <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
         android:fontFamily="sans-serif-medium"
         android:gravity="top|center_horizontal"
         android:text="@string/welcome_sum"
         android:textColor="@color/secondary_text_color_light"
-        android:textSize="@dimen/text_size_default" />
+        android:textSize="@dimen/text_size_default"
+        tools:layout_editor_absoluteX="0dp"
+        tools:layout_editor_absoluteY="0dp"
+        app:layout_constraintLeft_toLeftOf="@+id/constraintLayout"
+        tools:layout_constraintLeft_creator="1"
+        app:layout_constraintTop_toTopOf="@+id/constraintLayout"
+        tools:layout_constraintTop_creator="1"
+        app:layout_constraintRight_toLeftOf="@+id/constraintLayout"
+        tools:layout_constraintRight_creator="1"
+        app:layout_constraintBottom_toTopOf="@+id/constraintLayout"
+        tools:layout_constraintBottom_creator="1" />
 
-</LinearLayout>
+</android.support.constraint.ConstraintLayout>
