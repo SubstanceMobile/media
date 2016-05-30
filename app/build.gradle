@@ -53,7 +53,5 @@ dependencies {
     compile project(path: ':theme-engine')
 }
 repositories {
-    maven { url 'http://dl.bintray.com/kotlin/kotlin-eap'}
     maven { url 'https://jitpack.io' }
-
 }

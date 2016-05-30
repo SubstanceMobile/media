@@ -26,15 +26,15 @@ public class MusicNotification {
         style.setShowActionsInCompactView(1);
         style.setMediaSession(sessionCompat.getSessionToken());
 
-        Bitmap artwork = BitmapFactory.decodeFile(Library.findAlbumById(song.getSongAlbumID()).getAlbumArtworkPath());
+        Bitmap artwork = BitmapFactory.decodeFile(Library.INSTANCE.findAlbumById(song.getSongAlbumID()).getAlbumArtworkPath());
         if (artwork == null)
-            artwork = BitmapFactory.decodeResource(context.getResources(), MusicOptions.getDefaultArt());
+            artwork = BitmapFactory.decodeResource(context.getResources(), MusicOptions.INSTANCE.getDefaultArt());
 
         android.support.v4.app.NotificationCompat.Builder builder = new NotificationCompat.Builder(context)
                 .setContentTitle(song.getSongTitle())
                 .setContentText(song.getSongArtistName())
                 .setSubText(song.getSongAlbumName())
-                .setSmallIcon(MusicOptions.getStatusbarIconResId())
+                .setSmallIcon(MusicOptions.INSTANCE.getStatusbarIconResId())
                 .setPriority(Notification.PRIORITY_MAX)
                 .setOngoing(false)
                 .setContentIntent(PlaybackRemote.INSTANCE.getPendingIntent(MusicUtil.getAction(context, MusicUtil.NOTIFICATION)))

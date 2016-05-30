@@ -108,7 +108,7 @@ object PlaybackRemote : ServiceConnection {
     }
 
     fun getMediaSession(): MediaSessionCompat {
-        return SERVICE!!.getSession()
+        return SERVICE!!.session
     }
 
     fun seekTo(progress: Int) {
@@ -132,7 +132,7 @@ object PlaybackRemote : ServiceConnection {
     }
 
     fun initGoogleCast(item: MenuItem) {
-        SERVICE!!.initGoogleCast(item, MusicOptions.getCastApplicationId())
+        SERVICE!!.initGoogleCast(item, MusicOptions.castApplicationId)
     }
 
     fun getPendingIntent(action: String): PendingIntent {

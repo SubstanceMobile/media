@@ -28,7 +28,7 @@ public class FileServer extends NanoHTTPD {
                 case 1:
                     return new Response(Response.Status.OK, "audio/*", new FileInputStream(new File(MusicQueue.INSTANCE.getCurrentSong().getFilePath())));
                 case 2:
-                    return new Response(Response.Status.OK, "image/*", new FileInputStream(new File(Library.findAlbumById(MusicQueue.INSTANCE.getCurrentSong().getSongAlbumID()).getAlbumArtworkPath())));
+                    return new Response(Response.Status.OK, "image/*", new FileInputStream(new File(Library.INSTANCE.findAlbumById(MusicQueue.INSTANCE.getCurrentSong().getSongAlbumID()).getAlbumArtworkPath())));
                 default:
                     return null;
             }

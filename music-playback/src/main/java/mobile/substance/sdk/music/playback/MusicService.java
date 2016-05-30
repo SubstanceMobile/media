@@ -2,7 +2,6 @@ package mobile.substance.sdk.music.playback;
 
 import android.app.NotificationManager;
 import android.content.Intent;
-import android.graphics.BitmapFactory;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
@@ -117,7 +116,7 @@ public class MusicService extends MediaBrowserServiceCompat implements MediaPlay
 
     private MediaMetadataCompat getMetadata() {
         Song song = MusicQueue.INSTANCE.getCurrentSong();
-        song.embedArtwork(BitmapFactory.decodeFile(Library.findAlbumById(song.getSongAlbumID()).getAlbumArtworkPath()));
+        song.setExplicitArtworkPath(Library.INSTANCE.findAlbumById(song.getSongAlbumID()).getAlbumArtworkPath());
         return song.getMetadataCompat();
     }
 
@@ -259,7 +258,7 @@ public class MusicService extends MediaBrowserServiceCompat implements MediaPlay
             localPlayer.setDataSource(getApplicationContext(), newSong.getUri());
         } catch (Exception e) {
             e.printStackTrace();
-            Toast.makeText(this, "Unable to play this file! Path: " + CoreUtil.getFilePath(this, newSong.getUri()), Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Unable to play this file! Path: " + CoreUtil.INSTANCE.getFilePath(this, newSong.getUri()), Toast.LENGTH_LONG).show();
         } finally {
             try {
                 Log.d(MusicService.class.getSimpleName(), "localPlayer.prepareAsync()");

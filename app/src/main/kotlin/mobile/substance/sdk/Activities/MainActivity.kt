@@ -48,7 +48,7 @@ class MainActivity : NavigationDrawerActivity(), PlaybackRemote.RemoteCallback, 
     override fun onSongChanged(song: Song) {
         if (currentSongCard!!.translationY != 0.0f) currentSongCard!!.animate().translationY(0.0f).setDuration(200).start()
         currentSongTitle!!.text = song.songTitle
-        Library.findAlbumById(song.songAlbumID)!!.requestArt(currentSongImage)
+        Library.findAlbumById(song.songAlbumID!!)!!.requestArt(currentSongImage!!)
     }
 
     override fun onStateChanged(state: PlaybackState, isRepeating: Boolean) {
@@ -84,14 +84,14 @@ class MainActivity : NavigationDrawerActivity(), PlaybackRemote.RemoteCallback, 
         Library.build()
         currentSongCard!!.setOnClickListener {
             val dialog = MaterialStyledDialog(this)
-                    .setTitle(MusicQueue.getCurrentSong()!!.songTitle)
+                    .setTitle(MusicQueue.getCurrentSong()!!.songTitle!!)
                     .setDescription(MusicQueue.getCurrentSong()!!.songArtistName + "\n" + MusicQueue.getCurrentSong()!!.songAlbumName)
                     .setPositive("Ok", MaterialDialog.SingleButtonCallback { materialDialog, dialogAction ->
                         materialDialog.dismiss()
                     })
 
             try {
-                dialog.setHeaderDrawable(BitmapDrawable(resources, BitmapFactory.decodeFile(Library.findAlbumById(MusicQueue.getCurrentSong()!!.songAlbumID)!!.albumArtworkPath)))
+                dialog.setHeaderDrawable(BitmapDrawable(resources, BitmapFactory.decodeFile(Library.findAlbumById(MusicQueue.getCurrentSong()!!.songAlbumID!!)!!.albumArtworkPath)))
             } catch(e: NullPointerException) {}
             dialog.show()
         }

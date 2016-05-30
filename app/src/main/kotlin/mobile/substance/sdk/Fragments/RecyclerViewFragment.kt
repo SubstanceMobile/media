@@ -36,38 +36,38 @@ class RecyclerViewFragment : BaseFragment(), LibraryListener {
         return this
     }
 
-    override fun onSongLoaded(item: Song?, pos: Int) {
+    override fun onSongLoaded(item: Song, pos: Int) {
     }
 
-    override fun onSongsCompleted(result: MutableList<Song>?) {
+    override fun onSongsCompleted(result: List<Song>) {
         if (type == LibraryData.SONGS) setAdapter()
     }
 
-    override fun onAlbumLoaded(item: Album?, pos: Int) {
+    override fun onAlbumLoaded(item: Album, pos: Int) {
     }
 
-    override fun onAlbumsCompleted(result: MutableList<Album>?) {
+    override fun onAlbumsCompleted(result: List<Album>) {
         if (type == LibraryData.ALBUMS) setAdapter()
     }
 
-    override fun onArtistLoaded(item: Artist?, pos: Int) {
+    override fun onArtistLoaded(item: Artist, pos: Int) {
     }
 
-    override fun onArtistsCompleted(result: MutableList<Artist>?) {
+    override fun onArtistsCompleted(result: List<Artist>) {
         if (type == LibraryData.ARTISTS) setAdapter()
     }
 
-    override fun onPlaylistLoaded(item: Playlist?, pos: Int) {
+    override fun onPlaylistLoaded(item: Playlist, pos: Int) {
     }
 
-    override fun onPlaylistsCompleted(result: MutableList<Playlist>?) {
+    override fun onPlaylistsCompleted(result: List<Playlist>) {
         if (type == LibraryData.PLAYLISTS) setAdapter()
     }
 
-    override fun onGenreLoaded(item: Genre?, pos: Int) {
+    override fun onGenreLoaded(item: Genre, pos: Int) {
     }
 
-    override fun onGenresCompleted(result: MutableList<Genre>?) {
+    override fun onGenresCompleted(result: List<Genre>) {
         if (type == LibraryData.GENRES) setAdapter()
     }
 
@@ -86,11 +86,11 @@ class RecyclerViewFragment : BaseFragment(), LibraryListener {
 
     private fun setAdapter() {
         when (type) {
-            LibraryData.SONGS -> recyclerview!!.adapter = MusicAdapter<Song>(Library.getSongs())
-            LibraryData.ALBUMS -> recyclerview!!.adapter = MusicAdapter<Album>(Library.getAlbums())
-            LibraryData.ARTISTS -> recyclerview!!.adapter = MusicAdapter<Artist>(Library.getArtists())
-            LibraryData.PLAYLISTS -> recyclerview!!.adapter = MusicAdapter<Playlist>(Library.getPlaylists())
-            LibraryData.GENRES -> recyclerview!!.adapter = MusicAdapter<Genre>(Library.getGenres())
+            LibraryData.SONGS -> recyclerview!!.adapter = MusicAdapter<Song>(Library.songs)
+            LibraryData.ALBUMS -> recyclerview!!.adapter = MusicAdapter<Album>(Library.albums)
+            LibraryData.ARTISTS -> recyclerview!!.adapter = MusicAdapter<Artist>(Library.artists)
+            LibraryData.PLAYLISTS -> recyclerview!!.adapter = MusicAdapter<Playlist>(Library.playlists)
+            LibraryData.GENRES -> recyclerview!!.adapter = MusicAdapter<Genre>(Library.genres)
         }
     }
 
@@ -102,6 +102,4 @@ class RecyclerViewFragment : BaseFragment(), LibraryListener {
         super.onDetach()
         Library.unregisterListener(this)
     }
-
-
 }
