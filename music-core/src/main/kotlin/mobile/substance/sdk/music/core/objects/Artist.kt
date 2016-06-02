@@ -38,9 +38,9 @@ class Artist : MediaObject() {
     ///////////////////////////////////////////////////////////////////////////
 
     var artistName: String?
-        get() = data?.getString(MediaMetadataCompat.METADATA_KEY_DISPLAY_TITLE)
+        get() = data?.getString(MediaMetadataCompat.METADATA_KEY_TITLE)
         set(value) {
-            if(value != null) putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_TITLE, value)
+            if(value != null) putString(MediaMetadataCompat.METADATA_KEY_TITLE, value)
         }
 
     var artistBio: String? = null
