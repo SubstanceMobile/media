@@ -297,7 +297,7 @@ object Library {
 
     fun findSongsForArtist(artist: Artist): List<Song> {
         val songs = ArrayList<Song>()
-        for (song in songs) {
+        for (song in this.songs) {
             if (song.songArtistId == artist.id)
                 songs.add(song)
         }
@@ -311,7 +311,7 @@ object Library {
 
     fun findAlbumsForArtist(artist: Artist): List<Album> {
         val albums = ArrayList<Album>()
-        for (album in albums) {
+        for (album in this.albums) {
             if (album.albumArtistName == artist.artistName)
                 albums.add(album)
         }
@@ -325,7 +325,7 @@ object Library {
 
     fun findSongsForAlbum(album: Album): List<Song> {
         val songs = ArrayList<Song>()
-        for (song in songs) {
+        for (song in this.songs) {
             if (song.songAlbumID == album.id)
                 songs.add(song)
         }
