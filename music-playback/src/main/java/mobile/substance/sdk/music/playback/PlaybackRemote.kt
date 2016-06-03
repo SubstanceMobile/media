@@ -10,7 +10,7 @@ import android.os.IBinder
 import android.support.v4.media.session.MediaSessionCompat
 import android.util.Log
 import android.view.MenuItem
-import mobile.substance.sdk.music.core.MusicOptions
+import mobile.substance.sdk.music.core.MusicCoreOptions
 import mobile.substance.sdk.music.core.objects.Song
 import java.util.*
 import java.util.concurrent.Callable
@@ -132,7 +132,7 @@ object PlaybackRemote : ServiceConnection {
     }
 
     fun initGoogleCast(item: MenuItem) {
-        SERVICE!!.initGoogleCast(item, MusicOptions.castApplicationId)
+        SERVICE!!.initGoogleCast(item, MusicCoreOptions.castApplicationId)
     }
 
     fun getPendingIntent(action: String): PendingIntent {

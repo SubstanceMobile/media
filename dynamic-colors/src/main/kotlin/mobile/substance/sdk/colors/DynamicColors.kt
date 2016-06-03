@@ -57,28 +57,29 @@ class DynamicColors private constructor(private val from: Any) {
 
         override fun doInBackground(vararg params: Any): ColorPackage? {
             var bitmap: Bitmap? = null
-            if (params[0] is Bitmap) bitmap = params[0] as Bitmap
-            if (params[0] is String) bitmap = BitmapFactory.decodeFile(params[0] as String)
-            if (params[0] is Pair<*, *>) {
-                val pair = params[0] as Pair<*, *>
-                if(pair.first is Uri) {
-                    val uri = pair.first as Uri
-                    val context = pair.second as Context
-                    if(uri.scheme == "file") {
-                        bitmap = BitmapFactory.decodeFile(uri.path)
-                    } else {
-                        bitmap = BitmapFactory.decodeStream(context.contentResolver.openInputStream(uri))
+            try {
+                if (params[0] is Bitmap) bitmap = params[0] as Bitmap
+                if (params[0] is String) bitmap = BitmapFactory.decodeFile(params[0] as String)
+                if (params[0] is Pair<*, *>) {
+                    val pair = params[0] as Pair<*, *>
+                    if(pair.first is Uri) {
+                        val uri = pair.first as Uri
+                        val context = pair.second as Context
+                        if(uri.scheme == "file") {
+                            bitmap = BitmapFactory.decodeFile(uri.path)
+                        } else {
+                            bitmap = BitmapFactory.decodeStream(context.contentResolver.openInputStream(uri))
+                        }
+                    } else if(pair.first is Resources) {
+                        val resources = pair.first as Resources
+                        val resId = pair.second as Int
+                        bitmap = BitmapFactory.decodeResource(resources, resId)
                     }
-                } else if(pair.first is Resources) {
-                    val resources = pair.first as Resources
-                    val resId = pair.second as Int
-                    bitmap = BitmapFactory.decodeResource(resources, resId)
+
                 }
+            } catch(e: Exception) { e.printStackTrace() }
 
-            }
-
-            if (bitmap == null) return null
-
+            if (bitmap == null) return DynamicColorsOptions.defaultColors
 
             val palette = Palette.from(bitmap).generate()
 

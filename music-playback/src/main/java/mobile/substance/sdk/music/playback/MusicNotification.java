@@ -7,7 +7,7 @@ import android.graphics.BitmapFactory;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v7.app.NotificationCompat;
 
-import mobile.substance.sdk.music.core.MusicOptions;
+import mobile.substance.sdk.music.core.MusicCoreOptions;
 import mobile.substance.sdk.music.core.objects.Song;
 import mobile.substance.sdk.music.loading.Library;
 
@@ -28,13 +28,13 @@ public class MusicNotification {
 
         Bitmap artwork = BitmapFactory.decodeFile(Library.INSTANCE.findAlbumById(song.getSongAlbumID()).getAlbumArtworkPath());
         if (artwork == null)
-            artwork = BitmapFactory.decodeResource(context.getResources(), MusicOptions.INSTANCE.getDefaultArt());
+            artwork = BitmapFactory.decodeResource(context.getResources(), MusicCoreOptions.INSTANCE.getDefaultArt());
 
         android.support.v4.app.NotificationCompat.Builder builder = new NotificationCompat.Builder(context)
                 .setContentTitle(song.getSongTitle())
                 .setContentText(song.getSongArtistName())
                 .setSubText(song.getSongAlbumName())
-                .setSmallIcon(MusicOptions.INSTANCE.getStatusbarIconResId())
+                .setSmallIcon(MusicCoreOptions.INSTANCE.getStatusbarIconResId())
                 .setPriority(Notification.PRIORITY_MAX)
                 .setOngoing(false)
                 .setContentIntent(PlaybackRemote.INSTANCE.getPendingIntent(MusicUtil.getAction(context, MusicUtil.NOTIFICATION)))

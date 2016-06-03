@@ -20,13 +20,12 @@ import android.graphics.Bitmap
 import android.net.Uri
 import android.provider.MediaStore
 import android.support.v4.media.MediaMetadataCompat
-import android.util.Log
 import android.widget.ImageView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.request.animation.GlideAnimation
 import com.bumptech.glide.request.target.SimpleTarget
-import mobile.substance.sdk.music.core.MusicOptions
+import mobile.substance.sdk.music.core.MusicCoreOptions
 
 class Album : MediaObject() {
 
@@ -78,17 +77,15 @@ class Album : MediaObject() {
     }
 
     fun requestArt(request: ArtRequest) {
-        Glide.with(getContext()).load(albumArtworkPath).asBitmap().placeholder(MusicOptions.defaultArt).diskCacheStrategy(DiskCacheStrategy.SOURCE).animate(android.R.anim.fade_in).centerCrop().into(object : SimpleTarget<Bitmap>() {
+        Glide.with(getContext()).load(albumArtworkPath).asBitmap().placeholder(MusicCoreOptions.defaultArt).diskCacheStrategy(DiskCacheStrategy.SOURCE).animate(android.R.anim.fade_in).centerCrop().into(object : SimpleTarget<Bitmap>() {
             override fun onResourceReady(resource: Bitmap, glideAnimation: GlideAnimation<in Bitmap>) {
                 request.respond(resource)
             }
         })
-        Log.d("requestArt(ArtRequest)", albumArtworkPath)
     }
 
     fun requestArt(imageView: ImageView) {
-        Glide.with(getContext()).load(albumArtworkPath).placeholder(MusicOptions.defaultArt).diskCacheStrategy(DiskCacheStrategy.SOURCE).crossFade().centerCrop().into(imageView)
-        Log.d("requestArt(ImageView)", albumArtworkPath)
+        Glide.with(getContext()).load(albumArtworkPath).placeholder(MusicCoreOptions.defaultArt).diskCacheStrategy(DiskCacheStrategy.SOURCE).crossFade().centerCrop().into(imageView)
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -135,9 +132,11 @@ class Album : MediaObject() {
     // Color Holding
     ///////////////////////////////////////////////////////////////////////////
 
-    var colors: Any
+    var colors: Any?
         get() = getData("album_colors")!!
-        set(value) = putData("album_colors", value)
+        set(value) {
+            if(value != null) putData("album_colors", value)
+        }
 
     ///////////////////////////////////////////////////////////////////////////
     // Builder

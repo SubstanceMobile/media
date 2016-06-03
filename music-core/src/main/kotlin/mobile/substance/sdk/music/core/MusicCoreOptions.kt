@@ -19,7 +19,7 @@ package mobile.substance.sdk.music.core
 /**
  * Created by Adrian on 07/05/2016.
  */
-object MusicOptions {
+object MusicCoreOptions {
 
     var defaultArt: Int = 0
     var statusbarIconResId = 0
