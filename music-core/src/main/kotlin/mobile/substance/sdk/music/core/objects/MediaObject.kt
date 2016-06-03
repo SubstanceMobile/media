@@ -27,7 +27,7 @@ import java.util.*
 
 
 open class MediaObject {
-    internal var data: MediaMetadataCompat? = null
+    var metadata: MediaMetadataCompat? = null
     internal var extraVars: HashMap<String, Any>? = null
 
     var id: Long = 0
@@ -80,25 +80,25 @@ open class MediaObject {
     protected fun putLong(key: String, value: Long) {
         if (isLocked) throw Error("Object locked. Cannot edit")
         builder.putLong(key, value)
-        data = builder.build()
+        metadata = builder.build()
     }
 
     protected fun putString(key: String, value: String) {
         if (isLocked) throw Error("Object locked. Cannot edit")
         builder.putString(key, value)
-        data = builder.build()
+        metadata = builder.build()
     }
 
     protected fun putBitmap(key: String, value: Bitmap) {
         if (isLocked) throw Error("Object locked. Cannot edit")
         builder.putBitmap(key, value)
-        data = builder.build()
+        metadata = builder.build()
     }
 
     protected fun putInteger(key: String, value: Int) {
         if (isLocked) throw Error("Object locked. Cannot edit")
         builder.putLong(key, value.toLong())
-        data = builder.build()
+        metadata = builder.build()
     }
 
     protected open //Override to change
@@ -121,9 +121,6 @@ open class MediaObject {
             Log.d(MediaObject.javaClass.simpleName, "Context was not requested. Ignoring")
         return this
     }
-
-    val metadataCompat: MediaMetadataCompat
-        get() = metadataCompat
 
     fun getPosInList(): Int {
         return posInList

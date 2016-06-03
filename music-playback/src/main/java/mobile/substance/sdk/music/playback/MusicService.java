@@ -117,7 +117,7 @@ public class MusicService extends MediaBrowserServiceCompat implements MediaPlay
     private MediaMetadataCompat getMetadata() {
         Song song = MusicQueue.INSTANCE.getCurrentSong();
         song.setExplicitArtworkPath(Library.INSTANCE.findAlbumById(song.getSongAlbumID()).getAlbumArtworkPath());
-        return song.getMetadataCompat();
+        return song.getMetadata();
     }
 
     private PlaybackStateCompat getPlaybackState() {

@@ -43,7 +43,7 @@ class Song : MediaObject() {
         get() = true
 
     fun toMediaItem(): MediaBrowserCompat.MediaItem {
-        return MediaBrowserCompat.MediaItem(data!!.description, MediaBrowserCompat.MediaItem.FLAG_PLAYABLE)
+        return MediaBrowserCompat.MediaItem(metadata!!.description, MediaBrowserCompat.MediaItem.FLAG_PLAYABLE)
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -53,7 +53,7 @@ class Song : MediaObject() {
     var songArtistId: Long? = null
 
     var songArtistName: String?
-        get() = data?.getString(METADATA_KEY_ARTIST)
+        get() = metadata?.getString(METADATA_KEY_ARTIST)
         set(value) {
             if(value != null) putString(METADATA_KEY_ARTIST, value)
         }
@@ -63,7 +63,7 @@ class Song : MediaObject() {
     ///////////////////////////////////////////////////////////////////////////
 
     var songTitle: String?
-        get() = data?.getString(METADATA_KEY_TITLE)
+        get() = metadata?.getString(METADATA_KEY_TITLE)
         set(value) {
             if(value != null) putString(METADATA_KEY_TITLE, value)
         }
@@ -75,7 +75,7 @@ class Song : MediaObject() {
     var songAlbumID: Long? = null
 
     var songAlbumName: String?
-        get() = data?.getString(METADATA_KEY_ALBUM)
+        get() = metadata?.getString(METADATA_KEY_ALBUM)
         set(value) {
             if(value != null) putString(METADATA_KEY_ALBUM, value)
         }
@@ -87,7 +87,7 @@ class Song : MediaObject() {
     val hasExplicitArtwork: Boolean = explicitArtworkPath != null
 
     var explicitArtworkPath: String?
-        get() = data?.getString(METADATA_KEY_ART_URI)
+        get() = metadata?.getString(METADATA_KEY_ART_URI)
         set(value) {
             if(value != null) putString(METADATA_KEY_ART_URI, value)
         }
@@ -97,7 +97,7 @@ class Song : MediaObject() {
     ///////////////////////////////////////////////////////////////////////////
 
     var songDuration: Long?
-        get() = data?.getLong(METADATA_KEY_DURATION)
+        get() = metadata?.getLong(METADATA_KEY_DURATION)
         set(value) {
             if(value != null) putLong(METADATA_KEY_DURATION, value)
         }
@@ -113,7 +113,7 @@ class Song : MediaObject() {
     ///////////////////////////////////////////////////////////////////////////
 
     var songTrackNumber: Long?
-        get() = data?.getLong(METADATA_KEY_TRACK_NUMBER)
+        get() = metadata?.getLong(METADATA_KEY_TRACK_NUMBER)
         set(value) {
             if(value != null) putLong(METADATA_KEY_TRACK_NUMBER, value)
         }
@@ -131,7 +131,7 @@ class Song : MediaObject() {
 
     var songYear: String?
         get() {
-            val year = data?.getLong(METADATA_KEY_YEAR)
+            val year = metadata?.getLong(METADATA_KEY_YEAR)
             if(year != null) return year.toString() else return "-"
         }
         set(value) {

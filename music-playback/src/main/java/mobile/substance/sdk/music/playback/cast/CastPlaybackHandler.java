@@ -206,6 +206,6 @@ public class CastPlaybackHandler implements RemoteMediaPlayer.OnStatusUpdatedLis
     }
 
     private MediaMetadataCompat buildMetadata() {
-        return MusicQueue.INSTANCE.getCurrentSong().getMetadataCompat();
+        return MusicQueue.INSTANCE.getCurrentSong().getMetadata();
     }
 }

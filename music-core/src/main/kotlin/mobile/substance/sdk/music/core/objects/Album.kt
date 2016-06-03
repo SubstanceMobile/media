@@ -44,7 +44,7 @@ class Album : MediaObject() {
     ///////////////////////////////////////////////////////////////////////////
 
     var albumName: String?
-        get() = data?.getString(MediaMetadataCompat.METADATA_KEY_TITLE)
+        get() = metadata?.getString(MediaMetadataCompat.METADATA_KEY_TITLE)
         set(value) {
             if(value != null) putString(MediaMetadataCompat.METADATA_KEY_TITLE, value)
         }
@@ -55,7 +55,7 @@ class Album : MediaObject() {
 
     var albumArtworkPath: String?
         get() {
-            val path = data?.getString(MediaMetadataCompat.METADATA_KEY_ALBUM_ART_URI)
+            val path = metadata?.getString(MediaMetadataCompat.METADATA_KEY_ALBUM_ART_URI)
             if(path != null) return path else return ""
         }
         set(value) {
@@ -93,7 +93,7 @@ class Album : MediaObject() {
     ///////////////////////////////////////////////////////////////////////////
 
     var albumArtistName: String?
-        get() = data?.getString(MediaMetadataCompat.METADATA_KEY_ALBUM_ARTIST)
+        get() = metadata?.getString(MediaMetadataCompat.METADATA_KEY_ALBUM_ARTIST)
         set(value) {
             if(value != null) putString(MediaMetadataCompat.METADATA_KEY_ALBUM_ARTIST, value)
         }
@@ -103,7 +103,7 @@ class Album : MediaObject() {
     ///////////////////////////////////////////////////////////////////////////
 
     var albumGenreName: String?
-        get() = data?.getString(MediaMetadataCompat.METADATA_KEY_GENRE)
+        get() = metadata?.getString(MediaMetadataCompat.METADATA_KEY_GENRE)
         set(value) {
             if(value != null) putString(MediaMetadataCompat.METADATA_KEY_GENRE, value)
         }
@@ -113,7 +113,7 @@ class Album : MediaObject() {
     ///////////////////////////////////////////////////////////////////////////
 
     var albumYear: Long?
-        get() = data?.getLong(MediaMetadataCompat.METADATA_KEY_YEAR)
+        get() = metadata?.getLong(MediaMetadataCompat.METADATA_KEY_YEAR)
         set(value) {
             if(value != null) putLong(MediaMetadataCompat.METADATA_KEY_YEAR, value)
         }
@@ -123,7 +123,7 @@ class Album : MediaObject() {
     ///////////////////////////////////////////////////////////////////////////
 
     var albumNumberOfSongs: Long?
-        get() = data?.getLong(MediaMetadataCompat.METADATA_KEY_NUM_TRACKS)
+        get() = metadata?.getLong(MediaMetadataCompat.METADATA_KEY_NUM_TRACKS)
         set(value) {
             if(value != null) putLong(MediaMetadataCompat.METADATA_KEY_NUM_TRACKS, value)
         }

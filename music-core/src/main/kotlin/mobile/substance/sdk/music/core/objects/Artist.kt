@@ -38,7 +38,7 @@ class Artist : MediaObject() {
     ///////////////////////////////////////////////////////////////////////////
 
     var artistName: String?
-        get() = data?.getString(MediaMetadataCompat.METADATA_KEY_TITLE)
+        get() = metadata?.getString(MediaMetadataCompat.METADATA_KEY_TITLE)
         set(value) {
             if(value != null) putString(MediaMetadataCompat.METADATA_KEY_TITLE, value)
         }
@@ -50,7 +50,7 @@ class Artist : MediaObject() {
     ///////////////////////////////////////////////////////////////////////////
 
     var artistImagePath: String?
-        get() = data?.getString(MediaMetadataCompat.METADATA_KEY_ART_URI)
+        get() = metadata?.getString(MediaMetadataCompat.METADATA_KEY_ART_URI)
         set(value) {
             if(value != null) putString(MediaMetadataCompat.METADATA_KEY_ART_URI, value)
         }

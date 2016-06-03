@@ -37,7 +37,7 @@ class Playlist : MediaObject() {
     ///////////////////////////////////////////////////////////////////////////
 
     var playlistName: String?
-        get() = data?.getString(MediaMetadataCompat.METADATA_KEY_TITLE)
+        get() = metadata?.getString(MediaMetadataCompat.METADATA_KEY_TITLE)
         set(value) {
             if(value != null) putString(MediaMetadataCompat.METADATA_KEY_TITLE, value)
         }

@@ -256,6 +256,11 @@ object Library {
         return null
     }
 
+    fun findArtistById(id: Long): Artist? {
+        for (artist in artists) if (artist.id == id) return artist
+        return null
+    }
+
     fun findPlaylistById(id: Long): Playlist? {
         for (playlist in playlists)
             if (playlist.id == id) return playlist
