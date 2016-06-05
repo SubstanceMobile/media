@@ -133,7 +133,7 @@ class Album : MediaObject() {
     ///////////////////////////////////////////////////////////////////////////
 
     var colors: Any?
-        get() = getData("album_colors")!!
+        get() = getData("album_colors")
         set(value) {
             if(value != null) putData("album_colors", value)
         }
