@@ -113,7 +113,7 @@ class DynamicColors private constructor(private val from: Any) {
 
             } else {
                 try {
-                    return ColorPackage(palette.getDarkVibrantColor(DynamicColorsOptions.defaultColors.primaryColor), palette.getLightVibrantColor(DynamicColorsOptions.defaultColors.accentColor))
+                    return ColorPackage(palette.getDarkVibrantColor(DynamicColorsOptions.defaultColors.primaryColor), palette.getVibrantColor(DynamicColorsOptions.defaultColors.accentColor))
                 } catch (e: Exception) {
                     return DynamicColorsOptions.defaultColors
                 }
