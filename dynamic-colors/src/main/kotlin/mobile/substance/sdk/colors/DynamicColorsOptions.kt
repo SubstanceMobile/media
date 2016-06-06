@@ -22,7 +22,7 @@ import android.graphics.Color
  * This class will act as a way to configure this library
  */
 object DynamicColorsOptions {
-    var defaultColors = ColorPackage(Color.WHITE, Color.BLACK)
+    var defaultColors = ColorPackage(Color.WHITE, Color.WHITE)
 
     var defaultCallback: DynamicColorsCallback = object : DynamicColorsCallback { override fun onColorsReady(colors: ColorPackage){} }
 }
