@@ -23,13 +23,11 @@ import android.content.IntentFilter
 import android.media.AudioManager
 
 /**
- * Audio noisy receiver
+ * Audio noisy receiver. register() and unregister() to enable and disable this. For example, if you are currently playing music this should be registered
  */
 object HeadsetPlugReceiver : BroadcastReceiver() {
 
-    override fun onReceive(context: Context, intent: Intent) {
-        PlaybackRemote.pause()
-    }
+    override fun onReceive(context: Context, intent: Intent) = PlaybackRemote.pause()
 
     infix fun register(context: Context) = context.registerReceiver(this, IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY))
 

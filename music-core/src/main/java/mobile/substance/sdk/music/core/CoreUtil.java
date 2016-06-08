@@ -74,10 +74,6 @@ public class CoreUtil {
     // Unit conversions
     ///////////////////////////////////////////////////////////////////////////
 
-    public static float dpToPx(Context context, float dp) {
-        return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, context.getResources().getDisplayMetrics());
-    }
-
     public static String getFilePath(final Context context, final Uri uri) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT && DocumentsContract.isDocumentUri(context, uri)) {
             if (isExternalStorageDocument(uri)) {

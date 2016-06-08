@@ -46,7 +46,7 @@ interface MediaNotification {
      * @param removedIntent The intent you should pass to your created notification for when it is dismissed.
      * @return The created notification builder that will eventually be passed on to methods like loadArt and populate.
      */
-    fun createNotification(context: Context, session: MediaSessionCompat,
+    fun createNotification(context: Context, session: MediaSessionCompat?,
                            playIntent: PendingIntent, pauseIntent: PendingIntent, nextIntent: PendingIntent, prevIntent: PendingIntent,
                            clickedIntent: PendingIntent, removedIntent: PendingIntent): NotificationCompat.Builder
     fun populate(song: Song, notificationBuilder: NotificationCompat.Builder)

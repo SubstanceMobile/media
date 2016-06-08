@@ -23,7 +23,9 @@ import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.graphics.Bitmap
+import android.graphics.drawable.BitmapDrawable
 import android.os.IBinder
+import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v7.app.NotificationCompat
 import android.util.Log
@@ -89,10 +91,6 @@ object PlaybackRemote : ServiceConnection {
 
     fun cleanup() {
         if (isBound) context!!.unbindService(this)
-    }
-
-    fun requestUpdate() {
-        service!!.requestUpdate()
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -220,6 +218,23 @@ object PlaybackRemote : ServiceConnection {
         this.notificationCreator = notification
     }
 
+    fun makeNotificaion(): Notification {
+
+    }
+
+    interface NotificationUpdateInterface {
+        fun updateNotification(notification: Notification)
+    }
+
+    fun makeNotification(updateInterface: NotificationUpdateInterface): Notification {
+        var firstArt: Bitmap? = getCurrentSong()?.metadataCompat?.getBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART);
+        if (firstArt == null) firstArt = (MusicCoreOptions.getDefaultArt() as BitmapDrawable).bitmap
+        else updateInterface.updateNotification(PlaybackRemote.makeNotification(firstArt))
+        //Fetch the album, then fetch the art, and then finally pass this all to create the notification. Meanwhile, this will use
+        //the default art as a placeholder until the new art is fetched.
+        //TODO: Use DataLinkers to get the album art (to create the notification)
+    }
+
     internal fun makeNotification(albumArt: Bitmap): Notification {
         if (notificationBuilder != null) notificationBuilder = notificationCreator.createNotification(context!!, getMediaSession(),
                 MusicPlaybackUtil.getPendingIntent(context!!, MusicPlaybackUtil.Action.PLAY),
@@ -241,10 +256,10 @@ object PlaybackRemote : ServiceConnection {
         service!!.initGoogleCast(item, MusicPlaybackOptions.castApplicationId)
     }
 
-    fun getMediaSession(): MediaSessionCompat = service!!.session!!
+    fun getMediaSession() = service?.getMediaSession()
 
     fun isReady() = isBound && REMOTE_CALLBACK != null
 
-    fun isPlaying() = service!!.playback.isPlaying()
+    fun isPlaying() = service?.playback.isPlaying()
 
 }

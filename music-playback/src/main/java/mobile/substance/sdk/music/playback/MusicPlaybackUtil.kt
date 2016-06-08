@@ -20,10 +20,13 @@ import android.app.ActivityManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.net.wifi.WifiManager
+import android.webkit.URLUtil
 
 import java.math.BigInteger
 import java.net.InetAddress
+import java.net.URL
 import java.net.UnknownHostException
 import java.nio.ByteOrder
 
@@ -91,6 +94,18 @@ object MusicPlaybackUtil {
     fun getPendingIntent(context: Context, action: Action): PendingIntent {
         return PendingIntent.getService(context, MusicService.UNIQUE_ID, Intent(context, MusicService::class.java).setAction(getAction(context, action)),
                 PendingIntent.FLAG_CANCEL_CURRENT)
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
+    // Url
+    ///////////////////////////////////////////////////////////////////////////
+
+    fun getUrlFromUri(uri: Uri) : String {
+        val url = uri.toString()
+        if (URLUtil.isValidUrl(url))
+            return url
+        else
+            return ""
     }
 
 }
