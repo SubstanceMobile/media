@@ -21,11 +21,9 @@ import android.app.NotificationManager
 import android.app.Service
 import android.content.Context
 import android.content.Intent
-import android.media.AudioManager
-import android.media.MediaPlayer
-import android.media.PlaybackParams
-import android.net.Uri
-import android.os.*
+import android.os.Binder
+import android.os.Bundle
+import android.os.IBinder
 import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaBrowserServiceCompat
 import android.support.v4.media.session.MediaSessionCompat
@@ -41,7 +39,6 @@ import com.google.android.gms.cast.Cast
 import com.google.android.gms.cast.CastDevice
 import com.google.android.gms.cast.CastMediaControlIntent
 import com.google.android.gms.common.api.GoogleApiClient
-import mobile.substance.sdk.music.core.CoreUtil
 import mobile.substance.sdk.music.playback.cast.*
 import mobile.substance.sdk.music.playback.players.Playback
 import java.util.*
@@ -61,7 +58,6 @@ class MusicService : MediaBrowserServiceCompat(), CastCallbacks {
     }
 
     private var notificationManager: NotificationManager? = null
-    var playback: Playback = LocalPlayback
 
     // Media Session
     private var session: MediaSessionCompat? = null
@@ -77,6 +73,46 @@ class MusicService : MediaBrowserServiceCompat(), CastCallbacks {
     }
 
     ///////////////////////////////////////////////////////////////////////////
+    // Playback Engine
+    ///////////////////////////////////////////////////////////////////////////
+
+    var engine: Playback = LocalPlayback
+
+    internal fun replacePlaybackEngine(newEngine: Playback, hotswap: Boolean, trustedSource: Boolean = false) {
+        var oldPos = 0
+        var wasPlaying = false
+
+        if (!trustedSource) Log.d(TAG, "DANGEROUS: Replacing playback engine with custom code. Make sure you debug extensively") else Log.d(TAG, "Service is requesting to replace engines internally. Hotswapping players")
+        if (hotswap) {
+            //Since we are hotswapping we need to save some data
+            if (newEngine.isPlaying()) {
+                newEngine.pause()
+                wasPlaying = true
+            }
+            oldPos = newEngine.getCurrentPosInSong()
+            Log.d(TAG, "Current state is saved. Cleaning up old engine")
+        }
+        newEngine.stop()
+        Log.d(TAG, "Current engine is now stopped")
+        engine = newEngine
+        engine.init(this)
+        session?.setCallback(newEngine)
+        Log.d(TAG, "Engine is set. Restoring previous properties = $hotswap")
+        if (hotswap) {
+            //Time to hotswap some data back in so as far as the user is concerned the engine is the same. In fact, the song they are currently listening to will resume
+            if (!trustedSource) Log.d(TAG, "Since you are hotswapping players, this might be a setting that the user can change. If this is the case please display some sort of confirmation to the user that the option has actually changed because they will most likely not be able to notice the change in engine (since you are hotswapping")
+            //Resume the current queue
+            newEngine.play()
+            //Seek back to where we were before
+            newEngine.seek(oldPos.toLong())
+            //Once we restored all of the old properties we pause the playback again if it was already paused
+            if (!wasPlaying) newEngine.pause()
+            Log.d(TAG, "State restored")
+        }
+        Log.d(TAG, "Engine transaction complete")
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
     // Initialization
     ///////////////////////////////////////////////////////////////////////////
 
@@ -84,8 +120,8 @@ class MusicService : MediaBrowserServiceCompat(), CastCallbacks {
         notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         session = MediaSessionCompat(this, MusicService::class.java.simpleName)
         session!!.setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS or MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS)
-        playback.init(this)
-        session!!.setCallback(playback)
+        engine.init(this)
+        session!!.setCallback(engine)
         sessionToken = session!!.sessionToken
     }
 
@@ -107,19 +143,19 @@ class MusicService : MediaBrowserServiceCompat(), CastCallbacks {
                     }
                     try {
                         for (CALLBACK in CALLBACKS) {
-                            CALLBACK.onProgressChanged(playback.getCurrentPosInSong())
+                            CALLBACK.onProgressChanged(engine.getCurrentPosInSong())
                             CALLBACK.onStateChanged(
-                                    if (playback.isPlaying())
+                                    if (engine.isPlaying())
                                         PlaybackState.STATE_PLAYING
                                     else if (MusicQueue.getCurrentSong() != null)
                                         PlaybackState.STATE_PAUSED
                                     else PlaybackState.STATE_IDLE,
-                                    playback.isRepeating())
+                                    engine.isRepeating())
                         }
                         session!!.setMetadata(MusicQueue.getCurrentSong()!!.metadataCompat)
                         session!!.setPlaybackState(
                                 PlaybackStateCompat.Builder().setActions(MusicPlaybackOptions.playbackActions.getActions())
-                                        .setState(playback.playbackState, playback.getCurrentPosInSong().toLong(), playback.getPlaybackSpeed())
+                                        .setState(engine.playbackState, engine.getCurrentPosInSong().toLong(), engine.getPlaybackSpeed())
                                         .build())
                     } catch (e: Exception) {
                         e.printStackTrace()
@@ -200,7 +236,7 @@ class MusicService : MediaBrowserServiceCompat(), CastCallbacks {
         val listener = Cast.Listener()
         val apiOptionsBuilder = Cast.CastOptions.Builder(device, listener)
 
-        connectionCallbacks = ConnectionCallbacks(routerCallback!!, ConnectionResultListener { castPlaybackHandler!!.load(playback.getCurrentPosInSong().toLong()) })
+        connectionCallbacks = ConnectionCallbacks(routerCallback!!, ConnectionResultListener { castPlaybackHandler!!.load(engine.getCurrentPosInSong().toLong()) })
 
         apiClient = GoogleApiClient.Builder(this).addApi(Cast.API, apiOptionsBuilder.build()).addConnectionCallbacks(connectionCallbacks!!).addOnConnectionFailedListener { Toast.makeText(this@MusicService, "Connection failed", Toast.LENGTH_LONG).show() }.build()
         connectionCallbacks!!.setApiClient(apiClient!!)

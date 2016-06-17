@@ -207,7 +207,5 @@ object LocalPlayback : Playback(),
 
     override fun isRepeating() = localPlayer.isLooping
 
-    override fun isInitialized() = SERVICE != null
-
     override fun getCurrentPosInSong() = localPlayer.currentPosition
 }

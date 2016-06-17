@@ -18,10 +18,13 @@ abstract class Playback : MediaSessionCompat.Callback() {
         val ACTION_SET_REPEAT = "SUBSTANCE_SDK_SET_REPEAT_" + MusicService.UNIQUE_ID
     }
 
-    var SERVICE: MusicService? = null;
+    var SERVICE: MusicService? = null
 
     fun init(service: MusicService) {
         SERVICE = service
+        Log.i(TAG, "Service has been set. We are now initialized")
+
+        //Calling configPlayer because instance will always be created out of the box. If necessary we will call create player too (see above)
         configPlayer()
         init()
     }
@@ -35,7 +38,16 @@ abstract class Playback : MediaSessionCompat.Callback() {
     private var firstPlayer = true
     private var playerReleased = false
 
-    private fun createMediaPlayerIfNecessary() {
+    /**
+     * Override this to specify that the player instance was NOT created when your playback class was created. Otherwise do
+     */
+    open fun playerCreatedOnClassCreation() = true
+
+    /**
+     * It is recommended that you don't call this method, as the library calls it itself where necessary. Only call this
+     * if you know what you are doing
+     */
+    fun createMediaPlayerIfNecessary() {
         if (isPlayerNecessary()) {
             createPlayer()
             configPlayer()
@@ -75,6 +87,7 @@ abstract class Playback : MediaSessionCompat.Callback() {
     fun play(song: Song) = play(song.uri!!, false)
 
     fun play(uri: Uri, listenersAlreadyNotified: Boolean) {
+        createMediaPlayerIfNecessary()
         if (!manualyHandleState()) playbackState = STATE_PLAYING
         doPlay(uri, listenersAlreadyNotified)
     }
@@ -245,7 +258,7 @@ abstract class Playback : MediaSessionCompat.Callback() {
 
     abstract fun isRepeating(): Boolean
 
-    abstract fun isInitialized(): Boolean
+    open fun isInitialized() = SERVICE != null
 
     abstract fun getCurrentPosInSong(): Int
 
