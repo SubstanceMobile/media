@@ -1,5 +1,5 @@
 # Substance SDK (Pre-Alpha)
-Project Managed by the entire Substance team.
+Project Managed by the entire Substance Mobile development team
 
 [![Version](https://jitpack.io/v/SubstanceMobile/SDK.svg)](https://jitpack.io/#SubstanceMobile/SDK)
 
@@ -15,11 +15,13 @@ allprojects {
 		}
 	}
 ```
-Next, make sure you have the "Kotlin" plugin installed in Android Studio. Finally, pick a library and add it to your `build.gradle` file.
+Next, make sure you have the "Kotlin" plugin installed in Android Studio. At this point, about a fourth of the SDK is written in Kotlin, so you need the plugin to be able to complile the library. Finally, pick a library and add it to your `build.gradle` file.
 
 To add the entire SDK to your app, just add this line to the `dependencies` of your module's `build.gradle` file:
 ```
-compile 'com.github.SubstanceMobile:SDK:-SNAPSHOT'
+compile('com.github.SubstanceMobile:SDK:-SNAPSHOT'@aar){
+    transitive = true
+}
 ``` 
 
 ## Module
@@ -32,6 +34,7 @@ compile('com.github.SubstanceMobile.SDK:Music:-SNAPSHOT'@aar){
     transitive = true
 }
 ```
+
 This package contains the following libraries:
 #### Core
 This is the core library. It contains the core media objects: `Song`, `Album`, `Artist`, `Playlist` and `Genre`.
