@@ -18,13 +18,12 @@ package mobile.substance.sdk.music.loading
 
 import android.content.Context
 import android.net.Uri
-import android.os.AsyncTask
 import android.provider.MediaStore
 import android.util.Log
 import mobile.substance.sdk.music.core.objects.*
+import mobile.substance.sdk.music.core.utils.ModularAsyncTask
 import mobile.substance.sdk.music.loading.tasks.*
 import java.util.*
-import java.util.concurrent.Callable
 
 @SuppressWarnings("unused")
 object Library {
@@ -271,30 +270,6 @@ object Library {
     // Find X for Y
     ///////////////////////////////////////////////////////////////////////////
 
-    interface QueryResult<T> {
-
-        fun onQueryResult(result: T)
-
-    }
-
-    class QueryTask<Result>(private val callback: QueryResult<Result>) : AsyncTask<Callable<Result>, Void, Result>() {
-
-        @SafeVarargs
-        override fun doInBackground(vararg params: Callable<Result>): Result? {
-            try {
-                return params[0].call()
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-
-            return null
-        }
-
-        override fun onPostExecute(result: Result) {
-            callback.onQueryResult(result)
-        }
-    }
-
     fun findSongsForArtist(artist: Artist): List<Song> {
         val songs = ArrayList<Song>()
         for (song in this.songs) {
@@ -305,8 +280,8 @@ object Library {
     }
 
     @SuppressWarnings("unchecked")
-    fun findSongsForArtistAsync(artist: Artist, callback: QueryResult<List<Song>>) {
-        QueryTask(callback).execute(Callable { findSongsForArtist(artist) })
+    fun findSongsForArtistAsync(artist: Artist, callback: ModularAsyncTask.TaskCallback<List<Song>>) {
+        ModularAsyncTask<List<Song>>(callback).execute({ findSongsForArtist(artist) })
     }
 
     fun findAlbumsForArtist(artist: Artist): List<Album> {
@@ -319,8 +294,8 @@ object Library {
     }
 
     @SuppressWarnings("unchecked")
-    fun findAlbumsForArtistAsync(artist: Artist, callback: QueryResult<List<Album>>) {
-        QueryTask(callback).execute(Callable { findAlbumsForArtist(artist) })
+    fun findAlbumsForArtistAsync(artist: Artist, callback: ModularAsyncTask.TaskCallback<List<Album>>) {
+        ModularAsyncTask<List<Album>>(callback).execute({ findAlbumsForArtist(artist) })
     }
 
     fun findSongsForAlbum(album: Album): List<Song> {
@@ -333,8 +308,8 @@ object Library {
     }
 
     @SuppressWarnings("unchecked")
-    fun findSongsForAlbumAsync(album: Album, callback: QueryResult<List<Song>>) {
-        QueryTask(callback).execute(Callable { findSongsForAlbum(album) })
+    fun findSongsForAlbumAsync(album: Album, callback: ModularAsyncTask.TaskCallback<List<Song>>) {
+        ModularAsyncTask<List<Song>>(callback).execute({ findSongsForAlbum(album) })
     }
 
     fun findArtistForAlbum(album: Album): Artist? {
@@ -346,8 +321,8 @@ object Library {
     }
 
     @SuppressWarnings("unchecked")
-    fun findArtistForAlbumAsync(album: Album, callback: QueryResult<Artist>) {
-        QueryTask(callback).execute(Callable<mobile.substance.sdk.music.core.objects.Artist> { findArtistForAlbum(album) })
+    fun findArtistForAlbumAsync(album: Album, callback: ModularAsyncTask.TaskCallback<Artist>) {
+        ModularAsyncTask<Artist>(callback).execute({ findArtistForAlbum(album)!! })
     }
 
     @Throws(NullPointerException::class)
@@ -372,8 +347,8 @@ object Library {
     }
 
     @SuppressWarnings("unchecked")
-    fun findSongsForPlaylistAsync(context: Context, playlist: Playlist, callback: QueryResult<List<Song>>) {
-        QueryTask(callback).execute(Callable { findSongsForPlaylist(context, playlist) })
+    fun findSongsForPlaylistAsync(context: Context, playlist: Playlist, callback: ModularAsyncTask.TaskCallback<List<Song>>) {
+        ModularAsyncTask<List<Song>>(callback).execute({ findSongsForPlaylist(context, playlist) })
     }
 
     @Throws(NullPointerException::class)
@@ -400,8 +375,8 @@ object Library {
     }
 
     @SuppressWarnings("unchecked")
-    fun findSongsForGenreAsync(context: Context, genre: Genre, callback: QueryResult<List<Song>>) {
-        QueryTask(callback).execute(Callable { findSongsForGenre(context, genre) })
+    fun findSongsForGenreAsync(context: Context, genre: Genre, callback: ModularAsyncTask.TaskCallback<List<Song>>) {
+        ModularAsyncTask<List<Song>>(callback).execute({ findSongsForGenre(context, genre) })
     }
 
     ///////////////////////////////////////////////////////////////////////////

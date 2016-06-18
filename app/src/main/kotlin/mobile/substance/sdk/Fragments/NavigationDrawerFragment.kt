@@ -17,15 +17,13 @@
 package mobile.substance.sdk.fragments
 
 import android.support.v4.widget.DrawerLayout
-import mobile.substance.sdk.activities.NavigationDrawerActivity
 
 /**
  * Created by Julian on 06/05/16.
  */
 open class NavigationDrawerFragment : BaseFragment() {
 
-    fun getDrawerLayout(): DrawerLayout {
-        return (activity as NavigationDrawerActivity).getDrawer()!!
-    }
+    var drawerLayout: DrawerLayout? = null
+        get() = (activity as mobile.substance.sdk.activities.NavigationDrawerActivity).getDrawer()
 
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package mobile.substance.sdk.music.core
+package mobile.substance.sdk.music.core.utils
 
 import android.annotation.SuppressLint
 import android.content.Context

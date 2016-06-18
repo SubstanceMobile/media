@@ -22,7 +22,7 @@ import android.graphics.Bitmap
 import android.net.Uri
 import android.support.v4.media.MediaMetadataCompat
 import android.util.Log
-import mobile.substance.sdk.music.core.CoreUtil
+import mobile.substance.sdk.music.core.utils.CoreUtil
 import java.util.*
 
 

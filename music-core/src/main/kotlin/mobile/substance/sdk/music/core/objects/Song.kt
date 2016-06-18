@@ -20,7 +20,7 @@ import android.net.Uri
 import android.provider.MediaStore
 import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaMetadataCompat.*
-import mobile.substance.sdk.music.core.CoreUtil
+import mobile.substance.sdk.music.core.utils.CoreUtil
 
 /**
  * Wrapper around a MediaMetadataCompat optimised for Song metadata

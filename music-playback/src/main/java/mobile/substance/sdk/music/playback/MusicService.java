@@ -33,8 +33,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import mobile.substance.sdk.music.core.CoreUtil;
 import mobile.substance.sdk.music.core.objects.Song;
+import mobile.substance.sdk.music.core.utils.CoreUtil;
 import mobile.substance.sdk.music.loading.Library;
 import mobile.substance.sdk.music.playback.cast.CastCallbacks;
 import mobile.substance.sdk.music.playback.cast.CastPlaybackHandler;

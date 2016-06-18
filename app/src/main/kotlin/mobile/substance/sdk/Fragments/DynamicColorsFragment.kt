@@ -59,7 +59,7 @@ class DynamicColorsFragment : NavigationDrawerFragment(), DynamicColorsCallback 
     }
 
     override fun init() {
-        NavigationHelper.setupNavigation(getDrawerLayout(), toolbar!!)
+        NavigationHelper.setupNavigation(drawerLayout!!, toolbar!!)
         toolbar!!.inflateMenu(R.menu.menu_dynamic_colors)
         toolbar!!.menu.findItem(R.id.menu_item_configure).isChecked = activity.getSharedPreferences("preferences", Context.MODE_PRIVATE).getBoolean("smartpicking", false)
         toolbar!!.setOnMenuItemClickListener {

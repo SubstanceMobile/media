@@ -23,6 +23,7 @@ import android.view.ViewGroup
 import com.bumptech.glide.Glide
 import mobile.substance.sdk.R
 import mobile.substance.sdk.music.core.objects.*
+import mobile.substance.sdk.music.core.utils.ModularAsyncTask
 import mobile.substance.sdk.music.loading.Library
 import mobile.substance.sdk.music.playback.PlaybackRemote
 import mobile.substance.sdk.viewholders.MusicViewHolder
@@ -81,8 +82,12 @@ class MusicAdapter<T : MediaObject>(items: List<T>) : RecyclerView.Adapter<Music
 
     private fun bindGenre(genre: Genre, holder: MusicViewHolder) {
         holder.title!!.text = genre.genreName
-        Library.findSongsForGenreAsync(context!!, genre, object : Library.QueryResult<List<Song>> {
-            override fun onQueryResult(result: List<Song>) {
+        Library.findSongsForGenreAsync(context!!, genre, object : ModularAsyncTask.TaskCallback<List<Song>> {
+            override fun onTaskStart() {}
+
+            override fun onTaskFailed(e: Exception) {}
+
+            override fun onTaskResult(result: List<Song>) {
                 if (result.size > 0) Library.findAlbumById(result.first().songAlbumID!!)!!.requestArt(holder.image!!)
             }
         })
@@ -91,8 +96,13 @@ class MusicAdapter<T : MediaObject>(items: List<T>) : RecyclerView.Adapter<Music
 
     private fun bindPlaylist(playlist: Playlist, holder: MusicViewHolder) {
         holder.title!!.text = playlist.playlistName
-        Library.findSongsForPlaylistAsync(context!!, playlist, object : Library.QueryResult<List<Song>> {
-            override fun onQueryResult(result: List<Song>) {
+        Library.findSongsForPlaylistAsync(context!!, playlist, object : ModularAsyncTask.TaskCallback<List<Song>> {
+
+            override fun onTaskStart() {}
+
+            override fun onTaskFailed(e: Exception) {}
+
+            override fun onTaskResult(result: List<Song>) {
                 if (result.size > 0) Library.findAlbumById(result.first().songAlbumID!!)!!.requestArt(holder.image!!)
             }
         })

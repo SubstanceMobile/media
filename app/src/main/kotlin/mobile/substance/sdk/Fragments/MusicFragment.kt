@@ -39,7 +39,7 @@ class MusicFragment : NavigationDrawerFragment() {
     override fun init() {
         pager!!.adapter = MusicPagerAdapter(activity, activity.supportFragmentManager)
         tabs!!.setupWithViewPager(pager)
-        NavigationHelper.setupNavigation(getDrawerLayout(), toolbar!!)
+        NavigationHelper.setupNavigation(drawerLayout!!, toolbar!!)
         super.init()
     }
 

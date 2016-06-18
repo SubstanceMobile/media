@@ -28,7 +28,7 @@ class HomeFragment : NavigationDrawerFragment() {
     private var toolbar: Toolbar? = null
 
     override fun init() {
-        NavigationHelper.setupNavigation(getDrawerLayout(), toolbar!!)
+        NavigationHelper.setupNavigation(drawerLayout!!, toolbar!!)
     }
 
     override fun initViews(root: View) {

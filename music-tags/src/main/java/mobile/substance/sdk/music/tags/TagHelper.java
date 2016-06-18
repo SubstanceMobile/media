@@ -29,10 +29,10 @@ import org.jaudiotagger.tag.Tag;
 
 import java.io.File;
 
-import mobile.substance.sdk.music.core.CoreUtil;
 import mobile.substance.sdk.music.core.objects.Album;
 import mobile.substance.sdk.music.core.objects.Playlist;
 import mobile.substance.sdk.music.core.objects.Song;
+import mobile.substance.sdk.music.core.utils.CoreUtil;
 
 public class TagHelper {
 
