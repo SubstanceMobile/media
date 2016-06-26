@@ -21,7 +21,9 @@ import android.support.v4.widget.DrawerLayout
 /**
  * Created by Julian on 06/05/16.
  */
-open class NavigationDrawerFragment : BaseFragment() {
+abstract class NavigationDrawerFragment : BaseFragment() {
+
+    override abstract val layoutResId: Int
 
     var drawerLayout: DrawerLayout? = null
         get() = (activity as mobile.substance.sdk.activities.NavigationDrawerActivity).getDrawer()

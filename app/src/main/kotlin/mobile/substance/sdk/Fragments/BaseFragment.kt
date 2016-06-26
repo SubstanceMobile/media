@@ -25,20 +25,18 @@ import android.view.ViewGroup
 /**
  * Created by Julian Os on 03.05.2016.
  */
-open class BaseFragment : Fragment() {
+abstract class BaseFragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val view: View = inflater!!.inflate(getLayoutResId(), container, false)
-        initViews(view)
-        init()
-        return view
+        return inflater!!.inflate(layoutResId, container, false)
     }
 
-    open fun initViews(root: View) {}
+    override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        init()
+    }
 
     open fun init() {}
 
-    open fun getLayoutResId(): Int {
-        return 0
-    }
+    abstract val layoutResId: Int
 }

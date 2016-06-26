@@ -24,6 +24,7 @@ import android.support.v4.app.FragmentPagerAdapter
 import android.support.v4.view.ViewPager
 import android.support.v7.widget.Toolbar
 import android.view.View
+import butterknife.bindView
 import mobile.substance.sdk.R
 import mobile.substance.sdk.helpers.NavigationHelper
 import mobile.substance.sdk.music.loading.LibraryData
@@ -32,26 +33,19 @@ import mobile.substance.sdk.music.loading.LibraryData
  * Created by Julian Os on 03.05.2016.
  */
 class MusicFragment : NavigationDrawerFragment() {
-    private var tabs: TabLayout? = null
-    private var pager: ViewPager? = null
-    private var toolbar: Toolbar? = null
+    private val tabs: TabLayout by bindView<TabLayout>(R.id.fragment_music_tabs)
+    private val pager: ViewPager by bindView<ViewPager>(R.id.fragment_music_viewpager)
+    private val toolbar: Toolbar by bindView<Toolbar>(R.id.fragment_music_toolbar)
 
     override fun init() {
-        pager!!.adapter = MusicPagerAdapter(activity, activity.supportFragmentManager)
-        tabs!!.setupWithViewPager(pager)
-        NavigationHelper.setupNavigation(drawerLayout!!, toolbar!!)
+        pager.adapter = MusicPagerAdapter(activity, activity.supportFragmentManager)
+        tabs.setupWithViewPager(pager)
+        NavigationHelper.setupNavigation(drawerLayout!!, toolbar)
         super.init()
     }
 
-    override fun initViews(root: View) {
-        tabs = root.findViewById(R.id.fragment_music_tabs) as TabLayout
-        pager = root.findViewById(R.id.fragment_music_viewpager) as ViewPager
-        toolbar = root.findViewById(R.id.fragment_music_toolbar) as Toolbar
-    }
-
-    override fun getLayoutResId(): Int {
-        return R.layout.fragment_music
-    }
+    override val layoutResId: Int
+        get() = R.layout.fragment_music
 
     class MusicPagerAdapter(context: Context, fm: FragmentManager) : FragmentPagerAdapter(fm) {
 

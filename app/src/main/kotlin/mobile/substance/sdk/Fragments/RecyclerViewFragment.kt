@@ -19,6 +19,7 @@ package mobile.substance.sdk.fragments
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.view.View
+import butterknife.bindView
 import mobile.substance.sdk.R
 import mobile.substance.sdk.adapters.MusicAdapter
 import mobile.substance.sdk.music.core.objects.*
@@ -71,15 +72,14 @@ class RecyclerViewFragment : BaseFragment(), LibraryListener {
         if (type == LibraryData.GENRES) setAdapter()
     }
 
-    private var recyclerview: RecyclerView? = null
+    private val recyclerview: RecyclerView by bindView<RecyclerView>(R.id.fragment_recyclerview)
     private var type: LibraryData? = null
 
-    override fun getLayoutResId(): Int {
-        return R.layout.fragment_recyclerview
-    }
+    override val layoutResId: Int
+        get() = R.id.fragment_recyclerview
 
     override fun init() {
-        recyclerview!!.layoutManager = LinearLayoutManager(activity)
+        recyclerview.layoutManager = LinearLayoutManager(activity)
         setAdapter()
         Library.registerListener(this)
     }
@@ -92,10 +92,6 @@ class RecyclerViewFragment : BaseFragment(), LibraryListener {
             LibraryData.PLAYLISTS -> recyclerview!!.adapter = MusicAdapter<Playlist>(Library.playlists)
             LibraryData.GENRES -> recyclerview!!.adapter = MusicAdapter<Genre>(Library.genres)
         }
-    }
-
-    override fun initViews(root: View) {
-        recyclerview = root.findViewById(R.id.fragment_recyclerview) as RecyclerView
     }
 
     override fun onDetach() {
