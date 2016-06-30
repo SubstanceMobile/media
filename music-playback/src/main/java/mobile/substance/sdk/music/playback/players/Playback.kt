@@ -21,7 +21,7 @@ import android.os.Bundle
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat.*
 import android.util.Log
-import mobile.substance.sdk.music.core.libraryHooks.PlaybackLibHook
+import mobile.substance.sdk.music.core.libraryhooks.PlaybackLibHook
 import mobile.substance.sdk.music.core.objects.Song
 import mobile.substance.sdk.music.playback.MusicQueue
 import mobile.substance.sdk.music.playback.MusicService

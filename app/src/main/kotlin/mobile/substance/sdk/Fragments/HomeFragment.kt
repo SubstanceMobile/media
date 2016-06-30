@@ -17,7 +17,7 @@
 package mobile.substance.sdk.fragments
 
 import android.support.v7.widget.Toolbar
-import android.view.View
+import butterknife.bindView
 import mobile.substance.sdk.R
 import mobile.substance.sdk.helpers.NavigationHelper
 
@@ -25,17 +25,12 @@ import mobile.substance.sdk.helpers.NavigationHelper
  * Created by Julian Os on 03.05.2016.
  */
 class HomeFragment : NavigationDrawerFragment() {
-    private var toolbar: Toolbar? = null
+    private val toolbar: Toolbar by bindView<Toolbar>(R.id.fragment_home_toolbar)
 
     override fun init() {
-        NavigationHelper.setupNavigation(getDrawerLayout(), toolbar!!)
+        NavigationHelper.setupNavigation(drawerLayout!!, toolbar)
     }
 
-    override fun initViews(root: View) {
-        toolbar = root.findViewById(R.id.fragment_home_toolbar) as Toolbar
-    }
-
-    override fun getLayoutResId(): Int {
-        return R.layout.fragment_home
-    }
+    override val layoutResId: Int
+        get() = R.layout.fragment_home
 }

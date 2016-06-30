@@ -16,16 +16,18 @@
 
 package mobile.substance.sdk.fragments
 
+import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.content.res.ColorStateList
-import android.graphics.Color
+import android.net.Uri
 import android.support.design.widget.FloatingActionButton
 import android.support.v4.widget.SwipeRefreshLayout
 import android.support.v7.widget.Toolbar
-import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
-import android.widget.Toast
+import butterknife.bindView
+import butterknife.bindViews
 import com.bumptech.glide.Glide
 import mobile.substance.sdk.R
 import mobile.substance.sdk.colors.ColorPackage
@@ -40,40 +42,42 @@ import mobile.substance.sdk.theming.util.TintHelper
  */
 class DynamicColorsFragment : NavigationDrawerFragment(), DynamicColorsCallback {
 
-    override fun onColorsReady(it: ColorPackage?) {
-        it!!
-        fab!!.backgroundTintList = ColorStateList.valueOf(it.accentColor)
-        fab!!.setImageDrawable(TintHelper.createTintedDrawable(resources.getDrawable(R.drawable.ic_color_lens_black_24dp), it.accentIconActiveColor))
-        text1!!.setBackgroundColor(it.primaryDarkColor)
-        text2!!.setBackgroundColor(it.primaryColor)
-        text3!!.setBackgroundColor(it.accentColor)
-        text1!!.text = DynamicColorsUtil.hexStringForInt(it.primaryDarkColor)
-        text2!!.text = DynamicColorsUtil.hexStringForInt(it.primaryColor)
-        text3!!.text = DynamicColorsUtil.hexStringForInt(it.accentColor)
-        Toast.makeText(activity, DynamicColorsUtil.hexStringForInt(it.textColor), Toast.LENGTH_LONG).show()
-        text1!!.setTextColor(Color.parseColor(DynamicColorsUtil.hexStringForInt(it.textColor)))
-        text2!!.setTextColor(it.textColor)
-        text3!!.setTextColor(it.accentTextColor)
+    companion object {
+        const val REQUEST_CODE_PICK_PHOTO = 1
+    }
+
+    override fun onColorsReady(it: ColorPackage) {
+        fab.backgroundTintList = ColorStateList.valueOf(it.accentColor)
+        fab.setImageDrawable(TintHelper.createTintedDrawable(resources.getDrawable(R.drawable.ic_add_a_photo_black_24dp), it.accentIconActiveColor))
+        fab.animate().scaleX(1.0f).scaleY(1.0f).setDuration(200).start()
+        texts[0].setBackgroundColor(it.primaryDarkColor)
+        texts[1].setBackgroundColor(it.primaryColor)
+        texts[2].setBackgroundColor(it.accentColor)
+        texts[0].text = DynamicColorsUtil.hexStringForInt(it.primaryDarkColor)
+        texts[1].text = DynamicColorsUtil.hexStringForInt(it.primaryColor)
+        texts[2].text = DynamicColorsUtil.hexStringForInt(it.accentColor)
+        texts[0].setTextColor(it.textColor)
+        texts[1].setTextColor(it.textColor)
+        texts[2].setTextColor(it.accentTextColor)
         swipeRefresh!!.isRefreshing = false
     }
 
-    private var fab: FloatingActionButton? = null
-    private var text1: TextView? = null
-    private var text2: TextView? = null
-    private var text3: TextView? = null
-    private var image: ImageView? = null
-    private var toolbar: Toolbar? = null
-    private var swipeRefresh: SwipeRefreshLayout? = null
+    private val fab: FloatingActionButton by bindView<FloatingActionButton>(R.id.fragment_dynamic_colors_fab)
+    private val texts: List<TextView> by bindViews<TextView>(R.id.fragment_dynamic_colors_one, R.id.fragment_dynamic_colors_two, R.id.fragment_dynamic_colors_three)
+    private val image: ImageView by bindView<ImageView>(R.id.fragment_dynamic_colors_header)
+    private val toolbar: Toolbar by bindView<Toolbar>(R.id.fragment_dynamic_colors_toolbar)
+    private val swipeRefresh: SwipeRefreshLayout by bindView<SwipeRefreshLayout>(R.id.fragment_dynamic_colors_swiperefresh)
 
+    private var customUri: Uri? = null
 
-    override fun getLayoutResId(): Int {
-        return R.layout.fragment_dynamic_colors
-    }
+    override val layoutResId: Int
+        get() = R.layout.fragment_dynamic_colors
 
     override fun init() {
-        NavigationHelper.setupNavigation(getDrawerLayout(), toolbar!!)
-        toolbar!!.inflateMenu(R.menu.menu_dynamic_colors)
-        toolbar!!.setOnMenuItemClickListener {
+        NavigationHelper.setupNavigation(drawerLayout!!, toolbar!!)
+        toolbar.inflateMenu(R.menu.menu_dynamic_colors)
+        toolbar.menu.findItem(R.id.menu_item_configure).isChecked = activity.getSharedPreferences("preferences", Context.MODE_PRIVATE).getBoolean("smartpicking", false)
+        toolbar.setOnMenuItemClickListener {
             if(it.itemId == R.id.menu_item_configure) {
                 it.isChecked = !it.isChecked
                 activity.getSharedPreferences("preferences", Context.MODE_PRIVATE)
@@ -84,30 +88,33 @@ class DynamicColorsFragment : NavigationDrawerFragment(), DynamicColorsCallback 
             } else false
         }
         Glide.with(activity).load(R.drawable.dynamic_colors).crossFade().centerCrop().into(image)
-
-        swipeRefresh!!.isRefreshing = true
-        swipeRefresh!!.setOnRefreshListener {
-            refresh()
+        fab.setOnClickListener {
+            startActivityForResult(Intent.createChooser(Intent(Intent.ACTION_GET_CONTENT).setType("image/*"), "Pick a photo"), REQUEST_CODE_PICK_PHOTO)
         }
-        refresh()
+        swipeRefresh.isRefreshing = true
+        swipeRefresh.setOnRefreshListener {
+            refresh(if(customUri != null) DynamicColors.from(customUri!!, activity) else DynamicColors.from(resources, R.drawable.dynamic_colors))
+        }
+        Glide.with(this).load(R.drawable.dynamic_colors).into(image)
+        refresh(DynamicColors.from(resources, R.drawable.dynamic_colors))
     }
 
-    private fun refresh() {
-        val dynamicColors = DynamicColors.from(resources, R.drawable.dynamic_colors)
+    private fun refresh(dynamicColors: DynamicColors) {
 
         if(activity.getSharedPreferences("preferences", Context.MODE_PRIVATE).getBoolean("smartpicking", false)) {
-            dynamicColors.generate(this, true)
+            dynamicColors.generate(true, this)
         } else dynamicColors.generateSimple(this)
     }
 
-    override fun initViews(root: View) {
-        fab = root.findViewById(R.id.fragment_dynamic_colors_fab) as FloatingActionButton
-        text1 = root.findViewById(R.id.fragment_dynamic_colors_one) as TextView
-        text2 = root.findViewById(R.id.fragment_dynamic_colors_two) as TextView
-        text3 = root.findViewById(R.id.fragment_dynamic_colors_three) as TextView
-        image = root.findViewById(R.id.fragment_dynamic_colors_header) as ImageView
-        toolbar = root.findViewById(R.id.fragment_dynamic_colors_toolbar) as Toolbar
-        swipeRefresh = root.findViewById(R.id.fragment_dynamic_colors_swiperefresh) as SwipeRefreshLayout
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if(requestCode == REQUEST_CODE_PICK_PHOTO && resultCode == Activity.RESULT_OK) {
+            refresh(DynamicColors.from(data!!.data, activity))
+            customUri = data.data
+            Glide.with(this).load(data.data).crossFade().into(image)
+        }
     }
+
+
 
 }

@@ -239,8 +239,8 @@ object PlaybackRemote : ServiceConnection {
     }
 
     fun makeNotification(updateInterface: NotificationUpdateInterface): Notification {
-        var firstArt: Bitmap? = getCurrentSong()?.metadataCompat?.getBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART);
-        if (firstArt == null) firstArt = (MusicCoreOptions.getDefaultArt() as BitmapDrawable).bitmap
+        var firstArt: Bitmap? = getCurrentSong()?.metadata?.getBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART);
+        if (firstArt == null) firstArt = (MusicCoreOptions.defaultArt as BitmapDrawable).bitmap
         else updateInterface.updateNotification(PlaybackRemote.makeNotification(firstArt))
         //Fetch the album, then fetch the art, and then finally pass this all to create the notification. Meanwhile, this will use
         //the default art as a placeholder until the new art is fetched.

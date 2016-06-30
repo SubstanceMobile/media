@@ -27,8 +27,8 @@ import mobile.substance.sdk.music.loading.Library
 import mobile.substance.sdk.music.playback.PlaybackRemote
 import mobile.substance.sdk.viewholders.MusicViewHolder
 
-class MusicAdapter<T : MediaObject>(items: MutableList<T>) : RecyclerView.Adapter<MusicViewHolder>() {
-    var items: MutableList<T>? = null
+class MusicAdapter<T : MediaObject>(items: List<T>) : RecyclerView.Adapter<MusicViewHolder>() {
+    var items: List<T>? = null
     var context: Context? = null
 
     init {
@@ -64,7 +64,7 @@ class MusicAdapter<T : MediaObject>(items: MutableList<T>) : RecyclerView.Adapte
     private fun bindSong(song: Song, holder: MusicViewHolder) {
         holder.title!!.text = song.songTitle
         holder.subtitle!!.text = song.songArtistName
-        Library.findAlbumById(song.songAlbumID)!!.requestArt(holder.image!!)
+        Library.findAlbumById(song.songAlbumId!!)!!.requestArt(holder.image!!)
         holder.itemView.setOnClickListener { it ->
             PlaybackRemote.play(song)
         }
@@ -81,15 +81,29 @@ class MusicAdapter<T : MediaObject>(items: MutableList<T>) : RecyclerView.Adapte
 
     private fun bindGenre(genre: Genre, holder: MusicViewHolder) {
         holder.title!!.text = genre.genreName
-        Library.findSongsForGenreAsync(context, genre, Library.QueryResult { it ->
-            if (it.size > 0) Library.findAlbumById(it.first().songAlbumID)!!.requestArt(holder.image)
+        Library.findSongsForGenreAsync(context!!, genre, object : ModularAsyncTask.TaskCallback<List<Song>> {
+            override fun onTaskStart() {}
+
+            override fun onTaskFailed(e: Exception) {}
+
+            override fun onTaskResult(result: List<Song>) {
+                if (result.size > 0) Library.findAlbumById(result.first().songAlbumId!!)!!.requestArt(holder.image!!)
+            }
         })
+
     }
 
     private fun bindPlaylist(playlist: Playlist, holder: MusicViewHolder) {
         holder.title!!.text = playlist.playlistName
-        Library.findSongsForPlaylistAsync(context, playlist, Library.QueryResult { it ->
-            if (it.size > 0) Library.findAlbumById(it.first().songAlbumID)!!.requestArt(holder.image)
+        Library.findSongsForPlaylistAsync(context!!, playlist, object : ModularAsyncTask.TaskCallback<List<Song>> {
+
+            override fun onTaskStart() {}
+
+            override fun onTaskFailed(e: Exception) {}
+
+            override fun onTaskResult(result: List<Song>) {
+                if (result.size > 0) Library.findAlbumById(result.first().songAlbumId!!)!!.requestArt(holder.image!!)
+            }
         })
     }
 

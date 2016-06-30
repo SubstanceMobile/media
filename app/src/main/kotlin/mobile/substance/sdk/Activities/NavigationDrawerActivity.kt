@@ -34,7 +34,7 @@ open class NavigationDrawerActivity : BaseActivity() {
                 .beginTransaction()
                 .replace(R.id.activity_main_fragment_placeholder, fragment, "SubstanceSDK")
                 .addToBackStack("SubstanceSDK")
-                .commit()
+                .commitAllowingStateLoss()
     }
 
     override fun init() {
@@ -46,7 +46,7 @@ open class NavigationDrawerActivity : BaseActivity() {
                  .beginTransaction()
                  .replace(R.id.activity_main_fragment_placeholder, fragment, "SubstanceSDK")
                  .addToBackStack("SubstanceSDK")
-                 .commit()
+                 .commitAllowingStateLoss()
     }
 
     fun handleNavigationClick(item: MenuItem): Boolean {

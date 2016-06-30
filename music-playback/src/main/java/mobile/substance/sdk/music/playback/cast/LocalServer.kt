@@ -16,11 +16,14 @@
 
 package mobile.substance.sdk.music.playback.cast
 
+import android.content.Context
+import android.net.Uri
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileNotFoundException
 
 import fi.iki.elonen.NanoHTTPD
+import mobile.substance.sdk.music.core.utils.CoreUtil
 import mobile.substance.sdk.music.loading.Library
 import mobile.substance.sdk.music.playback.MusicPlaybackUtil
 import mobile.substance.sdk.music.playback.MusicQueue
@@ -29,20 +32,16 @@ import mobile.substance.sdk.music.playback.PlaybackRemote
 /**
  * Created by Julian Os on 13.02.2016.
  */
-class LocalServer(internal var type: Int) : NanoHTTPD(MusicPlaybackUtil.getServerportForType(type)) {
+class LocalServer(internal var type: Int, private val context: Context) : NanoHTTPD(MusicPlaybackUtil.getServerportForType(type)) {
 
-    override fun serve(session: NanoHTTPD.IHTTPSession): NanoHTTPD.Response? {
+    fun serve(uri: Uri): NanoHTTPD.Response? {
         try {
-            when (type) {
-                MusicPlaybackUtil.SERVER_TYPE_AUDIO -> return NanoHTTPD.Response(NanoHTTPD.Response.Status.OK, "audio/*", FileInputStream(File(PlaybackRemote.getCurrentSong()!!.filePath)))
-                MusicPlaybackUtil.SERVER_TYPE_ARTWORK -> return NanoHTTPD.Response(NanoHTTPD.Response.Status.OK, "image/*", FileInputStream(File(Library.findAlbumById(PlaybackRemote.getCurrentSong()!!.songAlbumID)!!.albumArtworkPath)))
-                else -> return null
-            }
+            val mimeType = if (type == MusicPlaybackUtil.SERVER_TYPE_AUDIO) "audio/*" else "image/*"
+            return NanoHTTPD.Response(NanoHTTPD.Response.Status.OK, mimeType, FileInputStream(File(CoreUtil.getFilePath(context, uri))))
         } catch (e: FileNotFoundException) {
             e.printStackTrace()
             return null
         }
-
     }
 
     companion object {

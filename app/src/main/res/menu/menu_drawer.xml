@@ -32,7 +32,7 @@
 
         <item
             android:id="@+id/drawer_dynamic_colors"
-            android:icon="@drawable/ic_color_lens_black_24dp"
+            android:icon="@drawable/ic_palette_black_24dp"
             android:title="Dynamic Colors" />
 
         <item

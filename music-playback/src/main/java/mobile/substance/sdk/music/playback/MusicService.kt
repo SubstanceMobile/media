@@ -163,7 +163,7 @@ class MusicService : MediaBrowserServiceCompat(), CastStateListener {
                                     else PlaybackState.STATE_IDLE,
                                     engine.isRepeating())
                         }
-                        session!!.setMetadata(MusicQueue.getCurrentSong()!!.metadataCompat)
+                        session!!.setMetadata(MusicQueue.getCurrentSong()!!.metadata)
                         session!!.setPlaybackState(
                                 PlaybackStateCompat.Builder().setActions(MusicPlaybackOptions.playbackActions.getActions())
                                         .setState(engine.playbackState, engine.getCurrentPosInSong().toLong(), engine.getPlaybackSpeed())

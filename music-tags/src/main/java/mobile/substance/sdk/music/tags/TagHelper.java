@@ -29,10 +29,10 @@ import org.jaudiotagger.tag.Tag;
 
 import java.io.File;
 
-import mobile.substance.sdk.music.core.CoreUtil;
 import mobile.substance.sdk.music.core.objects.Album;
 import mobile.substance.sdk.music.core.objects.Playlist;
 import mobile.substance.sdk.music.core.objects.Song;
+import mobile.substance.sdk.music.core.utils.CoreUtil;
 
 public class TagHelper {
 
@@ -90,7 +90,7 @@ public class TagHelper {
     }
 
     public static Uri getFileUri(Context context, Uri uri) {
-        return Uri.parse(CoreUtil.getFilePath(context, uri));
+        return Uri.parse(CoreUtil.INSTANCE.getFilePath(context, uri));
     }
 
     private Playlist createPlaylist(Context context, String name) {
@@ -110,7 +110,7 @@ public class TagHelper {
                         context.getContentResolver().notifyChange(Uri.parse("content://media/audio/playlists"), null);
                         Playlist p = new Playlist();
                         p.setPlaylistName(name);
-                        p.setID(Integer.valueOf(mInsert.getLastPathSegment()));
+                        p.setId(Integer.valueOf(mInsert.getLastPathSegment()));
                         //p.setFavorites(TYPE);
                         return p;
                     } else return null;

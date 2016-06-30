@@ -105,7 +105,7 @@ public class PlaylistEditor {
 
     private TagResult addToPlaylist(List<Song> songs) {
         String[] s = new String[]{"max(play_order)"};
-        Uri uri = MediaStore.Audio.Playlists.Members.getContentUri("external", playlist.getID());
+        Uri uri = MediaStore.Audio.Playlists.Members.getContentUri("external", playlist.getId());
         try {
             Cursor query = context.getContentResolver().query(uri, s, null, null, null);
             if (query != null) {
@@ -129,7 +129,7 @@ public class PlaylistEditor {
 
     private TagResult deletePlaylist() {
         try {
-            context.getContentResolver().delete(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, "_id IN (" + playlist.getID() + ")", null);
+            context.getContentResolver().delete(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, "_id IN (" + playlist.getId() + ")", null);
             playlist = null;
             return TagResult.SUCCESS;
         } catch (Exception ignored) {
@@ -142,14 +142,14 @@ public class PlaylistEditor {
         for (int i = 0; i < songs.size(); i++) {
             cv[i] = new ContentValues();
             cv[i].put(MediaStore.Audio.Playlists.Members.PLAY_ORDER, count + i + 1);
-            cv[i].put(MediaStore.Audio.Playlists.Members.AUDIO_ID, songs.get(i).getID());
+            cv[i].put(MediaStore.Audio.Playlists.Members.AUDIO_ID, songs.get(i).getId());
         }
         return cv;
     }
 
     private TagResult movePlaylistItem(int fromPos, int toPos) {
         try {
-            MediaStore.Audio.Playlists.Members.moveItem(context.getContentResolver(), playlist.getID(), fromPos, toPos);
+            MediaStore.Audio.Playlists.Members.moveItem(context.getContentResolver(), playlist.getId(), fromPos, toPos);
             return TagResult.SUCCESS;
         } catch (Exception e) {
             e.printStackTrace();
@@ -160,7 +160,7 @@ public class PlaylistEditor {
     private TagResult removeFromPlaylist(List<Song> songs) {
         try {
             for (Song song : songs) {
-                context.getContentResolver().delete(MediaStore.Audio.Playlists.Members.getContentUri("external", playlist.getID()), "audio_id =?", new String[]{String.valueOf(song.getID())});
+                context.getContentResolver().delete(MediaStore.Audio.Playlists.Members.getContentUri("external", playlist.getId()), "audio_id =?", new String[]{String.valueOf(song.getId())});
             }
             return TagResult.SUCCESS;
         } catch (Exception e) {
@@ -174,7 +174,7 @@ public class PlaylistEditor {
         ContentValues contentValues = new ContentValues();
         contentValues.put(MediaStore.Audio.Playlists.NAME, newName);
         try {
-            context.getContentResolver().update(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, contentValues, "_id=?", new String[]{String.valueOf(playlist.getID())});
+            context.getContentResolver().update(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, contentValues, "_id=?", new String[]{String.valueOf(playlist.getId())});
             context.getContentResolver().notifyChange(Uri.parse("content://media"), null);
             playlist.setPlaylistName(newName);
             return TagResult.SUCCESS;
