@@ -38,12 +38,21 @@ import android.widget.Toast
 import com.google.android.gms.cast.Cast
 import com.google.android.gms.cast.CastDevice
 import com.google.android.gms.cast.CastMediaControlIntent
+import com.google.android.gms.cast.framework.CastContext
+import com.google.android.gms.cast.framework.CastState
+import com.google.android.gms.cast.framework.CastStateListener
 import com.google.android.gms.common.api.GoogleApiClient
 import mobile.substance.sdk.music.playback.cast.*
+import mobile.substance.sdk.music.playback.players.CastPlayback
 import mobile.substance.sdk.music.playback.players.Playback
 import java.util.*
 
-class MusicService : MediaBrowserServiceCompat(), CastCallbacks {
+class MusicService : MediaBrowserServiceCompat(), CastStateListener {
+
+    override fun onCastStateChanged(p0: Int) {
+        if (p0 == CastState.CONNECTED) replacePlaybackEngine(CastPlayback, true, true)
+    }
+
     //Companion object for the unique ID and log tag.
     companion object {
         // Log Tag
@@ -123,6 +132,8 @@ class MusicService : MediaBrowserServiceCompat(), CastCallbacks {
         engine.init(this)
         session!!.setCallback(engine)
         sessionToken = session!!.sessionToken
+
+        if (MusicPlaybackOptions.isCastEnabled) CastContext.getSharedInstance(this).addCastStateListener(this)
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -193,56 +204,6 @@ class MusicService : MediaBrowserServiceCompat(), CastCallbacks {
     fun control() = session?.controller
 
     fun getMediaSession() = session
-
-    ///////////////////////////////////////////////////////////////////////////
-    // Google Cast functions
-    ///////////////////////////////////////////////////////////////////////////
-
-    private var apiClient: GoogleApiClient? = null
-    private var castPlaybackHandler: CastPlaybackHandler? = null
-    private val isCastInitialized = false
-    private var applicationId: String? = null
-    @Volatile private var mediaRouter: MediaRouter? = null
-    @Volatile private var routeSelector: MediaRouteSelector? = null
-    private var connectionCallbacks: ConnectionCallbacks? = null
-    private var routerCallback: MediaRouterCallback? = null
-
-    fun initGoogleCast(routeItem: MenuItem, applicationId: String) {
-        this.applicationId = applicationId
-
-        mediaRouter = MediaRouter.getInstance(applicationContext)
-        routeSelector = MediaRouteSelector.Builder().addControlCategory(CastMediaControlIntent.categoryForCast(applicationId)).build()
-
-        val routeActionProvider = MenuItemCompat.getActionProvider(routeItem) as MediaRouteActionProvider
-        routeActionProvider.routeSelector = routeSelector!!
-        routerCallback = MediaRouterCallback(this)
-        mediaRouter!!.addCallback(routeSelector!!, routerCallback!!,
-                MediaRouter.CALLBACK_FLAG_REQUEST_DISCOVERY)
-    }
-
-    override fun onCastDeviceSelected(mDevice: CastDevice) {
-        launchCast(mDevice)
-    }
-
-    override fun onCastDeviceUnselected() {
-        progressThread!!.interrupt()
-        progressThread = null
-    }
-
-    private val isCastConnected: Boolean
-        get() = castPlaybackHandler != null && castPlaybackHandler!!.isConnected
-
-    private fun launchCast(device: CastDevice) {
-        val listener = Cast.Listener()
-        val apiOptionsBuilder = Cast.CastOptions.Builder(device, listener)
-
-        connectionCallbacks = ConnectionCallbacks(routerCallback!!, ConnectionResultListener { castPlaybackHandler!!.load(engine.getCurrentPosInSong().toLong()) })
-
-        apiClient = GoogleApiClient.Builder(this).addApi(Cast.API, apiOptionsBuilder.build()).addConnectionCallbacks(connectionCallbacks!!).addOnConnectionFailedListener { Toast.makeText(this@MusicService, "Connection failed", Toast.LENGTH_LONG).show() }.build()
-        connectionCallbacks!!.setApiClient(apiClient!!)
-        castPlaybackHandler = CastPlaybackHandler(this, apiClient!!)
-        apiClient!!.connect()
-    }
 
     ///////////////////////////////////////////////////////////////////////////
     // Lifecycle

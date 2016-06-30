@@ -27,4 +27,5 @@ object MusicPlaybackOptions {
     var statusbarIconResId = 0
 
     var castApplicationId = "null"
+    var isCastEnabled = false
 }

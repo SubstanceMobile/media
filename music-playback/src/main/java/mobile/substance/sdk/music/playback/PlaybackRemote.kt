@@ -78,7 +78,7 @@ object PlaybackRemote : ServiceConnection {
     // Main
     ///////////////////////////////////////////////////////////////////////////
 
-    fun setup(context: Context) {
+    fun init(context: Context) {
         this.context = context
     }
 
@@ -213,9 +213,9 @@ object PlaybackRemote : ServiceConnection {
 
     fun getCurrentSong(): Song? = MusicQueue.getCurrentSong()
 
-    fun getQueue(): List<Song>? = MusicQueue.getMutableQueue(false)
+    fun getQueue(): List<Song>? = MusicQueue.getQueue(false)
 
-    fun getQueue(startAtPosition: Boolean): List<Song>? = MusicQueue.getMutableQueue(startAtPosition)
+    fun getQueue(startAtPosition: Boolean): List<Song>? = MusicQueue.getQueue(startAtPosition)
 
     fun setQueue(queue: MutableList<Song>, position: Int) = MusicQueue.set(queue, position)
 
@@ -231,7 +231,7 @@ object PlaybackRemote : ServiceConnection {
     }
 
     fun makeNotificaion(): Notification {
-
+        return null as Notification // TODO: Setting this for build success
     }
 
     interface NotificationUpdateInterface {
@@ -244,7 +244,7 @@ object PlaybackRemote : ServiceConnection {
         else updateInterface.updateNotification(PlaybackRemote.makeNotification(firstArt))
         //Fetch the album, then fetch the art, and then finally pass this all to create the notification. Meanwhile, this will use
         //the default art as a placeholder until the new art is fetched.
-        //TODO: Use DataLinkers to get the album art (to create the notification)
+        return null as Notification //TODO: Setting this for build success, use DataLinkers to get the album art (to create the notification)
     }
 
     internal fun makeNotification(albumArt: Bitmap): Notification {
@@ -281,7 +281,7 @@ object PlaybackRemote : ServiceConnection {
     })
 
     fun initGoogleCast(item: MenuItem) {
-        service!!.initGoogleCast(item, MusicPlaybackOptions.castApplicationId)
+
     }
 
     fun getMediaSession() = service?.getMediaSession()

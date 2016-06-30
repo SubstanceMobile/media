@@ -34,16 +34,20 @@ import java.nio.ByteOrder
  * Created by Julian Os on 07.05.2016.
  */
 object MusicPlaybackUtil {
-    val PLAY = 1
-    val PAUSE = 2
-    val RESUME = 3
-    val SKIP_FORWARD = 4
-    val SKIP_BACKWARD = 5
-    val SEEK = 6
-    val STOP = 7
-    val NOTIFICATION = 8
-    val FILE_PORT = 12345
-    val ARTWORK_PORT = 23456
+
+    const val SERVER_PORT_AUDIO = 12345
+    const val SERVER_PORT_ARTWORK = 23456
+
+    const val SERVER_TYPE_ARTWORK = 1
+    const val SERVER_TYPE_AUDIO = 2
+
+    fun getServerportForType(type: Int): Int {
+        when (type) {
+            SERVER_TYPE_ARTWORK -> return SERVER_PORT_ARTWORK
+            SERVER_TYPE_AUDIO -> return SERVER_PORT_AUDIO
+            else -> return 0
+        }
+    }
 
     fun isServiceRunning(context: Context): Boolean {
         val manager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
@@ -78,15 +82,15 @@ object MusicPlaybackUtil {
 
     fun getAction(context: Context, action: Action): String {
         val packageName = context.applicationContext.packageName + ".action"
-        when (action.ordinal) {
-            PLAY -> return packageName + ".PLAY"
-            PAUSE -> return packageName + ".PAUSE"
-            RESUME -> return packageName + ".RESUME"
-            SKIP_FORWARD -> return packageName + ".skip.FORWARD"
-            SKIP_BACKWARD -> return packageName + ".skip.BACKWARD"
-            SEEK -> return packageName + ".SEEk"
-            STOP -> return packageName + ".STOP"
-            NOTIFICATION -> return packageName + ".NOTIFICATION"
+        when (action) {
+            Action.PLAY -> return packageName + ".PLAY"
+            Action.PAUSE -> return packageName + ".PAUSE"
+            Action.RESUME -> return packageName + ".RESUME"
+            Action.SKIP_FORWARD -> return packageName + ".skip.FORWARD"
+            Action.SKIP_BACKWARD -> return packageName + ".skip.BACKWARD"
+            Action.SEEK -> return packageName + ".SEEK"
+            Action.STOP -> return packageName + ".STOP"
+            Action.NOTIFICATION -> return packageName + ".NOTIFICATION"
             else -> return packageName + ".NOTFOUND"
         }
     }

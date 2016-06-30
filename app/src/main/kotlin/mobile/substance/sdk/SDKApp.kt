@@ -18,6 +18,8 @@ package mobile.substance.sdk
 
 import android.app.Application
 import mobile.substance.sdk.music.core.MusicCoreOptions
+import mobile.substance.sdk.music.playback.MusicPlaybackOptions
+import mobile.substance.sdk.music.playback.PlaybackRemote
 
 /**
  * Created by Julian Os on 09.05.2016.
@@ -31,8 +33,8 @@ class SDKApp : Application() {
 
         Thread() {
             run {
-                MusicCoreOptions.setDefaultArt(R.drawable.default_artwork_gem)
-                MusicCoreOptions.setStatusbarIconResId(R.drawable.ic_audiotrack_white_24dp)
+                // MusicCoreOptions.setDefaultArt(R.drawable.default_artwork_gem) TODO: <- Fix this
+                MusicPlaybackOptions.statusbarIconResId = R.drawable.ic_audiotrack_white_24dp
             }
         }.start()
     }
