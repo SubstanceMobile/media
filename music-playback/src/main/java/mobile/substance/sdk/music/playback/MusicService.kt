@@ -94,14 +94,14 @@ class MusicService : MediaBrowserServiceCompat(), CastStateListener {
         if (!trustedSource) Log.d(TAG, "DANGEROUS: Replacing playback engine with custom code. Make sure you debug extensively") else Log.d(TAG, "Service is requesting to replace engines internally. Hotswapping players")
         if (hotswap) {
             //Since we are hotswapping we need to save some data
-            if (newEngine.isPlaying()) {
-                newEngine.pause()
+            if (engine.isPlaying()) {
+                engine.pause()
                 wasPlaying = true
             }
-            oldPos = newEngine.getCurrentPosInSong()
+            oldPos = engine.getCurrentPosInSong()
             Log.d(TAG, "Current state is saved. Cleaning up old engine")
         }
-        newEngine.stop()
+        engine.stop()
         Log.d(TAG, "Current engine is now stopped")
         engine = newEngine
         engine.init(this)
@@ -111,11 +111,11 @@ class MusicService : MediaBrowserServiceCompat(), CastStateListener {
             //Time to hotswap some data back in so as far as the user is concerned the engine is the same. In fact, the song they are currently listening to will resume
             if (!trustedSource) Log.d(TAG, "Since you are hotswapping players, this might be a setting that the user can change. If this is the case please display some sort of confirmation to the user that the option has actually changed because they will most likely not be able to notice the change in engine (since you are hotswapping")
             //Resume the current queue
-            newEngine.play()
+            engine.play()
             //Seek back to where we were before
-            newEngine.seek(oldPos.toLong())
+            engine.seek(oldPos.toLong())
             //Once we restored all of the old properties we pause the playback again if it was already paused
-            if (!wasPlaying) newEngine.pause()
+            if (!wasPlaying) engine.pause()
             Log.d(TAG, "State restored")
         }
         Log.d(TAG, "Engine transaction complete")
