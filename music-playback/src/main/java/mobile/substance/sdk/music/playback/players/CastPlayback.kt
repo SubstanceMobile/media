@@ -206,7 +206,7 @@ object CastPlayback : Playback(), SessionManagerListener<Session>, RemoteMediaCl
         }
     }
 
-    override fun repeat(repeating: Boolean) {
+    override fun setRepeating(repeating: Boolean) {
         this.repeating = repeating
     }
 

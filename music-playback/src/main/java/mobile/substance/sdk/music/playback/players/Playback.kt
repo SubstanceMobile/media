@@ -160,9 +160,13 @@ abstract class Playback : MediaSessionCompat.Callback() {
     // Next
     ///////////////////////////////////////////////////////////////////////////
 
+    /**
+     * This also handles the next button with repeat. This way, calling next() will repeat if setRepeating() is set to true. This can be turned off by overriding
+     * callRepeatOnNext to be false.
+     */
     fun next() {
         if (!manualyHandleState()) playbackState = STATE_SKIPPING_TO_NEXT
-        doNext()
+        if (isRepeating() && callRepeatOnNext()) doRepeat() else doNext()
     }
 
     open fun doNext() = PlaybackRemote.playNext()
@@ -265,14 +269,27 @@ abstract class Playback : MediaSessionCompat.Callback() {
     open fun manualyHandleState() = false
 
     ///////////////////////////////////////////////////////////////////////////
+    // Repeat
+    ///////////////////////////////////////////////////////////////////////////
+
+    private var repeating = false
+
+    open fun setRepeating(repeating: Boolean) {
+        this.repeating = repeating
+    }
+
+    open fun isRepeating() = repeating
+
+    open fun doRepeat() = play()
+
+    open fun callRepeatOnNext() = true
+
+    ///////////////////////////////////////////////////////////////////////////
     // Others
     ///////////////////////////////////////////////////////////////////////////
 
-    abstract fun repeat(repeating: Boolean)
-
     abstract fun isPlaying(): Boolean
 
-    abstract fun isRepeating(): Boolean
 
     open fun isInitialized() = SERVICE != null
 
