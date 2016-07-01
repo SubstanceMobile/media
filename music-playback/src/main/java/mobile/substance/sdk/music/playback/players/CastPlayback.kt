@@ -45,7 +45,7 @@ object CastPlayback : Playback(), SessionManagerListener<Session>, RemoteMediaCl
                     MediaStatus.IDLE_REASON_ERROR -> {
 
                     }
-                    // MediaStatus.IDLE_REASON_FINISHED -> if (isRepeating()) repeatProperly?() else next()
+                    MediaStatus.IDLE_REASON_FINISHED -> next()
                 }
             }
             MediaStatus.PLAYER_STATE_BUFFERING -> {

@@ -21,10 +21,11 @@ import android.net.Uri
 import android.os.AsyncTask
 import android.provider.MediaStore
 import android.util.Log
+import mobile.substance.sdk.music.core.libraryhooks.PlaybackLibHook
+import mobile.substance.sdk.music.core.libraryhooks.TagsLibHook
 import mobile.substance.sdk.music.core.objects.*
 import mobile.substance.sdk.music.loading.tasks.*
 import java.util.*
-import java.util.concurrent.Callable
 
 @SuppressWarnings("unused")
 object Library {
@@ -52,11 +53,24 @@ object Library {
 
     private val listeners = ArrayList<LibraryListener>()
 
-    fun init(context: Context, config: LibraryConfig) {
+    private fun hookIfNecessary(libraryConfig: LibraryConfig) {
+        if (libraryConfig.playbackHook) {
+            PlaybackLibHook.albumList = { Library.albums }
+            PlaybackLibHook.songList = { Library.songs }
+        }
+        if (libraryConfig.tagsHook) {
+            TagsLibHook.albumList = { Library.albums }
+            TagsLibHook.songList = { Library.songs }
+        }
+    }
+
+    fun init(context: Context, libraryConfig: LibraryConfig) {
         Library.context = context.applicationContext
 
+        hookIfNecessary(libraryConfig)
+
         //Creates tasks
-        if (config.get().contains(LibraryData.SONGS)) {
+        if (libraryConfig.config.contains(LibraryData.SONGS)) {
             val songsTask = SongsTask(context)
             songsTask.addListener(object : Loader.TaskListener<Song> {
                 override fun onOneLoaded(item: Song, pos: Int) {
@@ -74,7 +88,7 @@ object Library {
             })
             LOADER_SONGS = songsTask
         }
-        if (config.get().contains(LibraryData.ALBUMS)) {
+        if (libraryConfig.config.contains(LibraryData.ALBUMS)) {
             val albumsTask = AlbumsTask(context)
             albumsTask.addListener(object : Loader.TaskListener<Album> {
                 override fun onOneLoaded(item: Album, pos: Int) {
@@ -92,7 +106,7 @@ object Library {
             })
             LOADER_ALBUMS = albumsTask
         }
-        if (config.get().contains(LibraryData.PLAYLISTS)) {
+        if (libraryConfig.config.contains(LibraryData.PLAYLISTS)) {
             val playlistsTask = PlaylistsTask(context)
             playlistsTask.addListener(object : Loader.TaskListener<Playlist> {
                 override fun onOneLoaded(item: Playlist, pos: Int) {
@@ -110,7 +124,7 @@ object Library {
             })
             LOADER_PLAYLISTS = playlistsTask
         }
-        if (config.get().contains(LibraryData.ARTISTS)) {
+        if (libraryConfig.config.contains(LibraryData.ARTISTS)) {
             val artistsTask = ArtistsTask(context)
             artistsTask.addListener(object : Loader.TaskListener<Artist> {
                 override fun onOneLoaded(item: Artist, pos: Int) {
@@ -128,7 +142,7 @@ object Library {
             })
             LOADER_ARTISTS = artistsTask
         }
-        if (config.get().contains(LibraryData.GENRES)) {
+        if (libraryConfig.config.contains(LibraryData.GENRES)) {
             val genresTask = GenresTask(context)
             genresTask.addListener(object : Loader.TaskListener<Genre> {
                 override fun onOneLoaded(item: Genre, pos: Int) {
@@ -277,12 +291,12 @@ object Library {
 
     }
 
-    class QueryTask<Result>(private val callback: QueryResult<Result>) : AsyncTask<Callable<Result>, Void, Result>() {
+    class QueryTask<Result>(private val callback: QueryResult<Result>) : AsyncTask<() -> Result, Void, Result>() {
 
         @SafeVarargs
-        override fun doInBackground(vararg params: Callable<Result>): Result? {
+        override fun doInBackground(vararg params: () -> Result): Result? {
             try {
-                return params[0].call()
+                return params[0].invoke()
             } catch (e: Exception) {
                 e.printStackTrace()
             }
@@ -306,7 +320,7 @@ object Library {
 
     @SuppressWarnings("unchecked")
     fun findSongsForArtistAsync(artist: Artist, callback: QueryResult<List<Song>>) {
-        QueryTask(callback).execute(Callable { findSongsForArtist(artist) })
+        QueryTask(callback).execute({ findSongsForArtist(artist) })
     }
 
     fun findAlbumsForArtist(artist: Artist): List<Album> {
@@ -320,7 +334,7 @@ object Library {
 
     @SuppressWarnings("unchecked")
     fun findAlbumsForArtistAsync(artist: Artist, callback: QueryResult<List<Album>>) {
-        QueryTask(callback).execute(Callable { findAlbumsForArtist(artist) })
+        QueryTask(callback).execute({ findAlbumsForArtist(artist) })
     }
 
     fun findSongsForAlbum(album: Album): List<Song> {
@@ -334,7 +348,7 @@ object Library {
 
     @SuppressWarnings("unchecked")
     fun findSongsForAlbumAsync(album: Album, callback: QueryResult<List<Song>>) {
-        QueryTask(callback).execute(Callable { findSongsForAlbum(album) })
+        QueryTask(callback).execute({ findSongsForAlbum(album) })
     }
 
     fun findArtistForAlbum(album: Album): Artist? {
@@ -346,8 +360,8 @@ object Library {
     }
 
     @SuppressWarnings("unchecked")
-    fun findArtistForAlbumAsync(album: Album, callback: QueryResult<Artist>) {
-        QueryTask(callback).execute(Callable<mobile.substance.sdk.music.core.objects.Artist> { findArtistForAlbum(album) })
+    fun findArtistForAlbumAsync(album: Album, callback: QueryResult<Artist?>) {
+        QueryTask(callback).execute({ findArtistForAlbum(album) })
     }
 
     @Throws(NullPointerException::class)
@@ -373,7 +387,7 @@ object Library {
 
     @SuppressWarnings("unchecked")
     fun findSongsForPlaylistAsync(context: Context, playlist: Playlist, callback: QueryResult<List<Song>>) {
-        QueryTask(callback).execute(Callable { findSongsForPlaylist(context, playlist) })
+        QueryTask(callback).execute({ findSongsForPlaylist(context, playlist) })
     }
 
     @Throws(NullPointerException::class)
@@ -401,7 +415,7 @@ object Library {
 
     @SuppressWarnings("unchecked")
     fun findSongsForGenreAsync(context: Context, genre: Genre, callback: QueryResult<List<Song>>) {
-        QueryTask(callback).execute(Callable { findSongsForGenre(context, genre) })
+        QueryTask(callback).execute({ findSongsForGenre(context, genre) })
     }
 
     ///////////////////////////////////////////////////////////////////////////

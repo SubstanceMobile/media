@@ -18,7 +18,7 @@ package mobile.substance.sdk.music.tags;
 
 import android.net.Uri;
 
-public interface MediaStoreCallbacks {
+public interface MediaStoreCallback {
 
     void onScanFinished(String path, Uri uri);
 

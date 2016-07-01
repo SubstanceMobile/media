@@ -22,15 +22,23 @@ import java.util.*
  * Created by Julian Os on 05.05.2016.
  */
 class LibraryConfig {
-    private val data = ArrayList<LibraryData>()
+    internal val config = ArrayList<LibraryData>()
+    internal var playbackHook = false
+    internal var tagsHook = false
 
     fun put(item: LibraryData): LibraryConfig {
-        data.add(item)
+        config.add(item)
         return this
     }
 
-    internal fun get(): List<LibraryData> {
-        return data
+    fun hookPlayback(): LibraryConfig {
+        playbackHook = true
+        return this
+    }
+
+    fun hookTags(): LibraryConfig {
+        tagsHook = true
+        return this
     }
 
 }

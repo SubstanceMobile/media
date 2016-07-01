@@ -28,21 +28,10 @@ import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaBrowserServiceCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
-import android.support.v4.view.MenuItemCompat
-import android.support.v7.app.MediaRouteActionProvider
-import android.support.v7.media.MediaRouteSelector
-import android.support.v7.media.MediaRouter
 import android.util.Log
-import android.view.MenuItem
-import android.widget.Toast
-import com.google.android.gms.cast.Cast
-import com.google.android.gms.cast.CastDevice
-import com.google.android.gms.cast.CastMediaControlIntent
 import com.google.android.gms.cast.framework.CastContext
 import com.google.android.gms.cast.framework.CastState
 import com.google.android.gms.cast.framework.CastStateListener
-import com.google.android.gms.common.api.GoogleApiClient
-import mobile.substance.sdk.music.playback.cast.*
 import mobile.substance.sdk.music.playback.players.CastPlayback
 import mobile.substance.sdk.music.playback.players.Playback
 import java.util.*
@@ -219,6 +208,7 @@ class MusicService : MediaBrowserServiceCompat(), CastStateListener {
         super.onDestroy()
         HeadsetPlugReceiver unregister this
         destroySession()
+        if (MusicPlaybackOptions.isCastEnabled) CastContext.getSharedInstance(this).removeCastStateListener(this)
     }
 
     fun startForeground() = startForeground(UNIQUE_ID, PlaybackRemote.makeNotification(object : PlaybackRemote.NotificationUpdateInterface {

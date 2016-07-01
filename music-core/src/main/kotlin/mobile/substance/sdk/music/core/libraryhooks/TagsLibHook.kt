@@ -20,9 +20,9 @@ import mobile.substance.sdk.music.core.objects.Album
 import mobile.substance.sdk.music.core.objects.Song
 
 /**
- * This class is used only as a data source for the playback library
+ * This class is used only as a data source for the tags library
  */
-object PlaybackLibHook {
+object TagsLibHook {
     var songList: (() -> List<Song>?)? = null
     var albumList: (() -> List<Album>?)? = null
 
@@ -39,5 +39,4 @@ object PlaybackLibHook {
         for (album in albumList!!.invoke()!!) if (album.id == id) return album
         return null
     }
-
 }

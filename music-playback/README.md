@@ -77,9 +77,9 @@ Then, set the receiver application id in ``MusicPlaybackOptions```:
 ```MusicPlaybackOptions.applicationId = APPLICATION_ID // It's that simple!```
 
 
-As the last step, initialize it with ```PlaybackRemote```:
+And the last step, enable it:
 
-```PlaybackRemote.initGoogleCast()```
+```MusicPlaybackOptions.isCastEnabled = true```
 
 #### Custom Playback Engines
 

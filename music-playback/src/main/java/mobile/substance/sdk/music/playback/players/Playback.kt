@@ -18,6 +18,7 @@ package mobile.substance.sdk.music.playback.players
 
 import android.net.Uri
 import android.os.Bundle
+import android.provider.MediaStore
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat.*
 import android.util.Log
@@ -140,7 +141,9 @@ abstract class Playback : MediaSessionCompat.Callback() {
     }
 
     override fun onPlayFromSearch(query: String?, extras: Bundle?) {
-        //TODO
+        when (extras?.get(MediaStore.EXTRA_MEDIA_FOCUS)) {
+
+        }
     }
 
     ///////////////////////////////////////////////////////////////////////////
