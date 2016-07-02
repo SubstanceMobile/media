@@ -29,7 +29,6 @@ import com.google.android.gms.cast.framework.media.RemoteMediaClient
 import com.google.android.gms.common.images.WebImage
 import mobile.substance.sdk.music.core.utils.CoreUtil
 import mobile.substance.sdk.music.playback.HeadsetPlugReceiver
-import mobile.substance.sdk.music.playback.LocalPlayback
 import mobile.substance.sdk.music.playback.MusicPlaybackUtil
 import mobile.substance.sdk.music.playback.cast.LocalServer
 

@@ -15,9 +15,13 @@
   ~ limitations under the License.
   -->
 
-<android.support.v7.widget.RecyclerView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/fragment_recyclerview_rv"
-    android:layout_width="match_parent"
-    android:paddingBottom="?actionBarSize"
-    android:clipToPadding="false"
-    android:layout_height="match_parent" />
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/media_route_menu_item"
+        android:title="Google Cast"
+        app:actionProviderClass="android.support.v7.app.MediaRouteActionProvider"
+        app:showAsAction="always" />
+
+</menu>

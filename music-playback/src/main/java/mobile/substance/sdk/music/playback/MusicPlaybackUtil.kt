@@ -22,11 +22,8 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.net.wifi.WifiManager
-import android.webkit.URLUtil
-
 import java.math.BigInteger
 import java.net.InetAddress
-import java.net.URL
 import java.net.UnknownHostException
 import java.nio.ByteOrder
 
@@ -105,9 +102,8 @@ object MusicPlaybackUtil {
     ///////////////////////////////////////////////////////////////////////////
 
     fun getUrlFromUri(uri: Uri) : String {
-        val url = uri.toString()
-        if (URLUtil.isValidUrl(url))
-            return url
+        if (uri.scheme == "http" || uri.scheme == "https")
+            return uri.toString()
         else
             return ""
     }

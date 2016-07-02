@@ -17,6 +17,7 @@
 package mobile.substance.sdk.fragments
 
 import android.content.Context
+import android.os.Bundle
 import android.support.design.widget.TabLayout
 import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentManager
@@ -24,6 +25,7 @@ import android.support.v4.app.FragmentPagerAdapter
 import android.support.v4.view.ViewPager
 import android.support.v7.widget.Toolbar
 import butterknife.bindView
+import com.google.android.gms.cast.framework.CastButtonFactory
 import mobile.substance.sdk.R
 import mobile.substance.sdk.helpers.NavigationHelper
 import mobile.substance.sdk.music.loading.LibraryData
@@ -36,27 +38,26 @@ class MusicFragment : NavigationDrawerFragment() {
     private val pager: ViewPager by bindView<ViewPager>(R.id.fragment_music_viewpager)
     private val toolbar: Toolbar by bindView<Toolbar>(R.id.fragment_music_toolbar)
 
-    override fun init() {
+    override fun init(savedInstanceState: Bundle?) {
         pager.adapter = MusicPagerAdapter(activity, activity.supportFragmentManager)
         tabs.setupWithViewPager(pager)
         NavigationHelper.setupNavigation(drawerLayout!!, toolbar)
-        super.init()
+        toolbar.inflateMenu(R.menu.menu_music)
+        CastButtonFactory.setUpMediaRouteButton(activity, toolbar.menu, R.id.media_route_menu_item)
     }
 
-    override val layoutResId: Int
-        get() = R.layout.fragment_music
+    override val layoutResId: Int = R.layout.fragment_music
 
     class MusicPagerAdapter(context: Context, fm: FragmentManager) : FragmentPagerAdapter(fm) {
 
         var context: Context? = context
-        val titleResIds: Array<Int> = arrayOf(R.string.songs, R.string.albums, R.string.artists, R.string.playlists, R.string.genres)
+        val titleResIds = arrayOf(R.string.songs, R.string.albums, R.string.artists, R.string.playlists, R.string.genres)
 
         override fun getCount(): Int {
             return 5
         }
 
         override fun getItem(position: Int): Fragment? {
-
             when (position) {
                 0 -> return RecyclerViewFragment().setType(LibraryData.SONGS)
                 1 -> return RecyclerViewFragment().setType(LibraryData.ALBUMS)

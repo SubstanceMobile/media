@@ -16,6 +16,7 @@
 
 package mobile.substance.sdk.fragments
 
+import android.os.Bundle
 import android.support.v7.widget.Toolbar
 import butterknife.bindView
 import mobile.substance.sdk.R
@@ -27,10 +28,9 @@ import mobile.substance.sdk.helpers.NavigationHelper
 class HomeFragment : NavigationDrawerFragment() {
     private val toolbar: Toolbar by bindView<Toolbar>(R.id.fragment_home_toolbar)
 
-    override fun init() {
+    override fun init(savedInstanceState: Bundle?) {
         NavigationHelper.setupNavigation(drawerLayout!!, toolbar)
     }
 
-    override val layoutResId: Int
-        get() = R.layout.fragment_home
+    override val layoutResId: Int = R.layout.fragment_home
 }

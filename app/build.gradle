@@ -17,6 +17,8 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 
+def SDK_CAST_ID = '"' + SUBSTANCE_SDK_CAST_ID + '"' ?: '"Define Cast applicationId for SDK"'
+
 android {
     compileSdkVersion 24
     buildToolsVersion "23.0.3"
@@ -27,6 +29,7 @@ android {
         targetSdkVersion 24
         versionCode 1
         versionName "1.0"
+        buildConfigField("String", "CAST_APPLICATION_ID", SDK_CAST_ID)
     }
     buildTypes {
         release {
@@ -52,5 +55,4 @@ dependencies {
     compile project(path: ':music')
     compile project(path: ':dynamic-colors')
     compile project(path: ':theme-engine')
-    compile 'com.android.support.constraint:constraint-layout:1.0.0-alpha1'
 }

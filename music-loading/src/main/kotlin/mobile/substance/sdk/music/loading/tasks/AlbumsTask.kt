@@ -39,7 +39,7 @@ class AlbumsTask(context: Context, vararg params: Any) : Loader<Album>(context, 
                 .setArtworkPath(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Albums.ALBUM_ART)))
                 .build()
 
-        Log.i("AlbumsTask", "Loaded ID " + album.id)
+        Log.d("AlbumsTask", "Loaded ID ${album.id} with artwork path ${album.albumArtworkPath}")
         return album
     }
 

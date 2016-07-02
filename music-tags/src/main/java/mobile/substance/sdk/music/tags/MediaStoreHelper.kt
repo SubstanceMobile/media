@@ -21,10 +21,10 @@ import android.media.MediaScannerConnection
 
 object MediaStoreHelper {
 
-    fun updateMedia(paths: Array<String>, context: Context, callbacks: MediaStoreCallback) {
+    fun updateMedia(paths: Array<String?>, context: Context, callbacks: MediaStoreCallback) {
         val mimeTypes = arrayOfNulls<String>(paths.size)
         for (i in paths.indices) {
-            mimeTypes[i] = "audio/" + paths[i].substring(paths[i].lastIndexOf(".") + 1, paths[i].length)
+            mimeTypes[i] = "audio/" + paths[i]!!.substring(paths[i]!!.lastIndexOf(".") + 1, paths[i]!!.length)
         }
 
         val count = intArrayOf(0)

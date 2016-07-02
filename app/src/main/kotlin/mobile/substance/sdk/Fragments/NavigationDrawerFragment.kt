@@ -26,6 +26,6 @@ abstract class NavigationDrawerFragment : BaseFragment() {
     override abstract val layoutResId: Int
 
     var drawerLayout: DrawerLayout? = null
-        get() = (activity as mobile.substance.sdk.activities.NavigationDrawerActivity).getDrawer()
+        get() = (activity as mobile.substance.sdk.activities.NavigationDrawerActivity).drawer
 
 }

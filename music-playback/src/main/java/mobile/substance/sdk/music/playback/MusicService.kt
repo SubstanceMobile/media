@@ -33,6 +33,7 @@ import com.google.android.gms.cast.framework.CastContext
 import com.google.android.gms.cast.framework.CastState
 import com.google.android.gms.cast.framework.CastStateListener
 import mobile.substance.sdk.music.playback.players.CastPlayback
+import mobile.substance.sdk.music.playback.players.LocalPlayback
 import mobile.substance.sdk.music.playback.players.Playback
 import java.util.*
 

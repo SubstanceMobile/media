@@ -24,15 +24,69 @@ import com.bumptech.glide.Glide
 import mobile.substance.sdk.R
 import mobile.substance.sdk.music.core.objects.*
 import mobile.substance.sdk.music.loading.Library
+import mobile.substance.sdk.music.loading.LibraryData
+import mobile.substance.sdk.music.loading.LibraryListener
 import mobile.substance.sdk.music.playback.PlaybackRemote
 import mobile.substance.sdk.viewholders.MusicViewHolder
 
-class MusicAdapter<T : MediaObject>(items: List<T>) : RecyclerView.Adapter<MusicViewHolder>() {
+class MusicAdapter<T : MediaObject>(private val type: LibraryData) : RecyclerView.Adapter<MusicViewHolder>(), LibraryListener {
+
     var items: List<T>? = null
     var context: Context? = null
 
     init {
-        this.items = items
+        Library.registerListener(this)
+
+        if (type == LibraryData.SONGS) items = Library.songs as List<T>
+        if (type == LibraryData.ALBUMS) items = Library.albums as List<T>
+        if (type == LibraryData.ARTISTS) items = Library.artists as List<T>
+        if (type == LibraryData.PLAYLISTS) items = Library.playlists as List<T>
+        if (type == LibraryData.GENRES) items = Library.genres as List<T>
+    }
+
+    override fun onSongLoaded(item: Song, pos: Int) {}
+
+    override fun onSongsCompleted(result: List<Song>) {
+        if (type == LibraryData.SONGS) {
+            items = result as List<T>
+            notifyDataSetChanged()
+        }
+    }
+
+    override fun onAlbumLoaded(item: Album, pos: Int) {}
+
+    override fun onAlbumsCompleted(result: List<Album>) {
+        if (type == LibraryData.ALBUMS) {
+            items = result as List<T>
+            notifyDataSetChanged()
+        }
+    }
+
+    override fun onArtistLoaded(item: Artist, pos: Int) {}
+
+    override fun onArtistsCompleted(result: List<Artist>) {
+        if (type == LibraryData.ARTISTS) {
+            items = result as List<T>
+            notifyDataSetChanged()
+        }
+    }
+
+    override fun onPlaylistLoaded(item: Playlist, pos: Int) {}
+
+    override fun onPlaylistsCompleted(result: List<Playlist>) {
+        if (type == LibraryData.PLAYLISTS) {
+            items = result as List<T>
+            notifyDataSetChanged()
+        }
+    }
+
+    override fun onGenreLoaded(item: Genre, pos: Int) {}
+
+    override fun onGenresCompleted(result: List<Genre>) {
+        if (type == LibraryData.GENRES) {
+            items = result as List<T>
+            notifyDataSetChanged()
+        }
     }
 
     override fun onBindViewHolder(holder: MusicViewHolder?, position: Int) {
@@ -52,7 +106,7 @@ class MusicAdapter<T : MediaObject>(items: List<T>) : RecyclerView.Adapter<Music
     }
 
     override fun getItemCount(): Int {
-        return items!!.size
+        return items?.size ?: 0
     }
 
     private fun bindAlbum(album: Album, holder: MusicViewHolder) {
@@ -81,12 +135,8 @@ class MusicAdapter<T : MediaObject>(items: List<T>) : RecyclerView.Adapter<Music
 
     private fun bindGenre(genre: Genre, holder: MusicViewHolder) {
         holder.title!!.text = genre.genreName
-        Library.findSongsForGenreAsync(context!!, genre, object : ModularAsyncTask.TaskCallback<List<Song>> {
-            override fun onTaskStart() {}
-
-            override fun onTaskFailed(e: Exception) {}
-
-            override fun onTaskResult(result: List<Song>) {
+        Library.findSongsForGenreAsync(context!!, genre, object : Library.QueryResult<List<Song>> {
+            override fun onQueryResult(result: List<Song>) {
                 if (result.size > 0) Library.findAlbumById(result.first().songAlbumId!!)!!.requestArt(holder.image!!)
             }
         })
@@ -95,13 +145,8 @@ class MusicAdapter<T : MediaObject>(items: List<T>) : RecyclerView.Adapter<Music
 
     private fun bindPlaylist(playlist: Playlist, holder: MusicViewHolder) {
         holder.title!!.text = playlist.playlistName
-        Library.findSongsForPlaylistAsync(context!!, playlist, object : ModularAsyncTask.TaskCallback<List<Song>> {
-
-            override fun onTaskStart() {}
-
-            override fun onTaskFailed(e: Exception) {}
-
-            override fun onTaskResult(result: List<Song>) {
+        Library.findSongsForPlaylistAsync(context!!, playlist, object : Library.QueryResult<List<Song>> {
+            override fun onQueryResult(result: List<Song>) {
                 if (result.size > 0) Library.findAlbumById(result.first().songAlbumId!!)!!.requestArt(holder.image!!)
             }
         })

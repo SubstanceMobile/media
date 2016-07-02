@@ -16,16 +16,19 @@
 
 package mobile.substance.sdk.activities
 
+import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v4.widget.DrawerLayout
-import android.util.Log
 import android.view.MenuItem
 import mobile.substance.sdk.R
 import mobile.substance.sdk.fragments.DynamicColorsFragment
 import mobile.substance.sdk.fragments.HomeFragment
 import mobile.substance.sdk.fragments.MusicFragment
 
-open class NavigationDrawerActivity : BaseActivity() {
+abstract class NavigationDrawerActivity : BaseActivity() {
+
+    override abstract val layoutResId: Int
+
     private var fragment: Fragment? = null
 
     private fun handleLaunch() {
@@ -37,33 +40,43 @@ open class NavigationDrawerActivity : BaseActivity() {
                 .commitAllowingStateLoss()
     }
 
-    override fun init() {
-        handleLaunch()
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+    }
+
+    override fun init(savedInstanceState: Bundle?) {
+        if (savedInstanceState == null) handleLaunch() else fragment = supportFragmentManager.getFragment(savedInstanceState, "FRAGMENT")
+    }
+
+    override fun onSaveInstanceState(outState: Bundle?) {
+        super.onSaveInstanceState(outState)
+        supportFragmentManager.putFragment(outState, "FRAGMENT", fragment)
     }
 
     private fun commitFragment() {
          supportFragmentManager
                  .beginTransaction()
-                 .replace(R.id.activity_main_fragment_placeholder, fragment, "SubstanceSDK")
-                 .addToBackStack("SubstanceSDK")
-                 .commitAllowingStateLoss()
+                 .replace(R.id.activity_main_fragment_placeholder, fragment)
+                 .commit()
     }
 
     fun handleNavigationClick(item: MenuItem): Boolean {
-        Log.d("handleNavigationClick()", "handleNavigationClick()")
         item.isChecked = true
         when (item.itemId) {
             R.id.drawer_home -> {
+                if (fragment is HomeFragment) return false
                 fragment = HomeFragment()
                 commitFragment()
                 return true
             }
             R.id.drawer_music -> {
+                if (fragment is MusicFragment) return false
                 fragment = MusicFragment()
                 commitFragment()
                 return true
             }
             R.id.drawer_dynamic_colors -> {
+                if (fragment is DynamicColorsFragment) return false
                 fragment = DynamicColorsFragment()
                 commitFragment()
                 return true
@@ -72,12 +85,6 @@ open class NavigationDrawerActivity : BaseActivity() {
         return false
     }
 
-    fun getFragment(): Fragment {
-        return fragment!!
-    }
-
-    open fun getDrawer(): DrawerLayout? {
-        return null
-    }
+    abstract val drawer: DrawerLayout?
 
 }

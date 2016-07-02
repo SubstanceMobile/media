@@ -23,8 +23,10 @@ import android.util.Log
 import mobile.substance.sdk.permissions.PermissionsCallbacks
 import mobile.substance.sdk.permissions.PermissionsHandler
 
-open class BaseActivity : AppCompatActivity(), PermissionsCallbacks {
+abstract class BaseActivity : AppCompatActivity(), PermissionsCallbacks {
     val permissionHandler = PermissionsHandler(this, arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE), this)
+
+    var savedInstanceState: Bundle? = null
 
     override fun onPermissionGranted(permission: String) {
         Log.d("Permission Granted!", permission)
@@ -39,17 +41,15 @@ open class BaseActivity : AppCompatActivity(), PermissionsCallbacks {
 
     override fun onAllGranted() {
         Log.d(BaseActivity::class.java.simpleName, "onAllGranted()")
-        runOnUiThread { init() }
+        runOnUiThread { init(savedInstanceState) }
     }
 
     override fun onPermissionUnavailable(permission: String) {}
 
-
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(getLayoutResId())
-        initViews()
+        this.savedInstanceState = savedInstanceState
+        setContentView(layoutResId)
         Thread() {
             run { permissionHandler.handlePermissions() }
         }.start()
@@ -60,14 +60,8 @@ open class BaseActivity : AppCompatActivity(), PermissionsCallbacks {
             super.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
 
-    open fun init() {
-    }
+    abstract fun init(savedInstanceState: Bundle?)
 
-    open fun initViews() {
-    }
-
-    open fun getLayoutResId(): Int {
-        return 0
-    }
+    abstract val layoutResId: Int
 
 }

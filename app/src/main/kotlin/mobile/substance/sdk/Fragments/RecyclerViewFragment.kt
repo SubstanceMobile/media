@@ -16,6 +16,7 @@
 
 package mobile.substance.sdk.fragments
 
+import android.os.Bundle
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import butterknife.bindView
@@ -71,13 +72,19 @@ class RecyclerViewFragment : BaseFragment(), LibraryListener {
         if (type == LibraryData.GENRES) setAdapter()
     }
 
-    private val recyclerview: RecyclerView by bindView<RecyclerView>(R.id.fragment_recyclerview)
+    override fun onSaveInstanceState(outState: Bundle?) {
+        super.onSaveInstanceState(outState)
+        outState?.putSerializable("type", type)
+    }
+
+    private val recyclerview: RecyclerView by bindView<RecyclerView>(R.id.fragment_recyclerview_rv)
     private var type: LibraryData? = null
 
-    override val layoutResId: Int
-        get() = R.id.fragment_recyclerview
+    override val layoutResId = R.layout.fragment_recyclerview
 
-    override fun init() {
+    override fun init(savedInstanceState: Bundle?) {
+        if (savedInstanceState != null) type = savedInstanceState.getSerializable("type") as LibraryData?
+
         recyclerview.layoutManager = LinearLayoutManager(activity)
         setAdapter()
         Library.registerListener(this)
@@ -85,16 +92,16 @@ class RecyclerViewFragment : BaseFragment(), LibraryListener {
 
     private fun setAdapter() {
         when (type) {
-            LibraryData.SONGS -> recyclerview!!.adapter = MusicAdapter<Song>(Library.songs)
-            LibraryData.ALBUMS -> recyclerview!!.adapter = MusicAdapter<Album>(Library.albums)
-            LibraryData.ARTISTS -> recyclerview!!.adapter = MusicAdapter<Artist>(Library.artists)
-            LibraryData.PLAYLISTS -> recyclerview!!.adapter = MusicAdapter<Playlist>(Library.playlists)
-            LibraryData.GENRES -> recyclerview!!.adapter = MusicAdapter<Genre>(Library.genres)
+            LibraryData.SONGS -> recyclerview.adapter = MusicAdapter<Song>(type!!)
+            LibraryData.ALBUMS -> recyclerview.adapter = MusicAdapter<Album>(type!!)
+            LibraryData.ARTISTS -> recyclerview.adapter = MusicAdapter<Artist>(type!!)
+            LibraryData.PLAYLISTS -> recyclerview.adapter = MusicAdapter<Playlist>(type!!)
+            LibraryData.GENRES -> recyclerview.adapter = MusicAdapter<Genre>(type!!)
         }
     }
 
-    override fun onDetach() {
-        super.onDetach()
+    override fun onDestroyView() {
+        super.onDestroyView()
         Library.unregisterListener(this)
     }
 }

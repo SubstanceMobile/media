@@ -21,6 +21,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.res.ColorStateList
 import android.net.Uri
+import android.os.Bundle
 import android.support.design.widget.FloatingActionButton
 import android.support.v4.widget.SwipeRefreshLayout
 import android.support.v7.widget.Toolbar
@@ -73,7 +74,7 @@ class DynamicColorsFragment : NavigationDrawerFragment(), DynamicColorsCallback 
     override val layoutResId: Int
         get() = R.layout.fragment_dynamic_colors
 
-    override fun init() {
+    override fun init(savedInstanceState: Bundle?) {
         NavigationHelper.setupNavigation(drawerLayout!!, toolbar!!)
         toolbar.inflateMenu(R.menu.menu_dynamic_colors)
         toolbar.menu.findItem(R.id.menu_item_configure).isChecked = activity.getSharedPreferences("preferences", Context.MODE_PRIVATE).getBoolean("smartpicking", false)

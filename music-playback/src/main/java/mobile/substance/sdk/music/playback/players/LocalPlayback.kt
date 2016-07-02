@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package mobile.substance.sdk.music.playback
+package mobile.substance.sdk.music.playback.players
 
 import android.content.Context
 import android.media.AudioManager
@@ -25,7 +25,8 @@ import android.os.Build
 import android.os.PowerManager
 import android.util.Log
 import mobile.substance.sdk.music.core.utils.CoreUtil
-import mobile.substance.sdk.music.playback.players.Playback
+import mobile.substance.sdk.music.playback.HeadsetPlugReceiver
+import mobile.substance.sdk.music.playback.MusicPlaybackUtil
 
 
 object LocalPlayback : Playback(),
@@ -63,7 +64,7 @@ object LocalPlayback : Playback(),
 
         //API 23+ playback speed API
         if (Build.VERSION.SDK_INT >= 23) {
-            localPlayer.playbackParams = PlaybackParams().setSpeed(getPlaybackSpeed()).allowDefaults()
+            localPlayer.playbackParams = PlaybackParams().setSpeed(getPlaybackSpeed()).allowDefaults() // TODO: throws java.lang.IllegalStateException
         }
     }
 
@@ -114,7 +115,7 @@ object LocalPlayback : Playback(),
 
     fun doResume(updateFocus: Boolean) {
         if (!isPlaying()) {
-            if (!updateFocus and requestAudioFocus()) {
+            if (!updateFocus or requestAudioFocus()) {
                 SERVICE!!.startProgressThread()
                 localPlayer.start()
                 SERVICE!!.startForeground()

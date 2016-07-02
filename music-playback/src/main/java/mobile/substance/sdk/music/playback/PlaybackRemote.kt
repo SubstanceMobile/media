@@ -22,12 +22,14 @@ import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.graphics.Bitmap
-import android.graphics.drawable.BitmapDrawable
+import android.graphics.BitmapFactory
 import android.os.IBinder
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v7.app.NotificationCompat
 import android.view.MenuItem
+import com.google.android.gms.cast.framework.CastContext
 import mobile.substance.sdk.music.core.MusicCoreOptions
+import mobile.substance.sdk.music.core.libraryhooks.PlaybackLibHook
 import mobile.substance.sdk.music.core.objects.Song
 import mobile.substance.sdk.music.playback.notification.DefaultMediaNotification
 import mobile.substance.sdk.music.playback.notification.MediaNotification
@@ -80,6 +82,7 @@ object PlaybackRemote : ServiceConnection {
 
     fun init(context: Context) {
         this.context = context
+        if (MusicPlaybackOptions.isCastEnabled) CastContext.getSharedInstance(context)
     }
 
     fun cleanup() {
@@ -203,8 +206,15 @@ object PlaybackRemote : ServiceConnection {
         }
     })
 
+    /**
+     * Shuffle the hooked songs
+     */
     fun shuffle() {
-        //TODO
+        // TODO: Finalize
+        val songs = ArrayList<Song>()
+        songs.addAll(PlaybackLibHook.songList?.invoke()!!)
+        Collections.shuffle(songs)
+        play(songs, 0)
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -231,7 +241,7 @@ object PlaybackRemote : ServiceConnection {
     }
 
     fun makeNotificaion(): Notification {
-        return null as Notification // TODO: Setting this for build success
+        return null as Notification // TODO: ?
     }
 
     interface NotificationUpdateInterface {
@@ -240,11 +250,11 @@ object PlaybackRemote : ServiceConnection {
 
     fun makeNotification(updateInterface: NotificationUpdateInterface): Notification {
         var firstArt: Bitmap? = getCurrentSong()?.metadata?.getBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART);
-        if (firstArt == null) firstArt = (MusicCoreOptions.defaultArt as BitmapDrawable).bitmap
+        if (firstArt == null) firstArt = BitmapFactory.decodeResource(context?.resources, MusicCoreOptions.defaultArt)
         else updateInterface.updateNotification(PlaybackRemote.makeNotification(firstArt))
         //Fetch the album, then fetch the art, and then finally pass this all to create the notification. Meanwhile, this will use
         //the default art as a placeholder until the new art is fetched.
-        return null as Notification //TODO: Setting this for build success, use DataLinkers to get the album art (to create the notification)
+        return null as Notification //TODO: use DataLinkers to get the album art (to create the notification)
     }
 
     internal fun makeNotification(albumArt: Bitmap): Notification {
