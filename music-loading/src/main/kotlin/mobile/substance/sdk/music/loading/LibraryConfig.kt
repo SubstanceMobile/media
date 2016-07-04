@@ -16,29 +16,77 @@
 
 package mobile.substance.sdk.music.loading
 
-import java.util.*
+import android.app.Activity
+import android.app.Application
+import android.content.Context
+import android.os.Bundle
 
-/**
- * Created by Julian Os on 05.05.2016.
- */
 class LibraryConfig {
-    internal val config = ArrayList<LibraryData>()
-    internal var playbackHook = false
-    internal var tagsHook = false
 
-    fun put(item: LibraryData): LibraryConfig {
-        config.add(item)
+    ///////////////////////////////////////////////////////////////////////////
+    // Main configuration
+    ///////////////////////////////////////////////////////////////////////////
+
+    private val config = arrayListOf(LibraryData.ALBUMS, LibraryData.ARTISTS, LibraryData.SONGS, LibraryData.PLAYLISTS, LibraryData.GENRES)
+
+    fun load(vararg items: LibraryData) : LibraryConfig {
+        for (item in items) config.add(item)
         return this
     }
 
-    fun hookPlayback(): LibraryConfig {
-        playbackHook = true
+    fun contains(item: LibraryData) = config.contains(item)
+
+    ///////////////////////////////////////////////////////////////////////////
+    // Optional configuration objects
+    ///////////////////////////////////////////////////////////////////////////
+
+    internal var hookData = true
+
+    fun doNotHookData(): LibraryConfig {
+        hookData = false
         return this
     }
 
-    fun hookTags(): LibraryConfig {
-        tagsHook = true
+    fun hookIntoActivityLifecycle(application: Application) : LibraryConfig {
+        application.registerActivityLifecycleCallbacks(object : Application.ActivityLifecycleCallbacks{
+
+            override fun onActivityStarted(p0: Activity?) {
+                try {
+                    Library.registerMediaStoreListeners()
+                } catch (ignored: Exception) {}
+            }
+
+            override fun onActivityStopped(p0: Activity?) {
+                try {
+                    Library.unregisterMediaStoreListeners()
+                } catch (ignored: Exception) {}
+            }
+
+            override fun onActivityDestroyed(p0: Activity?) {
+                //Do nothing
+            }
+
+            override fun onActivitySaveInstanceState(p0: Activity?, p1: Bundle?) {
+                //Do nothing
+            }
+
+            override fun onActivityCreated(p0: Activity?, p1: Bundle?) {
+                //Do nothing
+            }
+
+            override fun onActivityResumed(p0: Activity?) {
+                //Do nothing
+            }
+
+            override fun onActivityPaused(p0: Activity?) {
+                //Do nothing
+            }
+
+        })
         return this
     }
 
+    fun hookIntoActivityLifecycle(activity: Activity) = hookIntoActivityLifecycle(activity.application)
+
+    fun apply(context: Context) = Library.init(context, this)
 }

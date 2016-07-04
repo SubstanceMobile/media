@@ -24,4 +24,10 @@ object MusicCoreOptions {
     var defaultArt: Int = 0
     var statusbarIconResId = 0
     var castApplicationId: String? = null
+
+    var songsString = "Please specify songsString in MusicCoreOptions"
+    var albumsString = "Please specify albumsString in MusicCoreOptions"
+    var playlistsString = "Please specify playlistsString in MusicCoreOptions"
+    var artistsString = "Please specify artistsString in MusicCoreOptions"
+    var genresString = "Please specify genresString in MusicCoreOptions"
 }
