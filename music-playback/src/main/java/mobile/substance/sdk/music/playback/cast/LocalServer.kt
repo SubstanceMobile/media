@@ -19,7 +19,7 @@ package mobile.substance.sdk.music.playback.cast
 import android.content.Context
 import android.net.Uri
 import fi.iki.elonen.NanoHTTPD
-import mobile.substance.sdk.music.core.utils.CoreUtil
+import mobile.substance.sdk.music.core.utils.MusicCoreUtil
 import mobile.substance.sdk.music.playback.MusicPlaybackUtil
 import java.io.File
 import java.io.FileInputStream
@@ -33,7 +33,7 @@ class LocalServer(internal var type: Int, private val context: Context) : NanoHT
     fun serve(uri: Uri): NanoHTTPD.Response? {
         try {
             val mimeType = if (type == MusicPlaybackUtil.SERVER_TYPE_AUDIO) "audio/*" else "image/*"
-            return NanoHTTPD.Response(NanoHTTPD.Response.Status.OK, mimeType, FileInputStream(File(CoreUtil.getFilePath(context, uri))))
+            return NanoHTTPD.Response(NanoHTTPD.Response.Status.OK, mimeType, FileInputStream(File(MusicCoreUtil.getFilePath(context, uri))))
         } catch (e: FileNotFoundException) {
             e.printStackTrace()
             return null

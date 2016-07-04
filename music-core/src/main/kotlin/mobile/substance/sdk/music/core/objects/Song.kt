@@ -20,7 +20,7 @@ import android.net.Uri
 import android.provider.MediaStore
 import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaMetadataCompat.*
-import mobile.substance.sdk.music.core.utils.CoreUtil
+import mobile.substance.sdk.music.core.utils.MusicCoreUtil
 
 /**
  * Wrapper around a MediaMetadataCompat optimised for Song metadata
@@ -105,7 +105,7 @@ class Song : MediaObject() {
     val songDurationString: String
         get() {
             val songDuration = songDuration
-            if(songDuration != null) return CoreUtil.stringForTime(songDuration) else return "--:--"
+            if(songDuration != null) return MusicCoreUtil.stringForTime(songDuration) else return "--:--"
         }
 
     ///////////////////////////////////////////////////////////////////////////

@@ -24,7 +24,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.PowerManager
 import android.util.Log
-import mobile.substance.sdk.music.core.utils.CoreUtil
+import mobile.substance.sdk.music.core.utils.MusicCoreUtil
 import mobile.substance.sdk.music.playback.HeadsetPlugReceiver
 import mobile.substance.sdk.music.playback.MusicPlaybackUtil
 
@@ -76,7 +76,7 @@ object LocalPlayback : Playback(),
     // Play TODO //
     ///////////////
 
-    override fun doPlay(uri: Uri, listenersAlreadyNotified: Boolean) {
+    override fun doPlay(uri: Uri, listenersAlreadyNotified: Boolean, mediaId: Long?) {
         //Clear out the media player if a song is being played right now.
         if (isPlaying()) {
             localPlayer.stop()
@@ -101,7 +101,7 @@ object LocalPlayback : Playback(),
                 triggerStartBuffer()
             }
         } catch (e: Exception) {
-            Log.e(TAG, "Unable to play " + CoreUtil.getFilePath(SERVICE!!, uri), e)
+            Log.e(TAG, "Unable to play " + MusicCoreUtil.getFilePath(SERVICE!!, uri), e)
         } finally {
             localPlayer.prepareAsync()
         }

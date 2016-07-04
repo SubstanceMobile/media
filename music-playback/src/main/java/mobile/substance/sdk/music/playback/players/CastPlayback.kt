@@ -27,7 +27,7 @@ import com.google.android.gms.cast.MediaStatus
 import com.google.android.gms.cast.framework.*
 import com.google.android.gms.cast.framework.media.RemoteMediaClient
 import com.google.android.gms.common.images.WebImage
-import mobile.substance.sdk.music.core.utils.CoreUtil
+import mobile.substance.sdk.music.core.utils.MusicCoreUtil
 import mobile.substance.sdk.music.playback.HeadsetPlugReceiver
 import mobile.substance.sdk.music.playback.MusicPlaybackUtil
 import mobile.substance.sdk.music.playback.cast.LocalServer
@@ -102,7 +102,7 @@ object CastPlayback : Playback(), SessionManagerListener<Session>, RemoteMediaCl
         remoteMediaClient?.addListener(this)
     }
 
-    override fun doPlay(uri: Uri, listenersAlreadyNotified: Boolean) {
+    override fun doPlay(uri: Uri, listenersAlreadyNotified: Boolean, mediaId: Long?) {
         //Clear out the player if a song is being played right now.
         if (isPlaying()) {
             remoteMediaClient?.stop()
@@ -147,7 +147,7 @@ object CastPlayback : Playback(), SessionManagerListener<Session>, RemoteMediaCl
                 doLoad(mediaInfo, true)
             }
         } catch (e: Exception) {
-            Log.e(TAG, "Unable to play " + CoreUtil.getFilePath(SERVICE!!, uri))
+            Log.e(TAG, "Unable to play " + MusicCoreUtil.getFilePath(SERVICE!!, uri))
         }
     }
 

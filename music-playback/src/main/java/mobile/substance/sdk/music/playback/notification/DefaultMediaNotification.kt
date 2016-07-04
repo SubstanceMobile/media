@@ -34,23 +34,23 @@ class DefaultMediaNotification: MediaNotification {
     override fun createNotification(context: Context, session: MediaSessionCompat?,
                                     playIntent: PendingIntent, pauseIntent: PendingIntent, nextIntent: PendingIntent, prevIntent: PendingIntent,
                                     clickedIntent: PendingIntent, removedIntent: PendingIntent): NotificationCompat.Builder {
-        /* val isPlaying = session.getController().playbackState.state.equals(PlaybackStateCompat.STATE_PLAYING);
+        val isPlaying = session?.controller?.playbackState?.state?.equals(PlaybackStateCompat.STATE_PLAYING) ?: false
         val playPauseString = if (isPlaying) "Pause Playback" else "Resume Playback"
-        val playPauseResId = if (isPlaying) R.drawable.ic_pause_white_24dp else R.drawable.ic_play_arrow_white_24dp */
+        val playPauseResId = if (isPlaying) R.drawable.ic_pause_white_24dp else R.drawable.ic_play_arrow_white_24dp
         val notif = NotificationCompat.Builder(context);
         val style = NotificationCompat.MediaStyle().setShowActionsInCompactView(1)
                 .setShowCancelButton(true).setCancelButtonIntent(removedIntent)
         if (session != null) style.setMediaSession(session.sessionToken)
-        /* notif.setSmallIcon(MusicPlaybackOptions.statusbarIconResId)
+        notif.setSmallIcon(MusicPlaybackOptions.statusbarIconResId)
                 .setPriority(Notification.PRIORITY_MAX)
                 .setOngoing(false)
-                .setContentIntent(PlaybackRemote.getPendingIntent(MusicPlaybackUtil.getAction(context, MusicPlaybackUtil.NOTIFICATION)))
-                .setDeleteIntent(PlaybackRemote.getPendingIntent(MusicPlaybackUtil.getAction(context, MusicPlaybackUtil.STOP)))
+                .setContentIntent(clickedIntent)
+                .setDeleteIntent(removedIntent)
                 .addAction(R.drawable.ic_skip_previous_white_24dp, "Skip Backward", prevIntent)
                 .addAction(playPauseResId, playPauseString, if (isPlaying) pauseIntent else playIntent)
                 .addAction(R.drawable.ic_skip_next_white_24dp, "Skip Forward", nextIntent)
-                .setStyle(style); */
-        return notif;
+                .setStyle(style)
+        return notif
     }
 
     override fun populate(song: Song, notificationBuilder: NotificationCompat.Builder) {

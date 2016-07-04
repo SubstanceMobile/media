@@ -16,6 +16,7 @@
 
 package mobile.substance.sdk.music.playback.players
 
+import android.content.ContentUris
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
@@ -24,6 +25,7 @@ import android.support.v4.media.session.PlaybackStateCompat.*
 import android.util.Log
 import mobile.substance.sdk.music.core.libraryhooks.PlaybackLibHook
 import mobile.substance.sdk.music.core.objects.Song
+import mobile.substance.sdk.music.core.utils.MusicCoreUtil
 import mobile.substance.sdk.music.playback.MusicQueue
 import mobile.substance.sdk.music.playback.MusicService
 import mobile.substance.sdk.music.playback.PlaybackRemote
@@ -101,19 +103,23 @@ abstract class Playback : MediaSessionCompat.Callback() {
 
     fun play() = play(MusicQueue.getCurrentSong()!!)
 
-    fun play(song: Song) = play(song.uri, false)
+    fun play(song: Song, mediaId: Long? = null) = play(song.uri, false, mediaId)
 
-    fun play(uri: Uri, listenersAlreadyNotified: Boolean) {
+    fun play(uri: Uri, listenersAlreadyNotified: Boolean, mediaId: Long? = null) {
         createMediaPlayerIfNecessary()
         if (!manualyHandleState()) playbackState = STATE_PLAYING
-        doPlay(uri, listenersAlreadyNotified)
+        doPlay(uri, listenersAlreadyNotified, mediaId)
     }
 
-    abstract fun doPlay(uri: Uri, listenersAlreadyNotified: Boolean)
+    abstract fun doPlay(uri: Uri, listenersAlreadyNotified: Boolean, mediaId: Long? = null)
 
     override fun onPlayFromUri(uri: Uri?, extras: Bundle?) {
         //TODO change the listener already notified to a variable
-        if (uri != null) play(uri, false)
+        if (uri != null) {
+            var mediaId: Long? = null
+            if (uri.scheme == "content") mediaId = MusicCoreUtil.findByMediaId(ContentUris.parseId(uri), PlaybackLibHook.albumList!!.invoke()!!, PlaybackLibHook.songList!!.invoke()!!)?.id
+            play(uri, false, mediaId)
+        }
     }
 
     ////////////

@@ -24,7 +24,7 @@ import android.provider.MediaStore
 import mobile.substance.sdk.music.core.objects.Album
 import mobile.substance.sdk.music.core.objects.Playlist
 import mobile.substance.sdk.music.core.objects.Song
-import mobile.substance.sdk.music.core.utils.CoreUtil
+import mobile.substance.sdk.music.core.utils.MusicCoreUtil
 import org.jaudiotagger.audio.AudioFileIO
 import org.jaudiotagger.tag.FieldKey
 import org.jaudiotagger.tag.Tag
@@ -136,7 +136,7 @@ class TagHelper {
         }
 
         fun getFileUri(context: Context, uri: Uri): Uri {
-            return Uri.parse(CoreUtil.getFilePath(context, uri))
+            return Uri.parse(MusicCoreUtil.getFilePath(context, uri))
         }
     }
 }

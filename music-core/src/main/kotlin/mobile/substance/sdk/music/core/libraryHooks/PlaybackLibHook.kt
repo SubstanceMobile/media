@@ -17,7 +17,9 @@
 package mobile.substance.sdk.music.core.libraryhooks
 
 import mobile.substance.sdk.music.core.objects.Album
+import mobile.substance.sdk.music.core.objects.MediaObject
 import mobile.substance.sdk.music.core.objects.Song
+import java.util.*
 
 /**
  * This class is used only as a data source for the playback library
@@ -38,6 +40,13 @@ object PlaybackLibHook {
         if (albumList!!.invoke()!!.isEmpty()) return null
         for (album in albumList!!.invoke()!!) if (album.id == id) return album
         return null
+    }
+
+    fun all(): List<MediaObject> {
+        val list = ArrayList<MediaObject>()
+        list.addAll(songList!!.invoke()!!)
+        list.addAll(albumList!!.invoke()!!)
+        return list
     }
 
 }

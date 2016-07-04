@@ -51,7 +51,7 @@ interface MediaNotification {
                            clickedIntent: PendingIntent, removedIntent: PendingIntent): NotificationCompat.Builder
     fun populate(song: Song, notificationBuilder: NotificationCompat.Builder)
     fun loadArt(albumArt: Bitmap, notificationBuilder: NotificationCompat.Builder) {
-        notificationBuilder.setLargeIcon(albumArt);
+        notificationBuilder.setLargeIcon(albumArt)
     }
     fun buildNotif(builder: NotificationCompat.Builder) = builder.build()
 
@@ -66,7 +66,5 @@ interface MediaNotification {
     fun onNotificationClicked() {
         Log.d("MediaNotification", "Please override onNotificationClicked in order to handle the event.")
     }
-    fun onNotificationDismissed() {
-        //TODO Add stop method
-    }
+    fun onNotificationDismissed() = PlaybackRemote.stop()
 }

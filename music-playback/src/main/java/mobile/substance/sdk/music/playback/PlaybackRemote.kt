@@ -198,6 +198,15 @@ object PlaybackRemote : ServiceConnection {
     })
 
     /**
+     * Stop playback
+     */
+    fun stop() = getService(object : ServiceLoadListener {
+        override fun respond(service: MusicService?) {
+            service!!.control()!!.transportControls.stop()
+        }
+    })
+
+    /**
      * Seek playback to the specified position
      */
     fun seekTo(progress: Int) = getService(object : ServiceLoadListener {
@@ -234,7 +243,7 @@ object PlaybackRemote : ServiceConnection {
     ///////////////////////////////////////////////////////////////////////////
 
     private var notificationCreator: MediaNotification = DefaultMediaNotification()
-    private var notificationBuilder: NotificationCompat.Builder? = null;
+    private var notificationBuilder: NotificationCompat.Builder? = null
 
     fun setNotification(notification: MediaNotification) {
         this.notificationCreator = notification
@@ -252,8 +261,7 @@ object PlaybackRemote : ServiceConnection {
         var firstArt: Bitmap? = getCurrentSong()?.metadata?.getBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART);
         if (firstArt == null) firstArt = BitmapFactory.decodeResource(context?.resources, MusicCoreOptions.defaultArt)
         else updateInterface.updateNotification(PlaybackRemote.makeNotification(firstArt))
-        //Fetch the album, then fetch the art, and then finally pass this all to create the notification. Meanwhile, this will use
-        //the default art as a placeholder until the new art is fetched.
+
         return null as Notification //TODO: use DataLinkers to get the album art (to create the notification)
     }
 

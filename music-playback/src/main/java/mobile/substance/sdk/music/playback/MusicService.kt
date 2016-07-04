@@ -226,9 +226,8 @@ class MusicService : MediaBrowserServiceCompat(), CastStateListener {
 
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
         Log.d(TAG, "onStartCommand()")
-        for (callback in CALLBACKS) {
+        for (callback in CALLBACKS)
             callback.onReceivedIntent(intent)
-        }
         return Service.START_STICKY
     }
 
