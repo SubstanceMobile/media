@@ -126,10 +126,10 @@ object CastPlayback : Playback(), SessionManagerListener<Session>, RemoteMediaCl
         try {
             val url = MusicPlaybackUtil.getUrlFromUri(uri)
 
-            if (url.equals("")) {
+            if (url == null) {
                 fileServer?.serve(uri)
                 artworkServer?.serve(null as Uri) // TODO
-                val ipAddress = MusicPlaybackUtil.getIP(SERVICE!!)
+                val ipAddress = MusicPlaybackUtil.getIpAddressString(SERVICE!!)
                 val fileUrl = "http://$ipAddress:${MusicPlaybackUtil.SERVER_PORT_AUDIO}"
                 val artworkUrl = "http://$ipAddress:${MusicPlaybackUtil.SERVER_PORT_ARTWORK}"
                 val mediaInfo = MediaInfo.Builder(fileUrl)

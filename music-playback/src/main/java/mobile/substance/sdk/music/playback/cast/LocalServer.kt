@@ -28,7 +28,7 @@ import java.io.FileNotFoundException
 /**
  * Created by Julian Os on 13.02.2016.
  */
-class LocalServer(internal var type: Int, private val context: Context) : NanoHTTPD(MusicPlaybackUtil.getServerportForType(type)) {
+class LocalServer(internal var type: Int, private val context: Context) : NanoHTTPD(MusicPlaybackUtil.getServerPortForType(type)) {
 
     fun serve(uri: Uri): NanoHTTPD.Response? {
         try {
@@ -38,9 +38,5 @@ class LocalServer(internal var type: Int, private val context: Context) : NanoHT
             e.printStackTrace()
             return null
         }
-    }
-
-    companion object {
-        val TAG = LocalServer::class.java.simpleName
     }
 }

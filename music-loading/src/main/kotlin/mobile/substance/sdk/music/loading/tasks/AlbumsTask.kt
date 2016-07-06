@@ -23,6 +23,7 @@ import android.net.Uri
 import android.os.Handler
 import android.provider.MediaStore
 import android.util.Log
+import mobile.substance.sdk.music.core.dataLinkers.MusicData
 
 import mobile.substance.sdk.music.core.objects.Album
 import mobile.substance.sdk.music.loading.Library
@@ -30,31 +31,35 @@ import mobile.substance.sdk.music.loading.Library
 class AlbumsTask(context: Context, vararg params: Any) : Loader<Album>(context, params) {
 
     override fun buildObject(cursor: Cursor): Album? {
-        val album = Album.Builder()
-                .setName(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Albums.ALBUM)))
-                .setAlbumId(cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Albums._ID)))
-                .setArtistName(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Albums.ARTIST)))
-                .setNumberOfSongs(cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Albums.NUMBER_OF_SONGS)))
-                .setYear(cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Albums.LAST_YEAR)))
-                .setArtworkPath(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Albums.ALBUM_ART)))
+        val name = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Albums.ALBUM))
+        val id = cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Albums._ID))
+        val artistName = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Albums.ARTIST))
+        val numberOfSongs = cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Albums.NUMBER_OF_SONGS))
+        val year = cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Albums.LAST_YEAR))
+        val artworkPath = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Albums.ALBUM_ART))
+
+        val a = Album.Builder()
+                .setName(name)
+                .setAlbumId(id)
+                .setArtistName(artistName)
+                .setNumberOfSongs(numberOfSongs)
+                .setYear(year)
+                .setArtworkPath(artworkPath)
                 .build()
 
-        Log.d("AlbumsTask", "Loaded ID ${album.id} with artwork path ${album.albumArtworkPath}")
-        return album
+        Log.d("AlbumsTask", "Loaded id $id with artwork path $artworkPath")
+        return a
     }
 
-    override val uri: Uri
-        get() = MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI
+    override val uri: Uri = MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI
 
 
-    override val sortOrder: String?
-        get() = MediaStore.Audio.Albums.DEFAULT_SORT_ORDER
+    override val sortOrder: String? = MediaStore.Audio.Albums.DEFAULT_SORT_ORDER
 
-    override val observer: ContentObserver?
-        get() = object : ContentObserver(Handler()) {
+    override val observer: ContentObserver? = object : ContentObserver(Handler()) {
             override fun onChange(selfChange: Boolean) {
                 super.onChange(selfChange)
-                update(Library.albums)
+                update(Library.getAlbums())
             }
         }
 

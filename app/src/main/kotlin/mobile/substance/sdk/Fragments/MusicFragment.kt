@@ -28,7 +28,7 @@ import butterknife.bindView
 import com.google.android.gms.cast.framework.CastButtonFactory
 import mobile.substance.sdk.R
 import mobile.substance.sdk.helpers.NavigationHelper
-import mobile.substance.sdk.music.loading.LibraryData
+import mobile.substance.sdk.music.loading.MusicType
 
 /**
  * Created by Julian Os on 03.05.2016.
@@ -59,11 +59,11 @@ class MusicFragment : NavigationDrawerFragment() {
 
         override fun getItem(position: Int): Fragment? {
             when (position) {
-                0 -> return RecyclerViewFragment().setType(LibraryData.SONGS)
-                1 -> return RecyclerViewFragment().setType(LibraryData.ALBUMS)
-                2 -> return RecyclerViewFragment().setType(LibraryData.ARTISTS)
-                3 -> return RecyclerViewFragment().setType(LibraryData.PLAYLISTS)
-                4 -> return RecyclerViewFragment().setType(LibraryData.GENRES)
+                0 -> return RecyclerViewFragment().setType(MusicType.SONGS)
+                1 -> return RecyclerViewFragment().setType(MusicType.ALBUMS)
+                2 -> return RecyclerViewFragment().setType(MusicType.ARTISTS)
+                3 -> return RecyclerViewFragment().setType(MusicType.PLAYLISTS)
+                4 -> return RecyclerViewFragment().setType(MusicType.GENRES)
             }
             return null
         }

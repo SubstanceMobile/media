@@ -1,10 +1,15 @@
 package mobile.substance.sdk
 
 import android.app.Application
+import android.content.Context
 import mobile.substance.sdk.music.core.MusicCoreOptions;
+import mobile.substance.sdk.music.core.dataLinkers.MusicData
+import mobile.substance.sdk.music.core.dataLinkers.MusicLibraryData
+import mobile.substance.sdk.music.core.libraryhooks.PlaybackLibHook
+import mobile.substance.sdk.music.core.objects.*
 import mobile.substance.sdk.music.loading.Library
 import mobile.substance.sdk.music.loading.LibraryConfig
-import mobile.substance.sdk.music.loading.LibraryData
+import mobile.substance.sdk.music.loading.MusicType
 import mobile.substance.sdk.music.playback.MusicPlaybackOptions
 
 /**
@@ -18,14 +23,9 @@ class SDKApp : Application() {
         super.onCreate()
 
         Library.init(this, LibraryConfig()
-                .hookPlayback()
-                .hookTags()
-                .put(LibraryData.SONGS)
-                .put(LibraryData.ALBUMS)
-                .put(LibraryData.ARTISTS)
-                .put(LibraryData.PLAYLISTS)
-                .put(LibraryData.GENRES))
-        Library.build()
+                .hookIntoActivityLifecycle(this)
+                .load(MusicType.SONGS, MusicType.ALBUMS, MusicType.ARTISTS, MusicType.GENRES, MusicType.PLAYLISTS))
+                .build()
 
         Thread() {
             run {

@@ -94,7 +94,7 @@ object LocalPlayback : Playback(),
         //Start the service and do some work!
         try {
             val url = MusicPlaybackUtil.getUrlFromUri(uri)
-            if (url.equals(""))
+            if (url == null)
                 localPlayer.setDataSource(SERVICE!!.applicationContext, uri)
             else {
                 localPlayer.setDataSource(url)

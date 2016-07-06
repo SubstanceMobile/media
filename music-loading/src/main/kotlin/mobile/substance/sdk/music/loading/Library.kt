@@ -65,12 +65,12 @@ object Library : MusicLibraryData {
     private var LOADER_PLAYLISTS: Loader<Playlist>? = null
     private var LOADER_GENRES: Loader<Genre>? = null
 
-    @JvmOverloads fun init(context: Context, libraryConfig: LibraryConfig = LibraryConfig()) {
+    @JvmOverloads fun init(context: Context, libraryConfig: LibraryConfig = LibraryConfig()): Library {
         Library.context = context.applicationContext
         if (libraryConfig.hookData) MusicData.hook(this)
 
         //Create tasks
-        if (libraryConfig.contains(LibraryData.SONGS)) {
+        if (libraryConfig.contains(MusicType.SONGS)) {
             val songsTask = SongsTask(context)
             songsTask.addListener(object : Loader.TaskListener<Song> {
                 override fun onOneLoaded(item: Song, pos: Int) {
@@ -85,7 +85,7 @@ object Library : MusicLibraryData {
             })
             LOADER_SONGS = songsTask
         }
-        if (libraryConfig.contains(LibraryData.ALBUMS)) {
+        if (libraryConfig.contains(MusicType.ALBUMS)) {
             val albumsTask = AlbumsTask(context)
             albumsTask.addListener(object : Loader.TaskListener<Album> {
                 override fun onOneLoaded(item: Album, pos: Int) {
@@ -100,7 +100,7 @@ object Library : MusicLibraryData {
             })
             LOADER_ALBUMS = albumsTask
         }
-        if (libraryConfig.contains(LibraryData.PLAYLISTS)) {
+        if (libraryConfig.contains(MusicType.PLAYLISTS)) {
             val playlistsTask = PlaylistsTask(context)
             playlistsTask.addListener(object : Loader.TaskListener<Playlist> {
                 override fun onOneLoaded(item: Playlist, pos: Int) {
@@ -115,7 +115,7 @@ object Library : MusicLibraryData {
             })
             LOADER_PLAYLISTS = playlistsTask
         }
-        if (libraryConfig.contains(LibraryData.ARTISTS)) {
+        if (libraryConfig.contains(MusicType.ARTISTS)) {
             val artistsTask = ArtistsTask(context)
             artistsTask.addListener(object : Loader.TaskListener<Artist> {
                 override fun onOneLoaded(item: Artist, pos: Int) {
@@ -130,7 +130,7 @@ object Library : MusicLibraryData {
             })
             LOADER_ARTISTS = artistsTask
         }
-        if (libraryConfig.contains(LibraryData.GENRES)) {
+        if (libraryConfig.contains(MusicType.GENRES)) {
             val genresTask = GenresTask(context)
             genresTask.addListener(object : Loader.TaskListener<Genre> {
                 override fun onOneLoaded(item: Genre, pos: Int) {
@@ -145,6 +145,8 @@ object Library : MusicLibraryData {
             })
             LOADER_GENRES = genresTask
         }
+
+        return this
     }
 
     fun build() {

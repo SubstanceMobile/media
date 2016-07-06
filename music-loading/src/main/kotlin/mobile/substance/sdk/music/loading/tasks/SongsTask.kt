@@ -43,9 +43,19 @@ class SongsTask(context: Context, vararg params: Any) : Loader<Song>(context, pa
         val artistId = cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST_ID))
         val year = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.YEAR))
 
-        val s = Song.Builder().setId(id).setTitle(title).setArtistName(artist).setArtistId(artistId).setAlbumName(albumName).setAlbumId(albumId).setTrackNumber(trackNumber).setYear(year ?: "0000").setDuration(duration).build()
+        val s = Song.Builder()
+                .setId(id)
+                .setTitle(title)
+                .setArtistName(artist)
+                .setArtistId(artistId)
+                .setAlbumName(albumName)
+                .setAlbumId(albumId)
+                .setTrackNumber(trackNumber)
+                .setYear(year ?: "0000")
+                .setDuration(duration)
+                .build()
 
-        Log.i("SongsTask", "Loaded ID " + id)
+        Log.i("SongsTask", "Loaded id $id")
         return s
     }
 
@@ -62,7 +72,7 @@ class SongsTask(context: Context, vararg params: Any) : Loader<Song>(context, pa
         get() = object : ContentObserver(Handler()) {
             override fun onChange(selfChange: Boolean) {
                 super.onChange(selfChange)
-                update(Library.songs)
+                update(Library.getSongs())
             }
         }
 }

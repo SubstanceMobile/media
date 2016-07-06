@@ -24,12 +24,12 @@ import com.bumptech.glide.Glide
 import mobile.substance.sdk.R
 import mobile.substance.sdk.music.core.objects.*
 import mobile.substance.sdk.music.loading.Library
-import mobile.substance.sdk.music.loading.LibraryData
+import mobile.substance.sdk.music.loading.MusicType
 import mobile.substance.sdk.music.loading.LibraryListener
 import mobile.substance.sdk.music.playback.PlaybackRemote
 import mobile.substance.sdk.viewholders.MusicViewHolder
 
-class MusicAdapter<T : MediaObject>(private val type: LibraryData) : RecyclerView.Adapter<MusicViewHolder>(), LibraryListener {
+class MusicAdapter<T : MediaObject>(private val type: MusicType) : RecyclerView.Adapter<MusicViewHolder>(), LibraryListener {
 
     var items: List<T>? = null
     var context: Context? = null
@@ -37,17 +37,17 @@ class MusicAdapter<T : MediaObject>(private val type: LibraryData) : RecyclerVie
     init {
         Library.registerListener(this)
 
-        if (type == LibraryData.SONGS) items = Library.songs as List<T>
-        if (type == LibraryData.ALBUMS) items = Library.albums as List<T>
-        if (type == LibraryData.ARTISTS) items = Library.artists as List<T>
-        if (type == LibraryData.PLAYLISTS) items = Library.playlists as List<T>
-        if (type == LibraryData.GENRES) items = Library.genres as List<T>
+        if (type == MusicType.SONGS) items = Library.songs as List<T>
+        if (type == MusicType.ALBUMS) items = Library.albums as List<T>
+        if (type == MusicType.ARTISTS) items = Library.artists as List<T>
+        if (type == MusicType.PLAYLISTS) items = Library.playlists as List<T>
+        if (type == MusicType.GENRES) items = Library.genres as List<T>
     }
 
     override fun onSongLoaded(item: Song, pos: Int) {}
 
     override fun onSongsCompleted(result: List<Song>) {
-        if (type == LibraryData.SONGS) {
+        if (type == MusicType.SONGS) {
             items = result as List<T>
             notifyDataSetChanged()
         }
@@ -56,7 +56,7 @@ class MusicAdapter<T : MediaObject>(private val type: LibraryData) : RecyclerVie
     override fun onAlbumLoaded(item: Album, pos: Int) {}
 
     override fun onAlbumsCompleted(result: List<Album>) {
-        if (type == LibraryData.ALBUMS) {
+        if (type == MusicType.ALBUMS) {
             items = result as List<T>
             notifyDataSetChanged()
         }
@@ -65,7 +65,7 @@ class MusicAdapter<T : MediaObject>(private val type: LibraryData) : RecyclerVie
     override fun onArtistLoaded(item: Artist, pos: Int) {}
 
     override fun onArtistsCompleted(result: List<Artist>) {
-        if (type == LibraryData.ARTISTS) {
+        if (type == MusicType.ARTISTS) {
             items = result as List<T>
             notifyDataSetChanged()
         }
@@ -74,7 +74,7 @@ class MusicAdapter<T : MediaObject>(private val type: LibraryData) : RecyclerVie
     override fun onPlaylistLoaded(item: Playlist, pos: Int) {}
 
     override fun onPlaylistsCompleted(result: List<Playlist>) {
-        if (type == LibraryData.PLAYLISTS) {
+        if (type == MusicType.PLAYLISTS) {
             items = result as List<T>
             notifyDataSetChanged()
         }
@@ -83,7 +83,7 @@ class MusicAdapter<T : MediaObject>(private val type: LibraryData) : RecyclerVie
     override fun onGenreLoaded(item: Genre, pos: Int) {}
 
     override fun onGenresCompleted(result: List<Genre>) {
-        if (type == LibraryData.GENRES) {
+        if (type == MusicType.GENRES) {
             items = result as List<T>
             notifyDataSetChanged()
         }
