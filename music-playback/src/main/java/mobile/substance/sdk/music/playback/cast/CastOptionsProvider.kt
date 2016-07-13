@@ -35,14 +35,11 @@ class CastOptionsProvider : OptionsProvider {
     }
 
     override fun getCastOptions(p0: Context?): CastOptions? {
-        val namespaces = ArrayList<String>()
-        namespaces.add(MEDIA_NAMESPACE)
-
         return CastOptions.Builder()
                 .setReceiverApplicationId(MusicPlaybackOptions.castApplicationId)
                 .setEnableReconnectionService(true)
                 .setResumeSavedSession(true)
-                .setSupportedNamespaces(namespaces)
+                .setSupportedNamespaces(listOf(MEDIA_NAMESPACE))
                 .build()
     }
 

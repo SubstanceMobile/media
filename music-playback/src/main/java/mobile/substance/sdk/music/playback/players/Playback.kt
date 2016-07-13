@@ -23,7 +23,7 @@ import android.provider.MediaStore
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat.*
 import android.util.Log
-import mobile.substance.sdk.music.core.libraryhooks.PlaybackLibHook
+import mobile.substance.sdk.music.core.dataLinkers.MusicData
 import mobile.substance.sdk.music.core.objects.Song
 import mobile.substance.sdk.music.core.utils.MusicCoreUtil
 import mobile.substance.sdk.music.playback.MusicQueue
@@ -107,7 +107,7 @@ abstract class Playback : MediaSessionCompat.Callback() {
 
     fun play(uri: Uri, listenersAlreadyNotified: Boolean, mediaId: Long? = null) {
         createMediaPlayerIfNecessary()
-        if (!manualyHandleState()) playbackState = STATE_PLAYING
+        if (!manuallyHandleState) playbackState = STATE_PLAYING
         doPlay(uri, listenersAlreadyNotified, mediaId)
     }
 
@@ -117,7 +117,7 @@ abstract class Playback : MediaSessionCompat.Callback() {
         //TODO change the listener already notified to a variable
         if (uri != null) {
             var mediaId: Long? = null
-            if (uri.scheme == "content") mediaId = MusicCoreUtil.findByMediaId(ContentUris.parseId(uri), PlaybackLibHook.albumList!!.invoke()!!, PlaybackLibHook.songList!!.invoke()!!)?.id
+            if (uri.scheme == "content") mediaId = MusicCoreUtil.findByMediaId(ContentUris.parseId(uri), MusicData.getAlbums(), MusicData.getSongs())?.id
             play(uri, false, mediaId)
         }
     }
@@ -127,7 +127,7 @@ abstract class Playback : MediaSessionCompat.Callback() {
     ////////////
 
     fun resume() {
-        if (!manualyHandleState()) playbackState = STATE_PLAYING
+        if (!manuallyHandleState) playbackState = STATE_PLAYING
         doResume()
     }
 
@@ -142,7 +142,7 @@ abstract class Playback : MediaSessionCompat.Callback() {
     ///////////
 
     override fun onPlayFromMediaId(mediaId: String?, extras: Bundle?) {
-        val song = PlaybackLibHook.findSongById(mediaId!!.toLong())
+        val song = MusicData.findSongById(mediaId!!.toLong())
         if (song != null) play(song) else Log.d(TAG, "onPlayFromMediaId: no song with such ID exists")
     }
 
@@ -157,7 +157,7 @@ abstract class Playback : MediaSessionCompat.Callback() {
     ///////////////////////////////////////////////////////////////////////////
 
     fun pause() {
-        if (!manualyHandleState()) playbackState = STATE_PAUSED
+        if (!manuallyHandleState) playbackState = STATE_PAUSED
         doPause()
     }
 
@@ -174,7 +174,7 @@ abstract class Playback : MediaSessionCompat.Callback() {
      * callRepeatOnNext to be false.
      */
     fun next() {
-        if (!manualyHandleState()) playbackState = STATE_SKIPPING_TO_NEXT
+        if (!manuallyHandleState) playbackState = STATE_SKIPPING_TO_NEXT
         if (isRepeating() && callRepeatOnNext()) doRepeat() else doNext()
     }
 
@@ -214,7 +214,7 @@ abstract class Playback : MediaSessionCompat.Callback() {
     ///////////////////////////////////////////////////////////////////////////
 
     fun stop() {
-        if (!manualyHandleState()) playbackState = STATE_STOPPED
+        if (!manuallyHandleState) playbackState = STATE_STOPPED
         doStop()
     }
 
@@ -230,12 +230,12 @@ abstract class Playback : MediaSessionCompat.Callback() {
 
     fun seek(time: Long) {
         if (time.toInt() > getCurrentPosInSong()) {
-            if (!manualyHandleState()) playbackState = STATE_FAST_FORWARDING
+            if (!manuallyHandleState) playbackState = STATE_FAST_FORWARDING
             doSeek(time)
         } else if (time.toInt() < getCurrentPosInSong()) {
-            if (!manualyHandleState()) playbackState = STATE_REWINDING
+            if (!manuallyHandleState) playbackState = STATE_REWINDING
             doSeek(time)
-        } else if (!manualyHandleState()) playbackState = STATE_PLAYING
+        } else if (!manuallyHandleState) playbackState = STATE_PLAYING
     }
 
     abstract fun doSeek(time: Long)
@@ -269,13 +269,13 @@ abstract class Playback : MediaSessionCompat.Callback() {
      * Call this method to set the playback state. This can also be used as triggerEndBuffer() that just sets a state other then playing.
      */
     fun setState(@State state: Int) {
-        if (manualyHandleState()) playbackState = state
+        if (manuallyHandleState) playbackState = state
     }
 
     /**
      * Override this to disable playback state being set automatically.
      */
-    open fun manualyHandleState() = false
+    open val manuallyHandleState: Boolean = false
 
     ///////////////////////////////////////////////////////////////////////////
     // Repeat

@@ -71,9 +71,9 @@ class MainActivity : NavigationDrawerActivity(), PlaybackRemote.RemoteCallback {
     override fun onDurationChanged(duration: Int) {}
 
     override fun onSongChanged(song: Song) {
-        if (currentSongCard!!.translationY != 0.0f) currentSongCard!!.animate().translationY(0.0f).setDuration(200).start()
-        currentSongTitle!!.text = song.songTitle
-        Library.findAlbumById(song.songAlbumId!!)!!.requestArt(currentSongImage!!)
+        if (currentSongCard.translationY != 0.0f) currentSongCard.animate().translationY(0.0f).setDuration(200).start()
+        currentSongTitle.text = song.songTitle
+        Library.findAlbumById(song.songAlbumId!!)!!.requestArt(currentSongImage)
     }
 
     override fun onStateChanged(state: PlaybackState, isRepeating: Boolean) {}
@@ -85,10 +85,12 @@ class MainActivity : NavigationDrawerActivity(), PlaybackRemote.RemoteCallback {
     override fun onStart() {
         super.onStart()
         PlaybackRemote.init(this)
+        PlaybackRemote.registerCallback(this)
     }
 
     override fun onStop() {
         super.onStop()
+        PlaybackRemote.unregisterCallback(this)
         PlaybackRemote.cleanup()
     }
 

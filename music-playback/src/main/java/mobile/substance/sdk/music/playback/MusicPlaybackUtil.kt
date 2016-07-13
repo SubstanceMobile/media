@@ -103,7 +103,7 @@ object MusicPlaybackUtil {
     ///////////////////////////////////////////////////////////////////////////
 
     fun getUrlFromUri(uri: Uri) : String? {
-        if (URLUtil.isValidUrl(uri.toString())) return uri.toString() else return null
+        if (URLUtil.isValidUrl(uri.toString()) && uri.toString().startsWith("http")) return uri.toString() else return null
     }
 
 }

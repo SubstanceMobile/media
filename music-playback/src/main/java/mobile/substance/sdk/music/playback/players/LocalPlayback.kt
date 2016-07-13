@@ -64,7 +64,7 @@ object LocalPlayback : Playback(),
 
         //API 23+ playback speed API
         if (Build.VERSION.SDK_INT >= 23) {
-            localPlayer.playbackParams = PlaybackParams().setSpeed(getPlaybackSpeed()).allowDefaults() // TODO: throws java.lang.IllegalStateException
+            // localPlayer.playbackParams = PlaybackParams().setSpeed(getPlaybackSpeed()).allowDefaults() TODO: throws java.lang.IllegalStateException
         }
     }
 
@@ -77,11 +77,11 @@ object LocalPlayback : Playback(),
     ///////////////
 
     override fun doPlay(uri: Uri, listenersAlreadyNotified: Boolean, mediaId: Long?) {
-        //Clear out the media player if a song is being played right now.
-        if (isPlaying()) {
+        //Stop the media player if a song is being played right now.
+        if (isPlaying())
             localPlayer.stop()
-            localPlayer.reset()
-        }
+
+        localPlayer.reset() // Necessary step to be able to setDataSource() again
 
         //Register the broadcast receiver
         HeadsetPlugReceiver register SERVICE!!
@@ -94,6 +94,7 @@ object LocalPlayback : Playback(),
         //Start the service and do some work!
         try {
             val url = MusicPlaybackUtil.getUrlFromUri(uri)
+            Log.d("Checking url validity", url.toString())
             if (url == null)
                 localPlayer.setDataSource(SERVICE!!.applicationContext, uri)
             else {

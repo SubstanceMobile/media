@@ -43,6 +43,7 @@ class MusicFragment : NavigationDrawerFragment() {
         tabs.setupWithViewPager(pager)
         NavigationHelper.setupNavigation(drawerLayout!!, toolbar)
         toolbar.inflateMenu(R.menu.menu_music)
+
         CastButtonFactory.setUpMediaRouteButton(activity, toolbar.menu, R.id.media_route_menu_item)
     }
 

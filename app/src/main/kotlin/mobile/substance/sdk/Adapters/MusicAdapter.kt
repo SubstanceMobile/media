@@ -22,6 +22,8 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import com.bumptech.glide.Glide
 import mobile.substance.sdk.R
+import mobile.substance.sdk.music.core.dataLinkers.MusicData
+import mobile.substance.sdk.music.core.dataLinkers.MusicLibraryData
 import mobile.substance.sdk.music.core.objects.*
 import mobile.substance.sdk.music.loading.Library
 import mobile.substance.sdk.music.loading.MusicType
@@ -37,11 +39,11 @@ class MusicAdapter<T : MediaObject>(private val type: MusicType) : RecyclerView.
     init {
         Library.registerListener(this)
 
-        if (type == MusicType.SONGS) items = Library.songs as List<T>
-        if (type == MusicType.ALBUMS) items = Library.albums as List<T>
-        if (type == MusicType.ARTISTS) items = Library.artists as List<T>
-        if (type == MusicType.PLAYLISTS) items = Library.playlists as List<T>
-        if (type == MusicType.GENRES) items = Library.genres as List<T>
+        if (type == MusicType.SONGS) items = MusicData.getSongs() as List<T>
+        if (type == MusicType.ALBUMS) items = MusicData.getAlbums() as List<T>
+        if (type == MusicType.ARTISTS) items = MusicData.getArtists() as List<T>
+        if (type == MusicType.PLAYLISTS) items = MusicData.getPlaylists() as List<T>
+        if (type == MusicType.GENRES) items = MusicData.getGenres() as List<T>
     }
 
     override fun onSongLoaded(item: Song, pos: Int) {}
@@ -118,7 +120,7 @@ class MusicAdapter<T : MediaObject>(private val type: MusicType) : RecyclerView.
     private fun bindSong(song: Song, holder: MusicViewHolder) {
         holder.title!!.text = song.songTitle
         holder.subtitle!!.text = song.songArtistName
-        Library.findAlbumById(song.songAlbumId!!)!!.requestArt(holder.image!!)
+        MusicData.findAlbumById(song.songAlbumId!!)!!.requestArt(holder.image!!)
         holder.itemView.setOnClickListener { it ->
             PlaybackRemote.play(song)
         }
@@ -135,9 +137,9 @@ class MusicAdapter<T : MediaObject>(private val type: MusicType) : RecyclerView.
 
     private fun bindGenre(genre: Genre, holder: MusicViewHolder) {
         holder.title!!.text = genre.genreName
-        Library.findSongsForGenreAsync(context!!, genre, object : Library.QueryResult<List<Song>> {
+        MusicData.findSongsForGenreAsync(genre, object : MusicLibraryData.QueryResult<List<Song>> {
             override fun onQueryResult(result: List<Song>) {
-                if (result.size > 0) Library.findAlbumById(result.first().songAlbumId!!)!!.requestArt(holder.image!!)
+                if (result.size > 0) MusicData.findAlbumById(result.first().songAlbumId!!)!!.requestArt(holder.image!!)
             }
         })
 
@@ -145,7 +147,7 @@ class MusicAdapter<T : MediaObject>(private val type: MusicType) : RecyclerView.
 
     private fun bindPlaylist(playlist: Playlist, holder: MusicViewHolder) {
         holder.title!!.text = playlist.playlistName
-        Library.findSongsForPlaylistAsync(context!!, playlist, object : Library.QueryResult<List<Song>> {
+        MusicData.findSongsForPlaylistAsync(playlist, object : MusicLibraryData.QueryResult<List<Song>> {
             override fun onQueryResult(result: List<Song>) {
                 if (result.size > 0) Library.findAlbumById(result.first().songAlbumId!!)!!.requestArt(holder.image!!)
             }

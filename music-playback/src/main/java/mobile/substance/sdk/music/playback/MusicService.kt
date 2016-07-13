@@ -130,49 +130,45 @@ class MusicService : MediaBrowserServiceCompat(), CastStateListener {
     // Progress Thread
     ///////////////////////////////////////////////////////////////////////////
 
-    private var progressThread: Thread? = null
-
-    fun startProgressThread() {
-        progressThread = object : Thread() {
-            override fun run() {
-                while (!Thread.interrupted()) {
-                    try {
-                        Thread.sleep(500)
-                    } catch (e: InterruptedException) {
-                        e.printStackTrace()
-                        interrupt()
+    private val progressThread = object : Thread() {
+        override fun run() {
+            while (!Thread.interrupted()) {
+                try {
+                    Thread.sleep(500)
+                } catch (e: InterruptedException) {
+                    e.printStackTrace()
+                    interrupt()
+                }
+                try {
+                    for (CALLBACK in CALLBACKS) {
+                        CALLBACK.onProgressChanged(engine.getCurrentPosInSong())
+                        CALLBACK.onStateChanged(
+                                if (engine.isPlaying())
+                                    PlaybackState.STATE_PLAYING
+                                else if (MusicQueue.getCurrentSong() != null)
+                                    PlaybackState.STATE_PAUSED
+                                else PlaybackState.STATE_IDLE,
+                                engine.isRepeating())
                     }
-                    try {
-                        for (CALLBACK in CALLBACKS) {
-                            CALLBACK.onProgressChanged(engine.getCurrentPosInSong())
-                            CALLBACK.onStateChanged(
-                                    if (engine.isPlaying())
-                                        PlaybackState.STATE_PLAYING
-                                    else if (MusicQueue.getCurrentSong() != null)
-                                        PlaybackState.STATE_PAUSED
-                                    else PlaybackState.STATE_IDLE,
-                                    engine.isRepeating())
-                        }
-                        session!!.setMetadata(MusicQueue.getCurrentSong()!!.metadata)
-                        session!!.setPlaybackState(
-                                PlaybackStateCompat.Builder().setActions(MusicPlaybackOptions.playbackActions.getActions())
-                                        .setState(engine.playbackState, engine.getCurrentPosInSong().toLong(), engine.getPlaybackSpeed())
-                                        .build())
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                        interrupt()
-                    }
+                    session!!.setMetadata(MusicQueue.getCurrentSong()!!.metadata)
+                    session!!.setPlaybackState(
+                            PlaybackStateCompat.Builder().setActions(MusicPlaybackOptions.playbackActions.getActions())
+                                    .setState(engine.playbackState, engine.getCurrentPosInSong().toLong(), engine.getPlaybackSpeed())
+                                    .build())
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    interrupt()
                 }
             }
         }
-        progressThread!!.start()
+    }
+
+    fun startProgressThread() {
+        progressThread.start()
     }
 
     fun shutdownProgressThread() {
-        if (progressThread != null) {
-            progressThread!!.interrupt()
-            progressThread = null
-        }
+        progressThread.interrupt()
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -213,10 +209,10 @@ class MusicService : MediaBrowserServiceCompat(), CastStateListener {
     }
 
     fun startForeground() = startForeground(UNIQUE_ID, PlaybackRemote.makeNotification(object : PlaybackRemote.NotificationUpdateInterface {
-        override fun updateNotification(notification: Notification): Unit = updateNotification(notification)
+        override fun updateNotification(notification: Notification): Unit = updateNotification(notif = notification)
     }))
 
-    fun updateNotification(notification: Notification) = notificationManager!!.notify(UNIQUE_ID, notification)
+    fun updateNotification(notif: Notification) = notificationManager!!.notify(UNIQUE_ID, notif)
 
     fun kill() {
         destroySession()

@@ -23,17 +23,20 @@ import android.content.Intent
 import android.content.ServiceConnection
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.net.Uri
 import android.os.IBinder
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v7.app.NotificationCompat
 import android.view.MenuItem
 import com.google.android.gms.cast.framework.CastContext
 import mobile.substance.sdk.music.core.MusicCoreOptions
-import mobile.substance.sdk.music.core.libraryhooks.PlaybackLibHook
+import mobile.substance.sdk.music.core.dataLinkers.MusicData
 import mobile.substance.sdk.music.core.objects.Song
+import mobile.substance.sdk.music.core.utils.MusicCoreUtil
 import mobile.substance.sdk.music.playback.notification.DefaultMediaNotification
 import mobile.substance.sdk.music.playback.notification.MediaNotification
 import mobile.substance.sdk.music.playback.players.Playback
+import java.net.URL
 import java.util.*
 
 /**
@@ -49,6 +52,7 @@ object PlaybackRemote : ServiceConnection {
     ///////////////////////////////////////////////////////////////////////////
 
     private val SERVICE_BOUND_LISTENERS: MutableList<ServiceLoadListener> = ArrayList()
+
     private interface ServiceLoadListener {
         fun respond(service: MusicService?)
     }
@@ -93,13 +97,17 @@ object PlaybackRemote : ServiceConnection {
     // Callback
     ///////////////////////////////////////////////////////////////////////////
 
-    fun registerCallback(callback: RemoteCallback) {
-        service!!.registerCallback(callback)
-    }
+    fun registerCallback(callback: RemoteCallback) = getService(object : ServiceLoadListener {
+        override fun respond(service: MusicService?) {
+            service!!.registerCallback(callback)
+        }
+    })
 
-    fun unregisterCallback(callback: RemoteCallback) {
-        service!!.unregisterCallback(callback)
-    }
+    fun unregisterCallback(callback: RemoteCallback) = getService(object : ServiceLoadListener {
+        override fun respond(service: MusicService?) {
+            service!!.unregisterCallback(callback)
+        }
+    })
 
     interface RemoteCallback {
 
@@ -158,7 +166,9 @@ object PlaybackRemote : ServiceConnection {
             play(songs, 0)
         } else {
             //Connect to the service and start playing music. This is not recommended and may cause unpredictable behaviour
-            getService(object : ServiceLoadListener { override fun respond(service: MusicService?) = service!!.engine.play(song)})
+            getService(object : ServiceLoadListener {
+                override fun respond(service: MusicService?) = service!!.engine.play(song)
+            })
         }
     }
 
@@ -221,7 +231,7 @@ object PlaybackRemote : ServiceConnection {
     fun shuffle() {
         // TODO: Finalize
         val songs = ArrayList<Song>()
-        songs.addAll(PlaybackLibHook.songList?.invoke()!!)
+        songs.addAll(MusicData.getSongs())
         Collections.shuffle(songs)
         play(songs, 0)
     }
@@ -250,23 +260,36 @@ object PlaybackRemote : ServiceConnection {
     }
 
     fun makeNotificaion(): Notification {
-        return null as Notification // TODO: ?
+        return makeNotification(null)
     }
 
     interface NotificationUpdateInterface {
         fun updateNotification(notification: Notification)
     }
 
-    fun makeNotification(updateInterface: NotificationUpdateInterface): Notification {
-        var firstArt: Bitmap? = getCurrentSong()?.metadata?.getBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART);
-        if (firstArt == null) firstArt = BitmapFactory.decodeResource(context?.resources, MusicCoreOptions.defaultArt)
-        else updateInterface.updateNotification(PlaybackRemote.makeNotification(firstArt))
+    internal fun getArtwork(): Bitmap? {
+        try {
+            val albumArtPath = MusicData.findAlbumById(getCurrentSong()?.songAlbumId!!)?.albumArtworkPath
+            if (albumArtPath != null && albumArtPath.length > 0) return BitmapFactory.decodeFile(albumArtPath)
+            if (getCurrentSong()?.hasExplicitArtwork!! && getCurrentSong()?.explicitArtworkPath!!.length > 0) {
+                val url = MusicPlaybackUtil.getUrlFromUri(Uri.parse(getCurrentSong()?.explicitArtworkPath))
+                if (url != null) BitmapFactory.decodeStream(URL(url).openStream()) else BitmapFactory.decodeFile(url)
+            }
+        } catch (e: Exception) { e.printStackTrace() }
 
-        return null as Notification //TODO: use DataLinkers to get the album art (to create the notification)
+        return BitmapFactory.decodeResource(context?.resources, MusicCoreOptions.defaultArt)
     }
 
-    internal fun makeNotification(albumArt: Bitmap): Notification {
-        if (notificationBuilder != null) notificationBuilder = notificationCreator.createNotification(context!!, getMediaSession(),
+    fun makeNotification(updateInterface: NotificationUpdateInterface): Notification {
+
+        val notification = PlaybackRemote.makeNotification(getArtwork())
+        updateInterface.updateNotification(notification)
+
+        return notification
+    }
+
+    internal fun makeNotification(albumArt: Bitmap?): Notification {
+        if (notificationBuilder == null) notificationBuilder = notificationCreator.createNotification(context!!, getMediaSession(), // Why checking notificationBuilder != null?
                 MusicPlaybackUtil.getPendingIntent(context!!, MusicPlaybackUtil.Action.PLAY),
                 MusicPlaybackUtil.getPendingIntent(context!!, MusicPlaybackUtil.Action.PAUSE),
                 MusicPlaybackUtil.getPendingIntent(context!!, MusicPlaybackUtil.Action.SKIP_FORWARD),
@@ -274,7 +297,7 @@ object PlaybackRemote : ServiceConnection {
                 MusicPlaybackUtil.getPendingIntent(context!!, MusicPlaybackUtil.Action.NOTIFICATION),
                 MusicPlaybackUtil.getPendingIntent(context!!, MusicPlaybackUtil.Action.STOP))
         notificationCreator.populate(getCurrentSong()!!, notificationBuilder!!)
-        notificationCreator.loadArt(albumArt, notificationBuilder!!)
+        if (albumArt != null) notificationCreator.loadArt(albumArt, notificationBuilder!!)
         return notificationCreator.buildNotif(notificationBuilder!!)
     }
 
@@ -297,10 +320,6 @@ object PlaybackRemote : ServiceConnection {
     @JvmOverloads fun setCustomPlaybackEngineForService(engine: Playback, hotswap: Boolean = true) = getService(object : ServiceLoadListener {
         override fun respond(service: MusicService?) = service!!.replacePlaybackEngine(engine, hotswap, false)
     })
-
-    fun initGoogleCast(item: MenuItem) {
-
-    }
 
     fun getMediaSession() = service?.getMediaSession()
 

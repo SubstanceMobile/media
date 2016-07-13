@@ -27,6 +27,8 @@ import com.google.android.gms.cast.MediaStatus
 import com.google.android.gms.cast.framework.*
 import com.google.android.gms.cast.framework.media.RemoteMediaClient
 import com.google.android.gms.common.images.WebImage
+import mobile.substance.sdk.music.core.dataLinkers.MusicData
+import mobile.substance.sdk.music.core.objects.Song
 import mobile.substance.sdk.music.core.utils.MusicCoreUtil
 import mobile.substance.sdk.music.playback.HeadsetPlugReceiver
 import mobile.substance.sdk.music.playback.MusicPlaybackUtil
@@ -126,22 +128,25 @@ object CastPlayback : Playback(), SessionManagerListener<Session>, RemoteMediaCl
         try {
             val url = MusicPlaybackUtil.getUrlFromUri(uri)
 
+            val song: Song? = if (mediaId != null) MusicData.findSongById(mediaId) else null
+
             if (url == null) {
+
                 fileServer?.serve(uri)
-                artworkServer?.serve(null as Uri) // TODO
+                if (mediaId != null) artworkServer?.serve(MusicData.findAlbumById(song?.songAlbumId!!)?.albumArtworkUri!!)
                 val ipAddress = MusicPlaybackUtil.getIpAddressString(SERVICE!!)
                 val fileUrl = "http://$ipAddress:${MusicPlaybackUtil.SERVER_PORT_AUDIO}"
                 val artworkUrl = "http://$ipAddress:${MusicPlaybackUtil.SERVER_PORT_ARTWORK}"
                 val mediaInfo = MediaInfo.Builder(fileUrl)
                         .setContentType("audio/*")
-                        .setMetadata(buildMetadata(artworkUrl, null as MediaMetadataCompat)) // TODO
+                        .setMetadata(buildMetadata(artworkUrl, song?.metadata!!)) // TODO
                         .setStreamType(MediaInfo.STREAM_TYPE_NONE)
                         .build()
                 doLoad(mediaInfo, true)
             } else {
                 val mediaInfo = MediaInfo.Builder(url)
                     .setContentType("audio/*")
-                    .setMetadata(buildMetadata(null as String, null as MediaMetadataCompat)) // TODO
+                    .setMetadata(buildMetadata(song?.explicitArtworkPath ?: "", song?.metadata!!)) // TODO
                     .setStreamType(MediaInfo.STREAM_TYPE_BUFFERED)
                     .build()
                 doLoad(mediaInfo, true)

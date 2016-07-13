@@ -3,10 +3,6 @@ package mobile.substance.sdk
 import android.app.Application
 import android.content.Context
 import mobile.substance.sdk.music.core.MusicCoreOptions;
-import mobile.substance.sdk.music.core.dataLinkers.MusicData
-import mobile.substance.sdk.music.core.dataLinkers.MusicLibraryData
-import mobile.substance.sdk.music.core.libraryhooks.PlaybackLibHook
-import mobile.substance.sdk.music.core.objects.*
 import mobile.substance.sdk.music.loading.Library
 import mobile.substance.sdk.music.loading.LibraryConfig
 import mobile.substance.sdk.music.loading.MusicType
@@ -30,7 +26,7 @@ class SDKApp : Application() {
         Thread() {
             run {
                 MusicCoreOptions.defaultArt = R.drawable.default_artwork_gem
-                MusicCoreOptions.statusbarIconResId = R.drawable.ic_audiotrack_white_24dp
+                MusicPlaybackOptions.statusbarIconResId = R.drawable.ic_audiotrack_white_24dp
                 MusicPlaybackOptions.isCastEnabled = true
                 MusicPlaybackOptions.castApplicationId = BuildConfig.CAST_APPLICATION_ID
             }
