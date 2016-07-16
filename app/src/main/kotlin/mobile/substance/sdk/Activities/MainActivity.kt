@@ -23,11 +23,14 @@ import android.support.design.widget.NavigationView
 import android.support.v4.view.GravityCompat
 import android.support.v4.widget.DrawerLayout
 import android.support.v7.widget.CardView
+import android.util.Log
+import android.view.Menu
 import android.widget.ImageView
 import android.widget.TextView
 import butterknife.bindView
 import com.afollestad.materialdialogs.MaterialDialog
 import com.github.javiersantos.materialstyleddialogs.MaterialStyledDialog
+import com.google.android.gms.cast.framework.CastButtonFactory
 import mobile.substance.sdk.R
 import mobile.substance.sdk.music.core.objects.Song
 import mobile.substance.sdk.music.loading.Library
@@ -82,16 +85,24 @@ class MainActivity : NavigationDrawerActivity(), PlaybackRemote.RemoteCallback {
 
     override val layoutResId: Int = R.layout.activity_main
 
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.menu_music, menu)
+        CastButtonFactory.setUpMediaRouteButton(this, menu, R.id.media_route_menu_item)
+        return true
+    }
+
     override fun onStart() {
         super.onStart()
+        Log.d("MainActivity.kt", "onStart()")
         PlaybackRemote.init(this)
         PlaybackRemote.registerCallback(this)
     }
 
     override fun onStop() {
-        super.onStop()
+        Log.d("MainActivity.kt", "onStop()")
         PlaybackRemote.unregisterCallback(this)
         PlaybackRemote.cleanup()
+        super.onStop()
     }
 
 }

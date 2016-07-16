@@ -19,7 +19,6 @@ package mobile.substance.sdk.music.playback.players
 import android.content.Context
 import android.media.AudioManager
 import android.media.MediaPlayer
-import android.media.PlaybackParams
 import android.net.Uri
 import android.os.Build
 import android.os.PowerManager
@@ -45,10 +44,12 @@ object LocalPlayback : Playback(),
     ///////////////////////////////////////////////////////////////////////////
 
     fun MediaPlayer.destroy() {
-        stop()
-        reset()
-        release()
-        tripPlayerNecessity()
+        try {
+            stop()
+            reset()
+            release()
+            tripPlayerNecessity()
+        } catch (ignored: Exception) {}
     }
 
     override fun createPlayer() {
@@ -147,7 +148,6 @@ object LocalPlayback : Playback(),
     fun doStop(updateFocus: Boolean) {
         if (updateFocus) giveUpAudioFocus()
         localPlayer.destroy()
-        SERVICE!!.kill()
     }
 
     //////////
@@ -225,5 +225,12 @@ object LocalPlayback : Playback(),
 
     override fun isRepeating() = localPlayer.isLooping
 
-    override fun getCurrentPosInSong() = localPlayer.currentPosition
+    override fun getCurrentPosInSong(): Int {
+        try {
+            return localPlayer.currentPosition
+        } catch (e: Exception) {
+            Log.e(TAG, "failed retrieving the current position, returning 0", e)
+            return 0
+        }
+    }
 }

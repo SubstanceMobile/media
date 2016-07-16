@@ -103,7 +103,9 @@ abstract class Playback : MediaSessionCompat.Callback() {
 
     fun play() = play(MusicQueue.getCurrentSong()!!)
 
-    fun play(song: Song, mediaId: Long? = null) = play(song.uri, false, mediaId)
+    fun play(song: Song, mediaId: Long? = null) {
+        play(song.uri, false, mediaId ?: song.id)
+    }
 
     fun play(uri: Uri, listenersAlreadyNotified: Boolean, mediaId: Long? = null) {
         createMediaPlayerIfNecessary()

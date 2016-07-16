@@ -39,7 +39,7 @@ object MusicPlaybackUtil {
     const val SERVER_TYPE_ARTWORK = 1
     const val SERVER_TYPE_AUDIO = 2
 
-    fun getServerPortForType(type: Int): Int {
+    @JvmStatic fun getServerPortForType(type: Int): Int {
         when (type) {
             SERVER_TYPE_ARTWORK -> return SERVER_PORT_ARTWORK
             SERVER_TYPE_AUDIO -> return SERVER_PORT_AUDIO

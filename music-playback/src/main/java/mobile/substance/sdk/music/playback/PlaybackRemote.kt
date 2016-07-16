@@ -16,6 +16,7 @@
 
 package mobile.substance.sdk.music.playback
 
+import android.app.Activity
 import android.app.Notification
 import android.content.ComponentName
 import android.content.Context
@@ -25,14 +26,12 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.IBinder
-import android.support.v4.media.MediaMetadataCompat
 import android.support.v7.app.NotificationCompat
-import android.view.MenuItem
+import android.util.Log
 import com.google.android.gms.cast.framework.CastContext
 import mobile.substance.sdk.music.core.MusicCoreOptions
 import mobile.substance.sdk.music.core.dataLinkers.MusicData
 import mobile.substance.sdk.music.core.objects.Song
-import mobile.substance.sdk.music.core.utils.MusicCoreUtil
 import mobile.substance.sdk.music.playback.notification.DefaultMediaNotification
 import mobile.substance.sdk.music.playback.notification.MediaNotification
 import mobile.substance.sdk.music.playback.players.Playback
@@ -58,13 +57,16 @@ object PlaybackRemote : ServiceConnection {
     }
 
     private fun getService(listener: ServiceLoadListener) {
-        val running = if (context != null) MusicPlaybackUtil.isServiceRunning(context as Context) else false
+        val running = if (context != null) MusicPlaybackUtil.isServiceRunning(context!!) else false
         if (running && isBound) {
             listener.respond(service)
             return
         }
-        if (!running) context?.startService(Intent(context, MusicService::class.java))
-        if (!isBound) context?.bindService(Intent(context, MusicService::class.java), this, Context.BIND_IMPORTANT)
+        if (!running) {
+            Log.d("getService()", "Looks like the service is not running. Starting it now...")
+            context?.startService(Intent(context, MusicService::class.java))
+        }
+        if (!isBound) context?.bindService(Intent(context, MusicService::class.java), this, Activity.BIND_ADJUST_WITH_ACTIVITY)
         SERVICE_BOUND_LISTENERS.add(listener)
     }
 
@@ -72,7 +74,10 @@ object PlaybackRemote : ServiceConnection {
         service = (binder as MusicService.ServiceBinder).service
         //TODO: Callback
         isBound = true
-        for (listener in SERVICE_BOUND_LISTENERS) listener.respond(service)
+        for (listener in SERVICE_BOUND_LISTENERS) {
+            listener.respond(service)
+            SERVICE_BOUND_LISTENERS.remove(listener)
+        }
     }
 
     override fun onServiceDisconnected(name: ComponentName?) {
@@ -161,9 +166,7 @@ object PlaybackRemote : ServiceConnection {
      */
     @JvmOverloads fun play(song: Song, replaceQueue: Boolean = true) {
         if (replaceQueue) {
-            val songs: MutableList<Song> = ArrayList()
-            songs.add(song)
-            play(songs, 0)
+            play(arrayListOf(song), 0)
         } else {
             //Connect to the service and start playing music. This is not recommended and may cause unpredictable behaviour
             getService(object : ServiceLoadListener {

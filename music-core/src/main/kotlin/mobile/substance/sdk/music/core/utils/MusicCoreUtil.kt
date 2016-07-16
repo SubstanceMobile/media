@@ -21,17 +21,13 @@ import android.content.Context
 import android.content.Intent
 import android.database.Cursor
 import android.net.Uri
-import android.os.AsyncTask
 import android.os.Build
 import android.os.Environment
 import android.provider.DocumentsContract
 import android.provider.MediaStore
-import android.util.Log
 import android.util.TypedValue
-import mobile.substance.sdk.music.core.R
-import mobile.substance.sdk.music.core.objects.*
+import mobile.substance.sdk.music.core.objects.MediaObject
 import java.io.File
-import java.util.*
 
 object MusicCoreUtil {
 
@@ -84,7 +80,7 @@ object MusicCoreUtil {
     }
 
 
-    fun getFilePath(context: Context, uri: Uri): String? {
+    @JvmStatic fun getFilePath(context: Context, uri: Uri): String? {
         if (isKitKat && DocumentsContract.isDocumentUri(context, uri)) {
             if (isExternalStorageDocument(uri)) {
                 val docId : String= DocumentsContract.getDocumentId(uri)

@@ -23,9 +23,9 @@ import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentManager
 import android.support.v4.app.FragmentPagerAdapter
 import android.support.v4.view.ViewPager
+import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
 import butterknife.bindView
-import com.google.android.gms.cast.framework.CastButtonFactory
 import mobile.substance.sdk.R
 import mobile.substance.sdk.helpers.NavigationHelper
 import mobile.substance.sdk.music.loading.MusicType
@@ -42,9 +42,7 @@ class MusicFragment : NavigationDrawerFragment() {
         pager.adapter = MusicPagerAdapter(activity, activity.supportFragmentManager)
         tabs.setupWithViewPager(pager)
         NavigationHelper.setupNavigation(drawerLayout!!, toolbar)
-        toolbar.inflateMenu(R.menu.menu_music)
-
-        CastButtonFactory.setUpMediaRouteButton(activity, toolbar.menu, R.id.media_route_menu_item)
+        (activity as AppCompatActivity).setSupportActionBar(toolbar)
     }
 
     override val layoutResId: Int = R.layout.fragment_music

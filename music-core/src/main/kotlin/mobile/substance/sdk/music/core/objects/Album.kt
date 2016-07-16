@@ -61,7 +61,7 @@ class Album : MediaObject() {
         set(value) {
             if (value != null) {
                 putString(MediaMetadataCompat.METADATA_KEY_ALBUM_ART_URI, value)
-                albumArtworkUri = Uri.parse("file://" + value)
+                albumArtworkUri = Uri.parse("file://$value")
                 isAnimated = false
             } else {
                 isAnimated = true

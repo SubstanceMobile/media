@@ -40,7 +40,7 @@ import java.util.*
 class MusicService : MediaBrowserServiceCompat(), CastStateListener {
 
     override fun onCastStateChanged(p0: Int) {
-        if (p0 == CastState.CONNECTED) replacePlaybackEngine(CastPlayback, true, true)
+        if (p0 == CastState.CONNECTED) replacePlaybackEngine(CastPlayback, engine.isPlaying() || engine.getCurrentPosInSong() != 0, true)
     }
 
     //Companion object for the unique ID and log tag.
@@ -116,14 +116,23 @@ class MusicService : MediaBrowserServiceCompat(), CastStateListener {
     ///////////////////////////////////////////////////////////////////////////
 
     private fun init() {
+        HeadsetPlugReceiver register this
+
         notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         session = MediaSessionCompat(this, MusicService::class.java.simpleName)
         session!!.setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS or MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS)
-        engine.init(this)
+
         session!!.setCallback(engine)
         sessionToken = session!!.sessionToken
 
-        if (MusicPlaybackOptions.isCastEnabled) CastContext.getSharedInstance(this).addCastStateListener(this)
+        if (MusicPlaybackOptions.isCastEnabled) {
+            val instance = CastContext.getSharedInstance(this)
+            instance.addCastStateListener(this)
+            if (instance.sessionManager.currentCastSession != null && instance.sessionManager.currentCastSession.isConnected)
+                replacePlaybackEngine(CastPlayback, false, true)
+        }
+
+        engine.init(this)
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -176,8 +185,8 @@ class MusicService : MediaBrowserServiceCompat(), CastStateListener {
     ///////////////////////////////////////////////////////////////////////////
 
     private fun destroySession() {
-        session!!.isActive = false
-        session!!.release()
+        session?.isActive = false
+        session?.release()
         session = null
     }
 
