@@ -29,6 +29,7 @@ import mobile.substance.sdk.music.core.utils.MusicCoreUtil
 import mobile.substance.sdk.music.playback.MusicQueue
 import mobile.substance.sdk.music.playback.MusicService
 import mobile.substance.sdk.music.playback.PlaybackRemote
+import java.util.*
 
 abstract class Playback : MediaSessionCompat.Callback() {
     companion object {
@@ -43,9 +44,9 @@ abstract class Playback : MediaSessionCompat.Callback() {
         SERVICE = service
         Log.i(TAG, "Service has been set. We are now initialized")
 
-        //Calling configPlayer because instance will always be created out of the box. If necessary we will call create player too (see above)
-        configPlayer()
         init()
+        createPlayerIfNecessary(false)
+        configPlayer()
     }
 
     abstract fun init()
@@ -54,22 +55,24 @@ abstract class Playback : MediaSessionCompat.Callback() {
     // Player Helper methods
     ///////////////////////////////////////////////////////////////////////////
 
+    private var pendingCalls: MutableList<() -> Unit> = ArrayList()
+    var inHotswapTransaction = false
     private var firstPlayer = true
     private var playerReleased = false
 
     /**
-     * Override this to specify that the player instance was NOT created when your playback class was created. Otherwise do
+     * Override this to specify that the player instance was NOT created when your playback class was created. Otherwise don't
      */
-    open fun playerCreatedOnClassCreation() = true
+    open val playerCreatedOnClassCreation: Boolean = true
 
     /**
      * It is recommended that you don't call this method, as the library calls it itself where necessary. Only call this
      * if you know what you are doing
      */
-    fun createMediaPlayerIfNecessary() {
+    fun createPlayerIfNecessary(config: Boolean) {
         if (isPlayerNecessary()) {
             createPlayer()
-            configPlayer()
+            if (config) configPlayer()
             firstPlayer = false
             playerReleased = false
         }
@@ -87,7 +90,7 @@ abstract class Playback : MediaSessionCompat.Callback() {
      */
     open fun configPlayer() {}
 
-    open fun isPlayerNecessary() = !firstPlayer and playerReleased
+    open fun isPlayerNecessary() = firstPlayer and !playerCreatedOnClassCreation or playerReleased
 
     fun tripPlayerNecessity() {
         playerReleased = true
@@ -108,9 +111,10 @@ abstract class Playback : MediaSessionCompat.Callback() {
     }
 
     fun play(uri: Uri, listenersAlreadyNotified: Boolean, mediaId: Long? = null) {
-        createMediaPlayerIfNecessary()
+        createPlayerIfNecessary(true)
         if (!manuallyHandleState) playbackState = STATE_PLAYING
         doPlay(uri, listenersAlreadyNotified, mediaId)
+        SERVICE!!.shutdownProgressThreadIfNecessary()
     }
 
     abstract fun doPlay(uri: Uri, listenersAlreadyNotified: Boolean, mediaId: Long? = null)
@@ -129,6 +133,11 @@ abstract class Playback : MediaSessionCompat.Callback() {
     ////////////
 
     fun resume() {
+        if (inHotswapTransaction) {
+            pendingCalls.add { resume() }
+            return
+        }
+
         if (!manuallyHandleState) playbackState = STATE_PLAYING
         doResume()
     }
@@ -159,6 +168,11 @@ abstract class Playback : MediaSessionCompat.Callback() {
     ///////////////////////////////////////////////////////////////////////////
 
     fun pause() {
+        if (inHotswapTransaction) {
+            pendingCalls.add { pause() }
+            return
+        }
+
         if (!manuallyHandleState) playbackState = STATE_PAUSED
         doPause()
     }
@@ -216,6 +230,10 @@ abstract class Playback : MediaSessionCompat.Callback() {
     ///////////////////////////////////////////////////////////////////////////
 
     fun stop() {
+        if (inHotswapTransaction) {
+            pendingCalls.add { stop() }
+        }
+
         if (!manuallyHandleState) playbackState = STATE_STOPPED
         doStop()
     }
@@ -231,6 +249,11 @@ abstract class Playback : MediaSessionCompat.Callback() {
     ///////////////////////////////////////////////////////////////////////////
 
     fun seek(time: Long) {
+        if (inHotswapTransaction) {
+            pendingCalls.add { seek(time) }
+            return
+        }
+
         if (time.toInt() > getCurrentPosInSong()) {
             if (!manuallyHandleState) playbackState = STATE_FAST_FORWARDING
             doSeek(time)
@@ -301,7 +324,6 @@ abstract class Playback : MediaSessionCompat.Callback() {
 
     abstract fun isPlaying(): Boolean
 
-
     open fun isInitialized() = SERVICE != null
 
     abstract fun getCurrentPosInSong(): Int
@@ -316,4 +338,16 @@ abstract class Playback : MediaSessionCompat.Callback() {
         }*/
         //TODO
     }
+
+    protected fun nowPlaying() {
+        if (inHotswapTransaction) {
+            inHotswapTransaction = false
+            for (call in pendingCalls)
+                call.invoke()
+            pendingCalls.clear()
+        }
+        SERVICE!!.startProgressThread()
+        SERVICE!!.startForeground()
+    }
+
 }

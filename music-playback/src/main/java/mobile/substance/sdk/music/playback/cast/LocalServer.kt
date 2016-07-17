@@ -8,9 +8,7 @@ import mobile.substance.sdk.music.playback.MusicPlaybackUtil
 import java.io.File
 import java.io.FileInputStream
 
-/**
- * Created by Julian on 16.07.16.
- */
+
 class LocalServer(private val type: Int) : NanoHTTPD(MusicPlaybackUtil.getServerPortForType(type)) {
 
     private var path: String? = null
@@ -21,7 +19,7 @@ class LocalServer(private val type: Int) : NanoHTTPD(MusicPlaybackUtil.getServer
 
     override fun serve(session: IHTTPSession?): Response {
         val inputStream = FileInputStream(File(path))
-        return newFixedLengthResponse(Response.Status.OK, if (type == MusicPlaybackUtil.SERVER_TYPE_AUDIO) "audio/*" else "image/*", inputStream, inputStream.channel.size())
+        return newChunkedResponse(Response.Status.OK, if (type == MusicPlaybackUtil.SERVER_TYPE_AUDIO) "audio/*" else "image/*", inputStream)
     }
 
 }

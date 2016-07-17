@@ -17,6 +17,7 @@
 package mobile.substance.sdk.adapters
 
 import android.content.Context
+import android.graphics.BitmapFactory
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -26,8 +27,8 @@ import mobile.substance.sdk.music.core.dataLinkers.MusicData
 import mobile.substance.sdk.music.core.dataLinkers.MusicLibraryData
 import mobile.substance.sdk.music.core.objects.*
 import mobile.substance.sdk.music.loading.Library
-import mobile.substance.sdk.music.loading.MusicType
 import mobile.substance.sdk.music.loading.LibraryListener
+import mobile.substance.sdk.music.loading.MusicType
 import mobile.substance.sdk.music.playback.PlaybackRemote
 import mobile.substance.sdk.viewholders.MusicViewHolder
 
@@ -112,22 +113,24 @@ class MusicAdapter<T : MediaObject>(private val type: MusicType) : RecyclerView.
     }
 
     private fun bindAlbum(album: Album, holder: MusicViewHolder) {
-        holder.title!!.text = album.albumName
-        holder.subtitle!!.text = album.albumArtistName
+        holder.title?.text = album.albumName
+        holder.subtitle?.text = album.albumArtistName
         album.requestArt(holder.image!!)
     }
 
     private fun bindSong(song: Song, holder: MusicViewHolder) {
-        holder.title!!.text = song.songTitle
-        holder.subtitle!!.text = song.songArtistName
-        MusicData.findAlbumById(song.songAlbumId!!)!!.requestArt(holder.image!!)
+        holder.title?.text = song.songTitle
+        holder.subtitle?.text = song.songArtistName
+        holder.image!!.setImageBitmap(BitmapFactory.decodeFile(MusicData.findAlbumById(song.songAlbumId ?: 0)!!.albumArtworkPath))
+        // MusicData.findAlbumById(song.songAlbumId!!)?.requestArt(holder.image!!)
+
         holder.itemView.setOnClickListener { it ->
             PlaybackRemote.play(song)
         }
     }
 
     private fun bindArtist(artist: Artist, holder: MusicViewHolder) {
-        holder.title!!.text = artist.artistName
+        holder.title?.text = artist.artistName
         Glide.with(context)
                 .load(R.drawable.ic_person_black_24dp)
                 .crossFade()

@@ -31,7 +31,7 @@ import mobile.substance.sdk.music.playback.MusicPlaybackUtil
 object LocalPlayback : Playback(),
         MediaPlayer.OnPreparedListener, MediaPlayer.OnCompletionListener, MediaPlayer.OnErrorListener, AudioManager.OnAudioFocusChangeListener {
     val TAG = "LocalPlayback"
-    private var localPlayer: MediaPlayer = MediaPlayer()
+    private var localPlayer: MediaPlayer? = null
     private var audioManager: AudioManager? = null
     private var wasPlayingBeforeAction = false
 
@@ -49,7 +49,9 @@ object LocalPlayback : Playback(),
             reset()
             release()
             tripPlayerNecessity()
-        } catch (ignored: Exception) {}
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
     override fun createPlayer() {
@@ -57,11 +59,11 @@ object LocalPlayback : Playback(),
     }
 
     override fun configPlayer() {
-        localPlayer.setWakeMode(SERVICE, PowerManager.PARTIAL_WAKE_LOCK)
-        localPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC)
-        localPlayer.setOnPreparedListener(this)
-        localPlayer.setOnCompletionListener(this)
-        localPlayer.setOnErrorListener(this)
+        localPlayer?.setWakeMode(SERVICE, PowerManager.PARTIAL_WAKE_LOCK)
+        localPlayer?.setAudioStreamType(AudioManager.STREAM_MUSIC)
+        localPlayer?.setOnPreparedListener(this)
+        localPlayer?.setOnCompletionListener(this)
+        localPlayer?.setOnErrorListener(this)
 
         //API 23+ playback speed API
         if (Build.VERSION.SDK_INT >= 23) {
@@ -80,9 +82,9 @@ object LocalPlayback : Playback(),
     override fun doPlay(uri: Uri, listenersAlreadyNotified: Boolean, mediaId: Long?) {
         //Stop the media player if a song is being played right now.
         if (isPlaying())
-            localPlayer.stop()
+            localPlayer?.stop()
 
-        localPlayer.reset() // Necessary step to be able to setDataSource() again
+        localPlayer?.reset() // Necessary step to be able to setDataSource() again
 
         //Register the broadcast receiver
         HeadsetPlugReceiver register SERVICE!!
@@ -97,15 +99,15 @@ object LocalPlayback : Playback(),
             val url = MusicPlaybackUtil.getUrlFromUri(uri)
             Log.d("Checking url validity", url.toString())
             if (url == null)
-                localPlayer.setDataSource(SERVICE!!.applicationContext, uri)
+                localPlayer?.setDataSource(SERVICE!!.applicationContext, uri)
             else {
-                localPlayer.setDataSource(url)
+                localPlayer?.setDataSource(url)
                 triggerStartBuffer()
             }
         } catch (e: Exception) {
             Log.e(TAG, "Unable to play " + MusicCoreUtil.getFilePath(SERVICE!!, uri), e)
         } finally {
-            localPlayer.prepareAsync()
+            localPlayer?.prepareAsync()
         }
     }
 
@@ -118,9 +120,8 @@ object LocalPlayback : Playback(),
     fun doResume(updateFocus: Boolean) {
         if (!isPlaying()) {
             if (!updateFocus or requestAudioFocus()) {
-                SERVICE!!.startProgressThread()
-                localPlayer.start()
-                SERVICE!!.startForeground()
+                localPlayer?.start()
+                nowPlaying()
             } else Log.e(TAG, "AudioFocus denied")
         } else Log.e(TAG, "It seems like resume was called while you are playing. It is recommended you do some debugging.")
     }
@@ -133,10 +134,10 @@ object LocalPlayback : Playback(),
 
     fun doPause(updateFocus: Boolean) {
         if (updateFocus) giveUpAudioFocus()
-        localPlayer.pause()
+        localPlayer?.pause()
         HeadsetPlugReceiver unregister SERVICE!!
         SERVICE!!.stopForeground(false)
-        SERVICE!!.shutdownProgressThread()
+        SERVICE!!.shutdownProgressThreadIfNecessary()
     }
 
     //////////
@@ -147,7 +148,7 @@ object LocalPlayback : Playback(),
 
     fun doStop(updateFocus: Boolean) {
         if (updateFocus) giveUpAudioFocus()
-        localPlayer.destroy()
+        localPlayer?.destroy()
     }
 
     //////////
@@ -157,9 +158,9 @@ object LocalPlayback : Playback(),
     override fun doSeek(time: Long) {
         val to = time.toInt()
         wasPlayingBeforeAction = isPlaying()
-        localPlayer.pause()
-        if (to >= localPlayer.duration) localPlayer.seekTo(to) else next()
-        if (wasPlayingBeforeAction) localPlayer.start()
+        localPlayer?.pause()
+        if (to >= localPlayer!!.duration) localPlayer?.seekTo(to) else next()
+        if (wasPlayingBeforeAction) localPlayer?.start()
     }
 
     ////////////
@@ -167,7 +168,7 @@ object LocalPlayback : Playback(),
     ////////////
 
     override fun setRepeating(repeating: Boolean) {
-        localPlayer.isLooping = repeating
+        localPlayer?.isLooping = repeating
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -184,7 +185,7 @@ object LocalPlayback : Playback(),
     override fun onCompletion(mp: MediaPlayer?) = next()
 
     override fun onError(mp: MediaPlayer?, what: Int, extra: Int): Boolean {
-        SERVICE!!.shutdownProgressThread()
+        SERVICE!!.shutdownProgressThreadIfNecessary()
         //TODO: Handle this with some some sort of callback
         return true
     }
@@ -214,23 +215,25 @@ object LocalPlayback : Playback(),
         }
     }
 
-    private fun setDucking(duck: Boolean) = localPlayer.setVolume(if (duck) 0.5f else 1.0f, if (duck) 0.5f else 1.0f)
+    private fun setDucking(duck: Boolean) = localPlayer?.setVolume(if (duck) 0.5f else 1.0f, if (duck) 0.5f else 1.0f)
 
     ///////////////////////////////////////////////////////////////////////////
     // Misc.
     // STATUS: COMPLETE
     ///////////////////////////////////////////////////////////////////////////
 
-    override fun isPlaying() = localPlayer.isPlaying
+    override fun isPlaying() = localPlayer?.isPlaying ?: false
 
-    override fun isRepeating() = localPlayer.isLooping
+    override fun isRepeating() = localPlayer?.isLooping ?: false
 
     override fun getCurrentPosInSong(): Int {
         try {
-            return localPlayer.currentPosition
+            return localPlayer?.currentPosition ?: 0
         } catch (e: Exception) {
             Log.e(TAG, "failed retrieving the current position, returning 0", e)
             return 0
         }
     }
+
+    override val playerCreatedOnClassCreation: Boolean = false
 }
