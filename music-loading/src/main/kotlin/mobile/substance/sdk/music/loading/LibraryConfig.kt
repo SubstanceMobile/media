@@ -27,7 +27,7 @@ class LibraryConfig {
     // Main configuration
     ///////////////////////////////////////////////////////////////////////////
 
-    private val config = arrayListOf(MusicType.ALBUMS, MusicType.ARTISTS, MusicType.SONGS, MusicType.PLAYLISTS, MusicType.GENRES)
+    private val config = arrayListOf<MusicType>()
 
     fun load(vararg items: MusicType) : LibraryConfig {
         for (item in items) config.add(item)
