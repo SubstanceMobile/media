@@ -21,8 +21,6 @@ import com.google.android.gms.cast.framework.CastOptions
 import com.google.android.gms.cast.framework.OptionsProvider
 import com.google.android.gms.cast.framework.SessionProvider
 import mobile.substance.sdk.music.playback.MusicPlaybackOptions
-import mobile.substance.sdk.music.playback.MusicPlaybackUtil
-import java.util.*
 
 class CastOptionsProvider : OptionsProvider {
 
@@ -35,14 +33,11 @@ class CastOptionsProvider : OptionsProvider {
     }
 
     override fun getCastOptions(p0: Context?): CastOptions? {
-        val namespaces = ArrayList<String>()
-        namespaces.add(MEDIA_NAMESPACE)
-
         return CastOptions.Builder()
                 .setReceiverApplicationId(MusicPlaybackOptions.castApplicationId)
                 .setEnableReconnectionService(true)
                 .setResumeSavedSession(true)
-                .setSupportedNamespaces(namespaces)
+                // .setSupportedNamespaces(listOf(MEDIA_NAMESPACE))
                 .build()
     }
 

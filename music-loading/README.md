@@ -11,7 +11,7 @@ compile('com.github.SubstanceMobile.SDK:music-loading:-SNAPSHOT'@aar){
 The basic use for this library is this:
 ```
 Library.init(Context, LibraryConfig() // Initialization
-        .put(LibraryData.SONGS)
+        .put(MusicType.SONGS)
         .hookPlayback()
         .hookTags())
 Library.registerListener(LibraryListener) // Get notified of all loading events

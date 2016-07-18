@@ -56,7 +56,7 @@ interface MusicLibraryData {
         return null
     }
 
-    fun findAlbumsById(id: Long) : Album? {
+    fun findAlbumById(id: Long) : Album? {
         for (album in getAlbums()) if (album.id == id) return album
         return null
     }

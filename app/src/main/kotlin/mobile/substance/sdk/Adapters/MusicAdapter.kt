@@ -17,19 +17,22 @@
 package mobile.substance.sdk.adapters
 
 import android.content.Context
+import android.graphics.BitmapFactory
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import com.bumptech.glide.Glide
 import mobile.substance.sdk.R
+import mobile.substance.sdk.music.core.dataLinkers.MusicData
+import mobile.substance.sdk.music.core.dataLinkers.MusicLibraryData
 import mobile.substance.sdk.music.core.objects.*
 import mobile.substance.sdk.music.loading.Library
-import mobile.substance.sdk.music.loading.LibraryData
 import mobile.substance.sdk.music.loading.LibraryListener
+import mobile.substance.sdk.music.loading.MusicType
 import mobile.substance.sdk.music.playback.PlaybackRemote
 import mobile.substance.sdk.viewholders.MusicViewHolder
 
-class MusicAdapter<T : MediaObject>(private val type: LibraryData) : RecyclerView.Adapter<MusicViewHolder>(), LibraryListener {
+class MusicAdapter<T : MediaObject>(private val type: MusicType) : RecyclerView.Adapter<MusicViewHolder>(), LibraryListener {
 
     var items: List<T>? = null
     var context: Context? = null
@@ -37,17 +40,17 @@ class MusicAdapter<T : MediaObject>(private val type: LibraryData) : RecyclerVie
     init {
         Library.registerListener(this)
 
-        if (type == LibraryData.SONGS) items = Library.songs as List<T>
-        if (type == LibraryData.ALBUMS) items = Library.albums as List<T>
-        if (type == LibraryData.ARTISTS) items = Library.artists as List<T>
-        if (type == LibraryData.PLAYLISTS) items = Library.playlists as List<T>
-        if (type == LibraryData.GENRES) items = Library.genres as List<T>
+        if (type == MusicType.SONGS) items = MusicData.getSongs() as List<T>
+        if (type == MusicType.ALBUMS) items = MusicData.getAlbums() as List<T>
+        if (type == MusicType.ARTISTS) items = MusicData.getArtists() as List<T>
+        if (type == MusicType.PLAYLISTS) items = MusicData.getPlaylists() as List<T>
+        if (type == MusicType.GENRES) items = MusicData.getGenres() as List<T>
     }
 
     override fun onSongLoaded(item: Song, pos: Int) {}
 
     override fun onSongsCompleted(result: List<Song>) {
-        if (type == LibraryData.SONGS) {
+        if (type == MusicType.SONGS) {
             items = result as List<T>
             notifyDataSetChanged()
         }
@@ -56,7 +59,7 @@ class MusicAdapter<T : MediaObject>(private val type: LibraryData) : RecyclerVie
     override fun onAlbumLoaded(item: Album, pos: Int) {}
 
     override fun onAlbumsCompleted(result: List<Album>) {
-        if (type == LibraryData.ALBUMS) {
+        if (type == MusicType.ALBUMS) {
             items = result as List<T>
             notifyDataSetChanged()
         }
@@ -65,7 +68,7 @@ class MusicAdapter<T : MediaObject>(private val type: LibraryData) : RecyclerVie
     override fun onArtistLoaded(item: Artist, pos: Int) {}
 
     override fun onArtistsCompleted(result: List<Artist>) {
-        if (type == LibraryData.ARTISTS) {
+        if (type == MusicType.ARTISTS) {
             items = result as List<T>
             notifyDataSetChanged()
         }
@@ -74,7 +77,7 @@ class MusicAdapter<T : MediaObject>(private val type: LibraryData) : RecyclerVie
     override fun onPlaylistLoaded(item: Playlist, pos: Int) {}
 
     override fun onPlaylistsCompleted(result: List<Playlist>) {
-        if (type == LibraryData.PLAYLISTS) {
+        if (type == MusicType.PLAYLISTS) {
             items = result as List<T>
             notifyDataSetChanged()
         }
@@ -83,7 +86,7 @@ class MusicAdapter<T : MediaObject>(private val type: LibraryData) : RecyclerVie
     override fun onGenreLoaded(item: Genre, pos: Int) {}
 
     override fun onGenresCompleted(result: List<Genre>) {
-        if (type == LibraryData.GENRES) {
+        if (type == MusicType.GENRES) {
             items = result as List<T>
             notifyDataSetChanged()
         }
@@ -110,22 +113,24 @@ class MusicAdapter<T : MediaObject>(private val type: LibraryData) : RecyclerVie
     }
 
     private fun bindAlbum(album: Album, holder: MusicViewHolder) {
-        holder.title!!.text = album.albumName
-        holder.subtitle!!.text = album.albumArtistName
+        holder.title?.text = album.albumName
+        holder.subtitle?.text = album.albumArtistName
         album.requestArt(holder.image!!)
     }
 
     private fun bindSong(song: Song, holder: MusicViewHolder) {
-        holder.title!!.text = song.songTitle
-        holder.subtitle!!.text = song.songArtistName
-        Library.findAlbumById(song.songAlbumId!!)!!.requestArt(holder.image!!)
+        holder.title?.text = song.songTitle
+        holder.subtitle?.text = song.songArtistName
+        holder.image!!.setImageBitmap(BitmapFactory.decodeFile(MusicData.findAlbumById(song.songAlbumId ?: 0)!!.albumArtworkPath))
+        // MusicData.findAlbumById(song.songAlbumId!!)?.requestArt(holder.image!!)
+
         holder.itemView.setOnClickListener { it ->
             PlaybackRemote.play(song)
         }
     }
 
     private fun bindArtist(artist: Artist, holder: MusicViewHolder) {
-        holder.title!!.text = artist.artistName
+        holder.title?.text = artist.artistName
         Glide.with(context)
                 .load(R.drawable.ic_person_black_24dp)
                 .crossFade()
@@ -135,9 +140,9 @@ class MusicAdapter<T : MediaObject>(private val type: LibraryData) : RecyclerVie
 
     private fun bindGenre(genre: Genre, holder: MusicViewHolder) {
         holder.title!!.text = genre.genreName
-        Library.findSongsForGenreAsync(context!!, genre, object : Library.QueryResult<List<Song>> {
+        MusicData.findSongsForGenreAsync(genre, object : MusicLibraryData.QueryResult<List<Song>> {
             override fun onQueryResult(result: List<Song>) {
-                if (result.size > 0) Library.findAlbumById(result.first().songAlbumId!!)!!.requestArt(holder.image!!)
+                if (result.size > 0) MusicData.findAlbumById(result.first().songAlbumId!!)!!.requestArt(holder.image!!)
             }
         })
 
@@ -145,7 +150,7 @@ class MusicAdapter<T : MediaObject>(private val type: LibraryData) : RecyclerVie
 
     private fun bindPlaylist(playlist: Playlist, holder: MusicViewHolder) {
         holder.title!!.text = playlist.playlistName
-        Library.findSongsForPlaylistAsync(context!!, playlist, object : Library.QueryResult<List<Song>> {
+        MusicData.findSongsForPlaylistAsync(playlist, object : MusicLibraryData.QueryResult<List<Song>> {
             override fun onQueryResult(result: List<Song>) {
                 if (result.size > 0) Library.findAlbumById(result.first().songAlbumId!!)!!.requestArt(holder.image!!)
             }

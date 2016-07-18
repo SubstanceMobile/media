@@ -22,8 +22,6 @@ package mobile.substance.sdk.music.core
 object MusicCoreOptions {
 
     var defaultArt: Int = 0
-    var statusbarIconResId = 0
-    var castApplicationId: String? = null
 
     var songsString = "Please specify songsString in MusicCoreOptions"
     var albumsString = "Please specify albumsString in MusicCoreOptions"

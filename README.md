@@ -56,8 +56,8 @@ An example usage loading only Songs and Albums where `this` stands for the `Acti
 ```
 // Initialization
 Library.init(this, new LibraryConfig()
-        .put(LibraryData.SONGS)
-        .put(LibraryData.ALBUMS));
+        .put(MusicType.SONGS)
+        .put(MusicType.ALBUMS));
         
 // Listener
 Library.registerListener(this);

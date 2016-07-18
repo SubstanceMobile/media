@@ -19,6 +19,6 @@ package mobile.substance.sdk.music.loading
 /**
  * Created by Julian Os on 05.05.2016.
  */
-enum class LibraryData {
+enum class MusicType {
     SONGS, ALBUMS, ARTISTS, PLAYLISTS, GENRES
 }

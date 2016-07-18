@@ -27,14 +27,14 @@ class LibraryConfig {
     // Main configuration
     ///////////////////////////////////////////////////////////////////////////
 
-    private val config = arrayListOf(LibraryData.ALBUMS, LibraryData.ARTISTS, LibraryData.SONGS, LibraryData.PLAYLISTS, LibraryData.GENRES)
+    private val config = arrayListOf<MusicType>()
 
-    fun load(vararg items: LibraryData) : LibraryConfig {
+    fun load(vararg items: MusicType) : LibraryConfig {
         for (item in items) config.add(item)
         return this
     }
 
-    fun contains(item: LibraryData) = config.contains(item)
+    fun contains(item: MusicType) = config.contains(item)
 
     ///////////////////////////////////////////////////////////////////////////
     // Optional configuration objects

@@ -24,7 +24,7 @@ import mobile.substance.sdk.R
 import mobile.substance.sdk.adapters.MusicAdapter
 import mobile.substance.sdk.music.core.objects.*
 import mobile.substance.sdk.music.loading.Library
-import mobile.substance.sdk.music.loading.LibraryData
+import mobile.substance.sdk.music.loading.MusicType
 import mobile.substance.sdk.music.loading.LibraryListener
 
 /**
@@ -32,7 +32,7 @@ import mobile.substance.sdk.music.loading.LibraryListener
  */
 class RecyclerViewFragment : BaseFragment(), LibraryListener {
 
-    fun setType(data: LibraryData): RecyclerViewFragment {
+    fun setType(data: MusicType): RecyclerViewFragment {
         this.type = data
         return this
     }
@@ -41,35 +41,35 @@ class RecyclerViewFragment : BaseFragment(), LibraryListener {
     }
 
     override fun onSongsCompleted(result: List<Song>) {
-        if (type == LibraryData.SONGS) setAdapter()
+        if (type == MusicType.SONGS) setAdapter()
     }
 
     override fun onAlbumLoaded(item: Album, pos: Int) {
     }
 
     override fun onAlbumsCompleted(result: List<Album>) {
-        if (type == LibraryData.ALBUMS) setAdapter()
+        if (type == MusicType.ALBUMS) setAdapter()
     }
 
     override fun onArtistLoaded(item: Artist, pos: Int) {
     }
 
     override fun onArtistsCompleted(result: List<Artist>) {
-        if (type == LibraryData.ARTISTS) setAdapter()
+        if (type == MusicType.ARTISTS) setAdapter()
     }
 
     override fun onPlaylistLoaded(item: Playlist, pos: Int) {
     }
 
     override fun onPlaylistsCompleted(result: List<Playlist>) {
-        if (type == LibraryData.PLAYLISTS) setAdapter()
+        if (type == MusicType.PLAYLISTS) setAdapter()
     }
 
     override fun onGenreLoaded(item: Genre, pos: Int) {
     }
 
     override fun onGenresCompleted(result: List<Genre>) {
-        if (type == LibraryData.GENRES) setAdapter()
+        if (type == MusicType.GENRES) setAdapter()
     }
 
     override fun onSaveInstanceState(outState: Bundle?) {
@@ -78,12 +78,12 @@ class RecyclerViewFragment : BaseFragment(), LibraryListener {
     }
 
     private val recyclerview: RecyclerView by bindView<RecyclerView>(R.id.fragment_recyclerview_rv)
-    private var type: LibraryData? = null
+    private var type: MusicType? = null
 
     override val layoutResId = R.layout.fragment_recyclerview
 
     override fun init(savedInstanceState: Bundle?) {
-        if (savedInstanceState != null) type = savedInstanceState.getSerializable("type") as LibraryData?
+        if (savedInstanceState != null) type = savedInstanceState.getSerializable("type") as MusicType?
 
         recyclerview.layoutManager = LinearLayoutManager(activity)
         setAdapter()
@@ -92,11 +92,11 @@ class RecyclerViewFragment : BaseFragment(), LibraryListener {
 
     private fun setAdapter() {
         when (type) {
-            LibraryData.SONGS -> recyclerview.adapter = MusicAdapter<Song>(type!!)
-            LibraryData.ALBUMS -> recyclerview.adapter = MusicAdapter<Album>(type!!)
-            LibraryData.ARTISTS -> recyclerview.adapter = MusicAdapter<Artist>(type!!)
-            LibraryData.PLAYLISTS -> recyclerview.adapter = MusicAdapter<Playlist>(type!!)
-            LibraryData.GENRES -> recyclerview.adapter = MusicAdapter<Genre>(type!!)
+            MusicType.SONGS -> recyclerview.adapter = MusicAdapter<Song>(type!!)
+            MusicType.ALBUMS -> recyclerview.adapter = MusicAdapter<Album>(type!!)
+            MusicType.ARTISTS -> recyclerview.adapter = MusicAdapter<Artist>(type!!)
+            MusicType.PLAYLISTS -> recyclerview.adapter = MusicAdapter<Playlist>(type!!)
+            MusicType.GENRES -> recyclerview.adapter = MusicAdapter<Genre>(type!!)
         }
     }
 

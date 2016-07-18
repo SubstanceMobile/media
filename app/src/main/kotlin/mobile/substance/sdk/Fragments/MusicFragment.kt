@@ -23,12 +23,12 @@ import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentManager
 import android.support.v4.app.FragmentPagerAdapter
 import android.support.v4.view.ViewPager
+import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
 import butterknife.bindView
-import com.google.android.gms.cast.framework.CastButtonFactory
 import mobile.substance.sdk.R
 import mobile.substance.sdk.helpers.NavigationHelper
-import mobile.substance.sdk.music.loading.LibraryData
+import mobile.substance.sdk.music.loading.MusicType
 
 /**
  * Created by Julian Os on 03.05.2016.
@@ -42,8 +42,7 @@ class MusicFragment : NavigationDrawerFragment() {
         pager.adapter = MusicPagerAdapter(activity, activity.supportFragmentManager)
         tabs.setupWithViewPager(pager)
         NavigationHelper.setupNavigation(drawerLayout!!, toolbar)
-        toolbar.inflateMenu(R.menu.menu_music)
-        CastButtonFactory.setUpMediaRouteButton(activity, toolbar.menu, R.id.media_route_menu_item)
+        (activity as AppCompatActivity).setSupportActionBar(toolbar)
     }
 
     override val layoutResId: Int = R.layout.fragment_music
@@ -59,11 +58,11 @@ class MusicFragment : NavigationDrawerFragment() {
 
         override fun getItem(position: Int): Fragment? {
             when (position) {
-                0 -> return RecyclerViewFragment().setType(LibraryData.SONGS)
-                1 -> return RecyclerViewFragment().setType(LibraryData.ALBUMS)
-                2 -> return RecyclerViewFragment().setType(LibraryData.ARTISTS)
-                3 -> return RecyclerViewFragment().setType(LibraryData.PLAYLISTS)
-                4 -> return RecyclerViewFragment().setType(LibraryData.GENRES)
+                0 -> return RecyclerViewFragment().setType(MusicType.SONGS)
+                1 -> return RecyclerViewFragment().setType(MusicType.ALBUMS)
+                2 -> return RecyclerViewFragment().setType(MusicType.ARTISTS)
+                3 -> return RecyclerViewFragment().setType(MusicType.PLAYLISTS)
+                4 -> return RecyclerViewFragment().setType(MusicType.GENRES)
             }
             return null
         }

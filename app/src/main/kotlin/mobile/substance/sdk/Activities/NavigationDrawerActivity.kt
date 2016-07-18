@@ -33,11 +33,7 @@ abstract class NavigationDrawerActivity : BaseActivity() {
 
     private fun handleLaunch() {
         fragment = HomeFragment()
-        supportFragmentManager
-                .beginTransaction()
-                .replace(R.id.activity_main_fragment_placeholder, fragment, "SubstanceSDK")
-                .addToBackStack("SubstanceSDK")
-                .commitAllowingStateLoss()
+        commitFragment()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

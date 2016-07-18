@@ -40,7 +40,7 @@ import java.util.*
 class MusicService : MediaBrowserServiceCompat(), CastStateListener {
 
     override fun onCastStateChanged(p0: Int) {
-        if (p0 == CastState.CONNECTED) replacePlaybackEngine(CastPlayback, true, true)
+        if (p0 == CastState.CONNECTED) replacePlaybackEngine(CastPlayback, engine.isPlaying() || engine.getCurrentPosInSong() > 0, true)
     }
 
     //Companion object for the unique ID and log tag.
@@ -100,6 +100,9 @@ class MusicService : MediaBrowserServiceCompat(), CastStateListener {
         if (hotswap) {
             //Time to hotswap some data back in so as far as the user is concerned the engine is the same. In fact, the song they are currently listening to will resume
             if (!trustedSource) Log.d(TAG, "Since you are hotswapping players, this might be a setting that the user can change. If this is the case please display some sort of confirmation to the user that the option has actually changed because they will most likely not be able to notice the change in engine (since you are hotswapping")
+            //Tells the engine that it should wait until it's actually playing before executing further playback tasks (Only one's that control the actual state, e.g. pause/resume, seek, stop). This is done in favor of asynchronous playbacks, e.g. CastPlayback
+            //We mustn't & don't want to have the Service slowing down the UIThread in order to await async operations. How do we handle this? Have a look at the "pendingCalls" variable and the nowPlaying() function in Playback.kt
+            engine.inHotswapTransaction = true
             //Resume the current queue
             engine.play()
             //Seek back to where we were before
@@ -116,63 +119,75 @@ class MusicService : MediaBrowserServiceCompat(), CastStateListener {
     ///////////////////////////////////////////////////////////////////////////
 
     private fun init() {
+        HeadsetPlugReceiver register this
+
         notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         session = MediaSessionCompat(this, MusicService::class.java.simpleName)
         session!!.setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS or MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS)
-        engine.init(this)
+
         session!!.setCallback(engine)
         sessionToken = session!!.sessionToken
 
-        if (MusicPlaybackOptions.isCastEnabled) CastContext.getSharedInstance(this).addCastStateListener(this)
+        if (MusicPlaybackOptions.isCastEnabled) {
+            val instance = CastContext.getSharedInstance(this)
+            instance.addCastStateListener(this)
+            if (instance.sessionManager.currentCastSession != null && instance.sessionManager.currentCastSession.isConnected)
+                replacePlaybackEngine(CastPlayback, false, true)
+        }
+
+        engine.init(this)
     }
 
     ///////////////////////////////////////////////////////////////////////////
     // Progress Thread
     ///////////////////////////////////////////////////////////////////////////
 
-    private var progressThread: Thread? = null
+    private var progressThread: ProgressThread? = null
 
-    fun startProgressThread() {
-        progressThread = object : Thread() {
-            override fun run() {
-                while (!Thread.interrupted()) {
-                    try {
-                        Thread.sleep(500)
-                    } catch (e: InterruptedException) {
-                        e.printStackTrace()
-                        interrupt()
+    inner class ProgressThread : Thread() {
+        override fun run() {
+            while (!Thread.interrupted()) {
+                try {
+                    Thread.sleep(500)
+                } catch (e: InterruptedException) {
+                    e.printStackTrace()
+                    interrupt()
+                }
+                try {
+                    for (CALLBACK in CALLBACKS) {
+                        CALLBACK.onProgressChanged(engine.getCurrentPosInSong())
+                        CALLBACK.onStateChanged(
+                                if (engine.isPlaying())
+                                    PlaybackState.STATE_PLAYING
+                                else if (MusicQueue.getCurrentSong() != null)
+                                    PlaybackState.STATE_PAUSED
+                                else PlaybackState.STATE_IDLE,
+                                engine.isRepeating())
                     }
-                    try {
-                        for (CALLBACK in CALLBACKS) {
-                            CALLBACK.onProgressChanged(engine.getCurrentPosInSong())
-                            CALLBACK.onStateChanged(
-                                    if (engine.isPlaying())
-                                        PlaybackState.STATE_PLAYING
-                                    else if (MusicQueue.getCurrentSong() != null)
-                                        PlaybackState.STATE_PAUSED
-                                    else PlaybackState.STATE_IDLE,
-                                    engine.isRepeating())
-                        }
-                        session!!.setMetadata(MusicQueue.getCurrentSong()!!.metadata)
-                        session!!.setPlaybackState(
-                                PlaybackStateCompat.Builder().setActions(MusicPlaybackOptions.playbackActions.getActions())
-                                        .setState(engine.playbackState, engine.getCurrentPosInSong().toLong(), engine.getPlaybackSpeed())
-                                        .build())
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                        interrupt()
-                    }
+                    session?.setMetadata(MusicQueue.getCurrentSong()!!.metadata)
+                    session?.setPlaybackState(
+                            PlaybackStateCompat.Builder().setActions(MusicPlaybackOptions.playbackActions.getActions())
+                                    .setState(engine.playbackState, engine.getCurrentPosInSong().toLong(), engine.getPlaybackSpeed())
+                                    .build())
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    interrupt()
                 }
             }
         }
-        progressThread!!.start()
     }
 
-    fun shutdownProgressThread() {
-        if (progressThread != null) {
-            progressThread!!.interrupt()
-            progressThread = null
-        }
+    fun startProgressThread() {
+        if (progressThread == null)
+            progressThread = ProgressThread()
+        progressThread?.start()
+    }
+
+    fun shutdownProgressThreadIfNecessary() {
+        if (progressThread == null) return
+        if (!(progressThread?.isInterrupted ?: false))
+            progressThread?.interrupt()
+        progressThread = null
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -180,8 +195,8 @@ class MusicService : MediaBrowserServiceCompat(), CastStateListener {
     ///////////////////////////////////////////////////////////////////////////
 
     private fun destroySession() {
-        session!!.isActive = false
-        session!!.release()
+        session?.isActive = false
+        session?.release()
         session = null
     }
 
@@ -213,10 +228,10 @@ class MusicService : MediaBrowserServiceCompat(), CastStateListener {
     }
 
     fun startForeground() = startForeground(UNIQUE_ID, PlaybackRemote.makeNotification(object : PlaybackRemote.NotificationUpdateInterface {
-        override fun updateNotification(notification: Notification): Unit = updateNotification(notification)
+        override fun updateNotification(notification: Notification): Unit = updateNotification(notif = notification)
     }))
 
-    fun updateNotification(notification: Notification) = notificationManager!!.notify(UNIQUE_ID, notification)
+    fun updateNotification(notif: Notification) = notificationManager!!.notify(UNIQUE_ID, notif)
 
     fun kill() {
         destroySession()
@@ -228,7 +243,7 @@ class MusicService : MediaBrowserServiceCompat(), CastStateListener {
         Log.d(TAG, "onStartCommand()")
         for (callback in CALLBACKS)
             callback.onReceivedIntent(intent)
-        return Service.START_STICKY
+        return Service.START_NOT_STICKY
     }
 
     ///////////////////////////////////////////////////////////////////////////

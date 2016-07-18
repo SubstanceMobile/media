@@ -22,6 +22,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.net.wifi.WifiManager
+import android.webkit.URLUtil
 import java.math.BigInteger
 import java.net.InetAddress
 import java.net.UnknownHostException
@@ -38,7 +39,7 @@ object MusicPlaybackUtil {
     const val SERVER_TYPE_ARTWORK = 1
     const val SERVER_TYPE_AUDIO = 2
 
-    fun getServerportForType(type: Int): Int {
+    @JvmStatic fun getServerPortForType(type: Int): Int {
         when (type) {
             SERVER_TYPE_ARTWORK -> return SERVER_PORT_ARTWORK
             SERVER_TYPE_AUDIO -> return SERVER_PORT_AUDIO
@@ -56,7 +57,7 @@ object MusicPlaybackUtil {
         return false
     }
 
-    fun getIP(context: Context): String? {
+    fun getIpAddressString(context: Context): String? {
         val wifiManager = context.getSystemService(Context.WIFI_SERVICE) as WifiManager
         var mIpAddress = wifiManager.connectionInfo.ipAddress
         if (ByteOrder.nativeOrder() == ByteOrder.LITTLE_ENDIAN) {
@@ -101,11 +102,8 @@ object MusicPlaybackUtil {
     // Url
     ///////////////////////////////////////////////////////////////////////////
 
-    fun getUrlFromUri(uri: Uri) : String {
-        if (uri.scheme == "http" || uri.scheme == "https")
-            return uri.toString()
-        else
-            return ""
+    fun getUrlFromUri(uri: Uri) : String? {
+        if (URLUtil.isValidUrl(uri.toString()) && uri.toString().startsWith("http")) return uri.toString() else return null
     }
 
 }

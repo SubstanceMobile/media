@@ -33,9 +33,16 @@ import mobile.substance.sdk.music.loading.Library
 class PlaylistsTask(context: Context, vararg params: Any) : Loader<Playlist>(context, params) {
 
     override fun buildObject(cursor: Cursor): Playlist? {
-        val playlist = Playlist.Builder().setName(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Playlists.NAME))).setID(cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Playlists._ID))).build()
-        Log.i("PlaylistsTask", "Loaded ID " + playlist.id)
-        return playlist
+        val name = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Playlists.NAME))
+        val id = cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Playlists._ID))
+
+        val p = Playlist.Builder()
+                .setName(name)
+                .setID(id)
+                .build()
+
+        Log.i("PlaylistsTask", "Loaded id $id")
+        return p
     }
 
     override val uri: Uri
@@ -48,7 +55,7 @@ class PlaylistsTask(context: Context, vararg params: Any) : Loader<Playlist>(con
         get() = object : ContentObserver(Handler()) {
             override fun onChange(selfChange: Boolean) {
                 super.onChange(selfChange)
-                update(Library.playlists)
+                update(Library.getPlaylists())
             }
         }
 }

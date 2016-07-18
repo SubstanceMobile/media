@@ -22,6 +22,7 @@ import android.content.Context
 import android.support.v7.app.NotificationCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
+import android.util.Log
 import mobile.substance.sdk.music.core.MusicCoreOptions
 import mobile.substance.sdk.music.core.objects.Song
 import mobile.substance.sdk.music.playback.MusicPlaybackOptions
@@ -38,7 +39,7 @@ class DefaultMediaNotification: MediaNotification {
         val playPauseString = if (isPlaying) "Pause Playback" else "Resume Playback"
         val playPauseResId = if (isPlaying) R.drawable.ic_pause_white_24dp else R.drawable.ic_play_arrow_white_24dp
         val notif = NotificationCompat.Builder(context);
-        val style = NotificationCompat.MediaStyle().setShowActionsInCompactView(1)
+        val style = NotificationCompat.MediaStyle().setShowActionsInCompactView(0, 1, 2)
                 .setShowCancelButton(true).setCancelButtonIntent(removedIntent)
         if (session != null) style.setMediaSession(session.sessionToken)
         notif.setSmallIcon(MusicPlaybackOptions.statusbarIconResId)
