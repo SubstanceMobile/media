@@ -14,16 +14,20 @@
  * limitations under the License.
  */
 
-package mobile.substance.sdk.music.playback.notification
+package mobile.substance.sdk.music.playback.service
 
+import android.app.Notification
 import android.app.PendingIntent
 import android.content.Context
 import android.graphics.Bitmap
 import android.support.v4.media.session.MediaSessionCompat
+import android.support.v4.media.session.PlaybackStateCompat
 import android.support.v7.app.NotificationCompat
 import android.util.Log
 import mobile.substance.sdk.music.core.objects.Song
+import mobile.substance.sdk.music.playback.MusicPlaybackOptions
 import mobile.substance.sdk.music.playback.PlaybackRemote
+import mobile.substance.sdk.music.playback.R
 
 /**
  * This class will be used to create your own media notification. It is required for you to override two of the methods, createNotification and populate. The rest already have code
@@ -34,10 +38,8 @@ import mobile.substance.sdk.music.playback.PlaybackRemote
 interface MediaNotification {
 
     /**
-     * This method is called whenever a notification needs to be created by the service. Do NOT populate this notification with any data such as album art and song metadata.
+     * This function is called whenever a notification needs to be created by the service. Do NOT populate this notification with any data such as album art and song metadata.
      * That will be handled by the populate function.
-     * @param context The application context.
-     * @param session The media session. Can be used to get token and state.
      * @param playIntent The intent you should pass to your created notification in order to resume music.
      * @param pauseIntent The intent you should pass to your created notification in order to pause music.
      * @param nextIntent The intent you should pass to your created notification in order to skip to the next song.
@@ -49,22 +51,60 @@ interface MediaNotification {
     fun createNotification(context: Context, session: MediaSessionCompat?,
                            playIntent: PendingIntent, pauseIntent: PendingIntent, nextIntent: PendingIntent, prevIntent: PendingIntent,
                            clickedIntent: PendingIntent, removedIntent: PendingIntent): NotificationCompat.Builder
-    fun populate(song: Song, notificationBuilder: NotificationCompat.Builder)
+
+    /**
+     * Populate the notification with the current song's details. Override this for custom notifications
+     */
+    fun populate(song: Song, notificationBuilder: NotificationCompat.Builder) {
+        notificationBuilder.setContentTitle(song.songTitle).setContentText(song.songArtistName).setSubText(song.songAlbumName)
+    }
+
+    /**
+     * Override this if you use a custom notification layout in order to set a loaded album art.
+     */
     fun loadArt(albumArt: Bitmap, notificationBuilder: NotificationCompat.Builder) {
         notificationBuilder.setLargeIcon(albumArt)
     }
+
+    /**
+     * Override this if you want to call something when (or after) the notification is built.
+     */
     fun buildNotif(builder: NotificationCompat.Builder) = builder.build()
 
     ///////////////////////////////////////////////////////////////////////////
     // Callbacks
     ///////////////////////////////////////////////////////////////////////////
 
-    fun onPlay() = PlaybackRemote.resume()
-    fun onPause() = PlaybackRemote.pause()
-    fun onSkipForward() = PlaybackRemote.playNext()
-    fun onSkipBackward() = PlaybackRemote.playPrevious()
     fun onNotificationClicked() {
         Log.d("MediaNotification", "Please override onNotificationClicked in order to handle the event.")
     }
+
     fun onNotificationDismissed() = PlaybackRemote.stop()
+}
+
+/**
+ * This class wraps around the MediaNotification allowing Java users to use the default implementations of everything.
+ */
+abstract class MediaNotificationWrapper : MediaNotification
+
+/**
+ * This class is the default implementation of the notification API for the SDK
+ */
+class DefaultMediaNotification : MediaNotification {
+
+    override fun createNotification(context: Context, session: MediaSessionCompat?,
+                                    playIntent: PendingIntent, pauseIntent: PendingIntent, nextIntent: PendingIntent, prevIntent: PendingIntent,
+                                    clickedIntent: PendingIntent, removedIntent: PendingIntent): NotificationCompat.Builder {
+        val isPlaying = session?.controller?.playbackState?.state?.equals(PlaybackStateCompat.STATE_PLAYING) ?: false
+        return NotificationCompat.Builder(context).setSmallIcon(MusicPlaybackOptions.statusbarIconResId)
+                .setPriority(Notification.PRIORITY_MAX)
+                .setOngoing(false)
+                .setContentIntent(clickedIntent)
+                .setDeleteIntent(removedIntent)
+                .addAction(R.drawable.ic_skip_previous_white_24dp, "Skip Backward", prevIntent)
+                .addAction(if (isPlaying) R.drawable.ic_pause_white_24dp else R.drawable.ic_play_arrow_white_24dp, if (isPlaying) "Pause Playback" else "Resume Playback", if (isPlaying) pauseIntent else playIntent)
+                .addAction(R.drawable.ic_skip_next_white_24dp, "Skip Forward", nextIntent)
+                .setStyle(NotificationCompat.MediaStyle().setShowActionsInCompactView(0, 1, 2).setShowCancelButton(true).setCancelButtonIntent(removedIntent).setMediaSession(session?.sessionToken))
+                as NotificationCompat.Builder
+    }
 }
