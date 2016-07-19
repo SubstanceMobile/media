@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package mobile.substance.sdk.music.playback
+package mobile.substance.sdk.music.playback.service
 
 import android.util.Log
 import mobile.substance.sdk.music.core.objects.Song
 import java.util.*
 
 /**
- * Created by Julian Os on 07.05.2016.
+ * This is the class that stores the queue for the playback library
  */
 internal object MusicQueue {
     private var POSITION: Int = 0

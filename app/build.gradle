@@ -21,10 +21,10 @@ apply plugin: 'kotlin-android'
 // Google Cast ID code. Unless specified in the build environment, it will use the default cast ID
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 
-def CAST_ID="CC1AD845"
-def DEBUG="n"
+def CAST_ID = '"CC1AD845"'
+def DEBUG = "n"
 if (project.hasProperty("SECURE_CAST_ID")) {
-    CAST_ID = SECURE_CAST_ID
+    CAST_ID = '"' + SECURE_CAST_ID + '"'
 }
 if (project.hasProperty("ALLOWIDDEBUG")) {
     DEBUG = ALLOWIDDEBUG

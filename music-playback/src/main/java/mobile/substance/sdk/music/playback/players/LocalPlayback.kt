@@ -24,8 +24,8 @@ import android.os.Build
 import android.os.PowerManager
 import android.util.Log
 import mobile.substance.sdk.music.core.utils.MusicCoreUtil
-import mobile.substance.sdk.music.playback.service.HeadsetPlugReceiver
 import mobile.substance.sdk.music.playback.MusicPlaybackUtil
+import mobile.substance.sdk.music.playback.service.HeadsetPlugReceiver
 
 
 object LocalPlayback : Playback(),
