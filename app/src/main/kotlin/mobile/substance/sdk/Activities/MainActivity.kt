@@ -69,19 +69,28 @@ class MainActivity : NavigationDrawerActivity(), PlaybackRemote.RemoteCallback {
     override val drawer: DrawerLayout?
         get() = drawerLayout
 
-    override fun onProgressChanged(progress: Int) {}
+    override fun onProgressChanged(progress: Int) {
+        Log.d("MainActivity.kt", "onProgressChanged, we are at second ${(progress.toLong() / 1000).toString()}")
+    }
 
-    override fun onDurationChanged(duration: Int) {}
+    override fun onDurationChanged(duration: Int) {
+        Log.d("MainActivity.kt", "onDurationChanged(), duration is ${(duration.toLong() / 1000).toString()} seconds")
+    }
 
     override fun onSongChanged(song: Song) {
+        Log.d("MainActivity.kt", "onSongChanged(), title: ${song.songTitle}, artist: ${song.songArtistName}")
         if (currentSongCard.translationY != 0.0f) currentSongCard.animate().translationY(0.0f).setDuration(200).start()
         currentSongTitle.text = song.songTitle
         Library.findAlbumById(song.songAlbumId!!)!!.requestArt(currentSongImage)
     }
 
-    override fun onStateChanged(state: PlaybackState, isRepeating: Boolean) {}
+    override fun onStateChanged(state: PlaybackState, isRepeating: Boolean) {
+        Log.d("MainActivity.kt", "onStateChanged(), ${state.name} isRepeating: ${isRepeating.toString()}")
+    }
 
-    override fun onQueueChanged(queue: List<Song>) {}
+    override fun onQueueChanged(queue: List<Song>) {
+        Log.d("MainActivity.kt", "onQueueChanged(), Queue has a size of ${queue.size.toString()}")
+    }
 
     override val layoutResId: Int = R.layout.activity_main
 

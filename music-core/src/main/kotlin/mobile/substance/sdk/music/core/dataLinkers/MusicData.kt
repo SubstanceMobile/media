@@ -19,6 +19,7 @@ package mobile.substance.sdk.music.core.dataLinkers
 import android.content.Context
 import mobile.substance.sdk.music.core.MusicApiError
 import mobile.substance.sdk.music.core.objects.*
+import java.util.*
 
 object MusicData : MusicLibraryData {
 
@@ -52,5 +53,26 @@ object MusicData : MusicLibraryData {
     override fun getGenres(): MutableList<Genre> = getData()!!.getGenres()
 
     override fun getContext(): Context = dataLinker!!.getContext()
+
+    inline fun <reified T : MediaObject> search(query: String): ArrayList<T>? {
+        val results = ArrayList<T>()
+        if (T::class.java == Song::class.java)
+            getSongs().forEach {
+                if (it.songTitle?.contains(query) ?: false)
+                    results.add(it as T)
+            }
+        if (T::class.java == Album::class.java)
+            getAlbums().forEach {
+                if (it.albumName?.contains(query) ?: false)
+                    results.add(it as T)
+            }
+        if (T::class.java == Artist::class.java)
+            getArtists().forEach {
+                if (it.artistName?.contains(query) ?: false)
+                    results.add(it as T)
+            }
+
+        return results
+    }
 
 }

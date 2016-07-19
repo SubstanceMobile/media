@@ -75,6 +75,10 @@ class MusicService : MediaBrowserServiceCompat(), CastStateListener {
     // Playback Engine
     ///////////////////////////////////////////////////////////////////////////
 
+    internal fun callback(call: (PlaybackRemote.RemoteCallback) -> Any) {
+        for (CALLBACK in CALLBACKS) call.invoke(CALLBACK)
+    }
+
     var engine: Playback = LocalPlayback
 
     internal fun replacePlaybackEngine(newEngine: Playback, hotswap: Boolean, trustedSource: Boolean = false) {

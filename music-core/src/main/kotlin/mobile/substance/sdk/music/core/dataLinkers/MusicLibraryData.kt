@@ -203,4 +203,5 @@ interface MusicLibraryData {
     fun findSongsForGenreAsync(genre: Genre, callback: QueryResult<List<Song>>) {
         QueryTask(callback).execute({ findSongsForGenre(genre) })
     }
+
 }

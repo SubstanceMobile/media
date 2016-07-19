@@ -24,6 +24,8 @@ import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat.*
 import android.util.Log
 import mobile.substance.sdk.music.core.dataLinkers.MusicData
+import mobile.substance.sdk.music.core.objects.Album
+import mobile.substance.sdk.music.core.objects.Artist
 import mobile.substance.sdk.music.core.objects.Song
 import mobile.substance.sdk.music.core.utils.MusicCoreUtil
 import mobile.substance.sdk.music.playback.MusicQueue
@@ -108,13 +110,13 @@ abstract class Playback : MediaSessionCompat.Callback() {
 
     fun play(song: Song, mediaId: Long? = null) {
         play(song.uri, false, mediaId ?: song.id)
+        SERVICE!!.callback { it.onSongChanged(song) }
     }
 
-    fun play(uri: Uri, listenersAlreadyNotified: Boolean, mediaId: Long? = null) {
+    private fun play(uri: Uri, listenersAlreadyNotified: Boolean, mediaId: Long? = null) {
         createPlayerIfNecessary(true)
         if (!manuallyHandleState) playbackState = STATE_PLAYING
         doPlay(uri, listenersAlreadyNotified, mediaId)
-        SERVICE!!.shutdownProgressThreadIfNecessary()
     }
 
     abstract fun doPlay(uri: Uri, listenersAlreadyNotified: Boolean, mediaId: Long? = null)
@@ -152,15 +154,35 @@ abstract class Playback : MediaSessionCompat.Callback() {
     // Other //
     ///////////
 
+    private fun playFromMediaId(mediaId: Long?) {
+
+    }
+
     override fun onPlayFromMediaId(mediaId: String?, extras: Bundle?) {
         val song = MusicData.findSongById(mediaId!!.toLong())
         if (song != null) play(song) else Log.d(TAG, "onPlayFromMediaId: no song with such ID exists")
     }
 
     override fun onPlayFromSearch(query: String?, extras: Bundle?) {
+        query ?: return
+        var songs: MutableList<Song>? = null
         when (extras?.get(MediaStore.EXTRA_MEDIA_FOCUS)) {
+            MediaStore.Audio.Media.ENTRY_CONTENT_TYPE -> {
+                songs = MusicData.search<Song>(query) ?: return
 
+            }
+            MediaStore.Audio.Albums.ENTRY_CONTENT_TYPE -> {
+                val results = MusicData.search<Album>(query) ?: return
+                songs = ArrayList<Song>()
+                results.forEach { songs!!.addAll(MusicData.findSongsForAlbum(it)) }
+            }
+            MediaStore.Audio.Artists.ENTRY_CONTENT_TYPE -> {
+                val results = MusicData.search<Artist>(query) ?: return
+                songs = ArrayList<Song>()
+                results.forEach { songs!!.addAll(MusicData.findSongsForArtist(it)) }
+            }
         }
+        if (songs != null && songs.size > 0) PlaybackRemote.play(songs, 0)
     }
 
     ///////////////////////////////////////////////////////////////////////////
