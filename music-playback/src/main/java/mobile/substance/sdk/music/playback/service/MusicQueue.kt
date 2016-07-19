@@ -45,7 +45,7 @@ internal object MusicQueue {
 
     fun getCurrentSong(): Song? {
         Log.d(MusicQueue::class.java.simpleName, "getCurrentSong(), Index is $POSITION")
-        if (QUEUE != null && QUEUE!!.size > 0) return QUEUE!![POSITION]
+        if (QUEUE != null && QUEUE!!.size > 0) return QUEUE!!.get(POSITION)
         return null
     }
 

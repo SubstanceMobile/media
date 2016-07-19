@@ -32,14 +32,13 @@ import com.google.android.gms.cast.framework.CastContext
 import mobile.substance.sdk.music.core.MusicCoreOptions
 import mobile.substance.sdk.music.core.dataLinkers.MusicData
 import mobile.substance.sdk.music.core.objects.Song
-import mobile.substance.sdk.music.playback.notification.DefaultMediaNotification
-import mobile.substance.sdk.music.playback.notification.MediaNotification
 import mobile.substance.sdk.music.playback.players.Playback
+import mobile.substance.sdk.music.playback.service.*
 import java.net.URL
 import java.util.*
 
 /**
- * Created by Julian Os on 07.05.2016.
+ * This class is used to control all music playback.
  */
 object PlaybackRemote : ServiceConnection {
     private var context: Context? = null
@@ -50,7 +49,7 @@ object PlaybackRemote : ServiceConnection {
     // Manages Connections
     ///////////////////////////////////////////////////////////////////////////
 
-    private val SERVICE_BOUND_LISTENERS: MutableList<ServiceLoadListener> = ArrayList()
+    private val SERVICE_BOUND_LISTENERS: MutableList<ServiceLoadListener> = arrayListOf()
 
     private interface ServiceLoadListener {
         fun respond(service: MusicService?)

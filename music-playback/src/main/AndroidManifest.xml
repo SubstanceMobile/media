@@ -29,7 +29,7 @@
         android:supportsRtl="true">
 
         <service
-            android:name="MusicService"
+            android:name=".service.MusicService"
             android:exported="false">
             <intent-filter>
                 <action android:name="android.media.browse.MediaBrowserService" />
@@ -37,7 +37,7 @@
         </service>
 
         <receiver
-            android:name=".MediaButtonReceiver"
+            android:name=".service.MediaButtonReceiver"
             android:enabled="true">
             <intent-filter>
                 <action android:name="android.intent.action.MEDIA_BUTTON" />

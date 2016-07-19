@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+clear
+# This script will setup the environment for SDK Development
+echo "Cast ID Setup"
+read -s -p "Your Google Cast application ID:" ID && echo
+read -p "Do you want the application ID to be printed out during Gradle builds for debugging purposes? [y/n]:" DEBUG && echo
+
+echo "Creating Gradle files"
+del mobile/gradle.properties > /dev/null
+echo "SECURE_CAST_ID = $ID" >> app/gradle.properties
+echo "ALLOWIDDEBUG = $DEBUG" >> app/gradle.properties
+
+echo Done! You should now be able to compile
+return

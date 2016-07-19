@@ -14,13 +14,16 @@
  * limitations under the License.
  */
 
-package mobile.substance.sdk.music.playback
+package mobile.substance.sdk.music.playback.service
 
 import android.app.Notification
 import android.app.NotificationManager
 import android.app.Service
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
+import android.media.AudioManager
 import android.os.Binder
 import android.os.Bundle
 import android.os.IBinder
@@ -32,6 +35,9 @@ import android.util.Log
 import com.google.android.gms.cast.framework.CastContext
 import com.google.android.gms.cast.framework.CastState
 import com.google.android.gms.cast.framework.CastStateListener
+import mobile.substance.sdk.music.playback.MusicPlaybackOptions
+import mobile.substance.sdk.music.playback.service.MusicQueue
+import mobile.substance.sdk.music.playback.PlaybackRemote
 import mobile.substance.sdk.music.playback.players.CastPlayback
 import mobile.substance.sdk.music.playback.players.LocalPlayback
 import mobile.substance.sdk.music.playback.players.Playback
@@ -150,9 +156,9 @@ class MusicService : MediaBrowserServiceCompat(), CastStateListener {
 
     inner class ProgressThread : Thread() {
         override fun run() {
-            while (!Thread.interrupted()) {
+            while (!interrupted()) {
                 try {
-                    Thread.sleep(500)
+                    sleep(500)
                 } catch (e: InterruptedException) {
                     e.printStackTrace()
                     interrupt()
@@ -204,9 +210,9 @@ class MusicService : MediaBrowserServiceCompat(), CastStateListener {
         session = null
     }
 
-    override fun onGetRoot(clientPackageName: String, clientUid: Int, rootHints: Bundle?): MediaBrowserServiceCompat.BrowserRoot? = null //We don't use this
+    override fun onGetRoot(clientPackageName: String, clientUid: Int, rootHints: Bundle?): BrowserRoot? = null //We don't use this
 
-    override fun onLoadChildren(parentId: String, result: MediaBrowserServiceCompat.Result<List<MediaBrowserCompat.MediaItem>>) {
+    override fun onLoadChildren(parentId: String, result: Result<List<MediaBrowserCompat.MediaItem>>) {
 
     } // We don't use this
 

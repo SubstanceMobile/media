@@ -28,8 +28,8 @@ import mobile.substance.sdk.music.core.objects.Album
 import mobile.substance.sdk.music.core.objects.Artist
 import mobile.substance.sdk.music.core.objects.Song
 import mobile.substance.sdk.music.core.utils.MusicCoreUtil
-import mobile.substance.sdk.music.playback.MusicQueue
-import mobile.substance.sdk.music.playback.MusicService
+import mobile.substance.sdk.music.playback.service.MusicQueue
+import mobile.substance.sdk.music.playback.service.MusicService
 import mobile.substance.sdk.music.playback.PlaybackRemote
 import java.util.*
 

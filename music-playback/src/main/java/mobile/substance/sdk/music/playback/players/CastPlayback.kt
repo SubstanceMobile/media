@@ -30,7 +30,7 @@ import com.google.android.gms.common.images.WebImage
 import mobile.substance.sdk.music.core.dataLinkers.MusicData
 import mobile.substance.sdk.music.core.objects.Song
 import mobile.substance.sdk.music.core.utils.MusicCoreUtil
-import mobile.substance.sdk.music.playback.HeadsetPlugReceiver
+import mobile.substance.sdk.music.playback.service.HeadsetPlugReceiver
 import mobile.substance.sdk.music.playback.MusicPlaybackUtil
 import mobile.substance.sdk.music.playback.cast.LocalServer
 

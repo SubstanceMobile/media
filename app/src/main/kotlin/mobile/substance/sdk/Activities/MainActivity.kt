@@ -35,7 +35,7 @@ import mobile.substance.sdk.R
 import mobile.substance.sdk.music.core.objects.Song
 import mobile.substance.sdk.music.loading.Library
 import mobile.substance.sdk.music.playback.PlaybackRemote
-import mobile.substance.sdk.music.playback.PlaybackState
+import mobile.substance.sdk.music.playback.service.PlaybackState
 
 class MainActivity : NavigationDrawerActivity(), PlaybackRemote.RemoteCallback {
 
