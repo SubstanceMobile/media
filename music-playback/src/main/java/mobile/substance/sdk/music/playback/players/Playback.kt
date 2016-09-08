@@ -21,6 +21,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
 import android.support.v4.media.session.MediaSessionCompat
+import android.support.v4.media.session.PlaybackStateCompat
 import android.support.v4.media.session.PlaybackStateCompat.*
 import android.util.Log
 import mobile.substance.sdk.music.core.dataLinkers.MusicData
@@ -28,6 +29,7 @@ import mobile.substance.sdk.music.core.objects.Album
 import mobile.substance.sdk.music.core.objects.Artist
 import mobile.substance.sdk.music.core.objects.Song
 import mobile.substance.sdk.music.core.utils.MusicCoreUtil
+import mobile.substance.sdk.music.playback.MusicPlaybackOptions
 import mobile.substance.sdk.music.playback.PlaybackRemote
 import mobile.substance.sdk.music.playback.service.MusicQueue
 import mobile.substance.sdk.music.playback.service.MusicService
@@ -369,7 +371,22 @@ abstract class Playback : MediaSessionCompat.Callback() {
             pendingCalls.clear()
         }
         SERVICE!!.startProgressThread()
+        // Set the state because the thread takes a few ms to make its first run
+        SERVICE!!.getMediaSession()?.setPlaybackState(
+                PlaybackStateCompat.Builder().setActions(MusicPlaybackOptions.playbackActions.getActions())
+                        .setState(playbackState, getCurrentPosInSong().toLong(), getPlaybackSpeed())
+                        .build())
         SERVICE!!.startForeground()
+    }
+
+    protected fun nowPaused() {
+        SERVICE!!.shutdownProgressThreadIfNecessary()
+        SERVICE!!.stopForeground(false)
+        SERVICE!!.getMediaSession()?.setPlaybackState(
+                PlaybackStateCompat.Builder().setActions(MusicPlaybackOptions.playbackActions.getActions())
+                        .setState(playbackState, getCurrentPosInSong().toLong(), getPlaybackSpeed())
+                        .build())
+        SERVICE!!.updateNotification(PlaybackRemote.makeNotificaion())
     }
 
 }

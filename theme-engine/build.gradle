@@ -24,7 +24,7 @@ android {
 
     defaultConfig {
         minSdkVersion 17
-        targetSdkVersion 24
+        targetSdkVersion 23
         versionCode 1
         versionName "1.0"
     }
@@ -42,13 +42,16 @@ android {
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     testCompile 'junit:junit:4.12'
-    compile 'com.android.support:appcompat-v7:24.0.0'
-    compile 'com.android.support:design:24.0.0'
+    compile "com.android.support:appcompat-v7:$project.supportLibVersion"
+    compile "com.android.support:design:$project.supportLibVersion"
 
-    provided 'com.android.support:cardview-v7:24.0.0'
+    provided "com.android.support:cardview-v7:$project.supportLibVersion"
 
     // Used for the preference classes
     provided 'com.github.afollestad.material-dialogs:core:0.8.5.8@aar'
     provided 'com.github.afollestad.material-dialogs:commons:0.8.5.8@aar'
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+}
+repositories {
+    mavenCentral()
 }

@@ -117,7 +117,7 @@ object PlaybackRemote : ServiceConnection {
 
         fun onReceivedIntent(intent: Intent) {
             when {
-                intent.action.endsWith(".RESUME") -> resume()
+                intent.action.endsWith(".PLAY") -> resume()
                 intent.action.endsWith(".PAUSE") -> pause()
                 intent.action.endsWith(".skip.FORWARD") -> playNext()
                 intent.action.endsWith(".skip.BACKWARD") -> playPrevious()
@@ -291,14 +291,14 @@ object PlaybackRemote : ServiceConnection {
     }
 
     internal fun makeNotification(albumArt: Bitmap?): Notification {
-        if (notificationBuilder == null) notificationBuilder = notificationCreator.createNotification(context!!, getMediaSession(), // Why checking notificationBuilder != null?
+        if (notificationBuilder == null) notificationBuilder = notificationCreator.createNotification(context!!, getMediaSession(),
                 MusicPlaybackUtil.getPendingIntent(context!!, MusicPlaybackUtil.Action.PLAY),
                 MusicPlaybackUtil.getPendingIntent(context!!, MusicPlaybackUtil.Action.PAUSE),
                 MusicPlaybackUtil.getPendingIntent(context!!, MusicPlaybackUtil.Action.SKIP_FORWARD),
                 MusicPlaybackUtil.getPendingIntent(context!!, MusicPlaybackUtil.Action.SKIP_BACKWARD),
                 MusicPlaybackUtil.getPendingIntent(context!!, MusicPlaybackUtil.Action.NOTIFICATION),
                 MusicPlaybackUtil.getPendingIntent(context!!, MusicPlaybackUtil.Action.STOP))
-        notificationCreator.populate(getCurrentSong()!!, notificationBuilder!!)
+        notificationCreator.populate(getCurrentSong()!!, notificationBuilder!!, getMediaSession(), MusicPlaybackUtil.getPendingIntent(context!!, MusicPlaybackUtil.Action.PLAY), MusicPlaybackUtil.getPendingIntent(context!!, MusicPlaybackUtil.Action.PAUSE))
         if (albumArt != null) notificationCreator.loadArt(albumArt, notificationBuilder!!)
         return notificationCreator.buildNotif(notificationBuilder!!)
     }
@@ -323,7 +323,7 @@ object PlaybackRemote : ServiceConnection {
         override fun respond(service: MusicService?) = service!!.replacePlaybackEngine(engine, hotswap, false)
     })
 
-    fun getMediaSession() = service?.getMediaSession()
+    fun getMediaSession() = service!!.getMediaSession()
 
     fun isReady() = isBound
 

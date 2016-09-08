@@ -64,7 +64,7 @@ object MusicPlaybackUtil {
     ///////////////////////////////////////////////////////////////////////////
 
     enum class Action {
-        PLAY, PAUSE, RESUME, SKIP_FORWARD, SKIP_BACKWARD, SEEK, STOP, NOTIFICATION
+        PLAY, PAUSE, SKIP_FORWARD, SKIP_BACKWARD, SEEK, STOP, NOTIFICATION
     }
 
     fun getAction(context: Context, action: Action): String {
@@ -72,7 +72,6 @@ object MusicPlaybackUtil {
         when (action) {
             Action.PLAY -> return packageName + ".PLAY"
             Action.PAUSE -> return packageName + ".PAUSE"
-            Action.RESUME -> return packageName + ".RESUME"
             Action.SKIP_FORWARD -> return packageName + ".skip.FORWARD"
             Action.SKIP_BACKWARD -> return packageName + ".skip.BACKWARD"
             Action.SEEK -> return packageName + ".SEEK"

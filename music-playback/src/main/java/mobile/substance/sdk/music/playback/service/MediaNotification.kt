@@ -55,7 +55,7 @@ interface MediaNotification {
     /**
      * Populate the notification with the current song's details. Override this for custom notifications
      */
-    fun populate(song: Song, notificationBuilder: NotificationCompat.Builder) {
+    fun populate(song: Song, notificationBuilder: NotificationCompat.Builder, session: MediaSessionCompat?, playIntent: PendingIntent, pauseIntent: PendingIntent) {
         notificationBuilder.setContentTitle(song.songTitle).setContentText(song.songArtistName).setSubText(song.songAlbumName)
     }
 
@@ -106,5 +106,14 @@ class DefaultMediaNotification : MediaNotification {
                 .addAction(R.drawable.ic_skip_next_white_24dp, "Skip Forward", nextIntent)
                 .setStyle(NotificationCompat.MediaStyle().setShowActionsInCompactView(0, 1, 2).setShowCancelButton(true).setCancelButtonIntent(removedIntent).setMediaSession(session?.sessionToken))
                 as NotificationCompat.Builder
+    }
+
+    override fun populate(song: Song, notificationBuilder: NotificationCompat.Builder, session: MediaSessionCompat?, playIntent: PendingIntent, pauseIntent: PendingIntent) {
+        super.populate(song, notificationBuilder, session, playIntent, pauseIntent)
+        val playPause = notificationBuilder.mActions[1]
+        val isPlaying = session?.controller?.playbackState?.state?.equals(PlaybackStateCompat.STATE_PLAYING) ?: false
+        playPause.icon = if (isPlaying) R.drawable.ic_pause_white_24dp else R.drawable.ic_play_arrow_white_24dp
+        playPause.title = if (isPlaying) "Pause Playback" else "Resume Playback"
+        playPause.actionIntent = if (isPlaying) pauseIntent else playIntent
     }
 }

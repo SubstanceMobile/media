@@ -121,6 +121,7 @@ object LocalPlayback : Playback(),
         if (!isPlaying()) {
             if (!updateFocus or requestAudioFocus()) {
                 localPlayer?.start()
+                HeadsetPlugReceiver register SERVICE!!
                 nowPlaying()
             } else Log.e(TAG, "AudioFocus denied")
         } else Log.e(TAG, "It seems like resume was called while you are playing. It is recommended you do some debugging.")
@@ -136,8 +137,7 @@ object LocalPlayback : Playback(),
         if (updateFocus) giveUpAudioFocus()
         localPlayer?.pause()
         HeadsetPlugReceiver unregister SERVICE!!
-        SERVICE!!.stopForeground(false)
-        SERVICE!!.shutdownProgressThreadIfNecessary()
+        nowPaused()
     }
 
     //////////
