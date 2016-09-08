@@ -16,7 +16,6 @@
             <option value="$PROJECT_DIR$/music-loading" />
             <option value="$PROJECT_DIR$/music-playback" />
             <option value="$PROJECT_DIR$/music-tags" />
-            <option value="$PROJECT_DIR$/permissions" />
             <option value="$PROJECT_DIR$/plugin-support" />
             <option value="$PROJECT_DIR$/theme-engine" />
           </set>
@@ -31,7 +30,6 @@
             <option value="$PROJECT_DIR$/music-loading" />
             <option value="$PROJECT_DIR$/music-playback" />
             <option value="$PROJECT_DIR$/music-tags" />
-            <option value="$PROJECT_DIR$/permissions" />
             <option value="$PROJECT_DIR$/plugin-support" />
             <option value="$PROJECT_DIR$/theme-engine" />
           </set>
