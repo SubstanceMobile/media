@@ -16,48 +16,39 @@
 
 package mobile.substance.sdk.activities
 
-import android.Manifest
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
-import android.util.Log
-import mobile.substance.sdk.permissions.PermissionsCallbacks
-import mobile.substance.sdk.permissions.PermissionsHandler
+import com.afollestad.assent.Assent
+import com.afollestad.assent.AssentActivity
+import com.afollestad.assent.AssentCallback
+import com.afollestad.assent.PermissionResultSet
+import java.util.*
 
-abstract class BaseActivity : AppCompatActivity(), PermissionsCallbacks {
-    val permissionHandler = PermissionsHandler(this, arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE), this)
+abstract class BaseActivity : AssentActivity(), AssentCallback {
 
     var savedInstanceState: Bundle? = null
 
-    override fun onPermissionGranted(permission: String) {
-        Log.d("Permission Granted!", permission)
+    override fun onPermissionResult(result: PermissionResultSet?) {
+        if (result!!.allPermissionsGranted())
+            init(savedInstanceState)
     }
 
-    override fun onSaveInstanceState(outState: Bundle?) {
-        if (permissionHandler.allGranted)
-            super.onSaveInstanceState(outState)
+    companion object {
+        val UNIQUE_ASSENT_REQUEST_CODE: Int by lazy {
+            Random().nextInt(100)
+        }
     }
-
-    override fun onShouldShowRationale(permission: String) {}
-
-    override fun onAllGranted() {
-        Log.d(BaseActivity::class.java.simpleName, "onAllGranted()")
-        runOnUiThread { init(savedInstanceState) }
-    }
-
-    override fun onPermissionUnavailable(permission: String) {}
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         this.savedInstanceState = savedInstanceState
         setContentView(layoutResId)
         Thread() {
-            run { permissionHandler.handlePermissions() }
+            run {
+                if (!Assent.isPermissionGranted(Assent.READ_EXTERNAL_STORAGE) || !Assent.isPermissionGranted(Assent.WRITE_EXTERNAL_STORAGE)) {
+                    Assent.requestPermissions(this, UNIQUE_ASSENT_REQUEST_CODE, Assent.READ_EXTERNAL_STORAGE, Assent.WRITE_EXTERNAL_STORAGE)
+                } else runOnUiThread { init(savedInstanceState) }
+            }
         }.start()
-    }
-
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
-        if (!permissionHandler.handleRequestPermissionsResult(requestCode, permissions, grantResults))
-            super.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
 
     abstract fun init(savedInstanceState: Bundle?)
