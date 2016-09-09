@@ -21,17 +21,17 @@ import android.app.NotificationManager
 import android.app.Service
 import android.content.Context
 import android.content.Intent
-import android.os.Binder
-import android.os.Bundle
-import android.os.IBinder
+import android.os.*
 import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaBrowserServiceCompat
+import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
 import com.google.android.gms.cast.framework.CastContext
 import com.google.android.gms.cast.framework.CastState
 import com.google.android.gms.cast.framework.CastStateListener
+import mobile.substance.sdk.music.core.utils.MusicCoreUtil
 import mobile.substance.sdk.music.playback.MusicPlaybackOptions
 import mobile.substance.sdk.music.playback.PlaybackRemote
 import mobile.substance.sdk.music.playback.players.CastPlayback
@@ -160,17 +160,20 @@ class MusicService : MediaBrowserServiceCompat(), CastStateListener {
                     interrupt()
                 }
                 try {
-                    for (CALLBACK in CALLBACKS) {
-                        CALLBACK.onProgressChanged(engine.getCurrentPosInSong())
-                        CALLBACK.onStateChanged(
-                                if (engine.isPlaying())
-                                    PlaybackState.STATE_PLAYING
-                                else if (MusicQueue.getCurrentSong() != null)
-                                    PlaybackState.STATE_PAUSED
-                                else PlaybackState.STATE_IDLE,
-                                engine.isRepeating())
+                    Handler(Looper.getMainLooper()).post {
+                        for (CALLBACK in CALLBACKS) {
+                            CALLBACK.onProgressChanged(engine.getCurrentPosInSong())
+                            CALLBACK.onStateChanged(
+                                    if (engine.isPlaying())
+                                        PlaybackState.STATE_PLAYING
+                                    else if (MusicQueue.getCurrentSong() != null)
+                                        PlaybackState.STATE_PAUSED
+                                    else PlaybackState.STATE_IDLE,
+                                    engine.isRepeating())
+                        }
                     }
-                    session?.setMetadata(MusicQueue.getCurrentSong()!!.metadata)
+
+
                     session?.setPlaybackState(
                             PlaybackStateCompat.Builder().setActions(MusicPlaybackOptions.playbackActions.getActions())
                                     .setState(engine.playbackState, engine.getCurrentPosInSong().toLong(), engine.getPlaybackSpeed())
@@ -183,13 +186,23 @@ class MusicService : MediaBrowserServiceCompat(), CastStateListener {
         }
     }
 
-    fun startProgressThread() {
-        if (progressThread == null)
-            progressThread = ProgressThread()
+    internal fun updateMetadata() {
+        Thread() {
+            run {
+                val source = MusicQueue.getCurrentSong()!!.metadata
+                session?.setMetadata(MediaMetadataCompat.Builder(source)
+                        .putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, MusicCoreUtil.getArtwork(MusicQueue.getCurrentSong(), this))
+                        .build())
+            }
+        }.start()
+    }
+
+    internal fun startProgressThread() {
+        if (progressThread == null) progressThread = ProgressThread() else if (progressThread?.isAlive ?: false) return
         progressThread?.start()
     }
 
-    fun shutdownProgressThreadIfNecessary() {
+    internal fun shutdownProgressThreadIfNecessary() {
         if (progressThread == null) return
         if (!(progressThread?.isInterrupted ?: false))
             progressThread?.interrupt()
@@ -247,8 +260,25 @@ class MusicService : MediaBrowserServiceCompat(), CastStateListener {
 
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
         Log.d(TAG, "onStartCommand()")
-        for (callback in CALLBACKS)
-            callback.onReceivedIntent(intent)
+
+        if (intent.action != null) {
+            when {
+                intent.action.endsWith(".PLAY") -> PlaybackRemote.resume()
+                intent.action.endsWith(".PAUSE") -> PlaybackRemote.pause()
+                intent.action.endsWith(".skip.FORWARD") -> PlaybackRemote.playNext()
+                intent.action.endsWith(".skip.BACKWARD") -> PlaybackRemote.playPrevious()
+                intent.action.endsWith(".NOTIFICATION") -> PlaybackRemote.notificationCreator.onNotificationClicked()
+                intent.action.endsWith(".SEEK") -> PlaybackRemote.seekTo(intent.getIntExtra("progress", 0))
+                intent.action.endsWith(".STOP") -> {
+                    stopForeground(true)
+                    engine.stop()
+                    PlaybackRemote.notificationCreator.onNotificationDismissed()
+                }
+                else -> for (callback in CALLBACKS)
+                    callback.onReceivedIntent(intent)
+            }
+        }
+
         return Service.START_NOT_STICKY
     }
 

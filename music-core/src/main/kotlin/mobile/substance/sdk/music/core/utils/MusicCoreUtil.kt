@@ -20,14 +20,21 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.database.Cursor
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
 import android.provider.DocumentsContract
 import android.provider.MediaStore
 import android.util.TypedValue
+import android.webkit.URLUtil
+import mobile.substance.sdk.music.core.MusicCoreOptions
+import mobile.substance.sdk.music.core.dataLinkers.MusicData
 import mobile.substance.sdk.music.core.objects.MediaObject
+import mobile.substance.sdk.music.core.objects.Song
 import java.io.File
+import java.net.URL
 
 object MusicCoreUtil {
 
@@ -79,6 +86,22 @@ object MusicCoreUtil {
         return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, context.resources.displayMetrics)
     }
 
+    ///////////////////////////////////////////////////////////////////////////
+    // Bitmap retrieval
+    ///////////////////////////////////////////////////////////////////////////
+
+    fun getArtwork(song: Song?, context: Context): Bitmap? {
+        try {
+            val albumArtPath = MusicData.findAlbumById(song?.songAlbumId!!)?.albumArtworkPath
+            if (albumArtPath != null && albumArtPath.length > 0) return BitmapFactory.decodeFile(albumArtPath)
+            if (song?.hasExplicitArtwork!! && song?.explicitArtworkPath!!.length > 0) {
+                val url = getUrlFromUri(Uri.parse(song?.explicitArtworkPath))
+                if (url != null) BitmapFactory.decodeStream(URL(url).openStream()) else BitmapFactory.decodeFile(url)
+            }
+        } catch (e: Exception) { e.printStackTrace() }
+
+        return BitmapFactory.decodeResource(context.resources, MusicCoreOptions.defaultArt)
+    }
 
     @JvmStatic fun getFilePath(context: Context, uri: Uri): String? {
         if (isKitKat && DocumentsContract.isDocumentUri(context, uri)) {
@@ -139,6 +162,14 @@ object MusicCoreUtil {
 
     private fun isMediaDocument(uri: Uri): Boolean {
         return "com.android.providers.media.documents" == uri.authority
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
+    // Url
+    ///////////////////////////////////////////////////////////////////////////
+
+    fun getUrlFromUri(uri: Uri): String? {
+        if (URLUtil.isValidUrl(uri.toString()) && uri.toString().startsWith("http")) return uri.toString() else return null
     }
 
 }

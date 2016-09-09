@@ -17,6 +17,10 @@ class LocalServer(private val type: Int) : NanoHTTPD(MusicPlaybackUtil.getServer
         path = MusicCoreUtil.getFilePath(context, uri)
     }
 
+    override fun start() {
+        super.start()
+    }
+
     override fun serve(session: IHTTPSession?): Response {
         val inputStream = FileInputStream(File(path))
         return newChunkedResponse(Response.Status.OK, if (type == MusicPlaybackUtil.SERVER_TYPE_AUDIO) "audio/*" else "image/*", inputStream)

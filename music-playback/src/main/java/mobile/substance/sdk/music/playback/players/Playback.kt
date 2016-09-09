@@ -112,7 +112,10 @@ abstract class Playback : MediaSessionCompat.Callback() {
 
     fun play(song: Song, mediaId: Long? = null) {
         play(song.uri, false, mediaId ?: song.id)
-        SERVICE!!.callback { it.onSongChanged(song) }
+        SERVICE!!.callback {
+            it.onSongChanged(song)
+            it.onDurationChanged(song.songDuration?.toInt() ?: 0, song.songDurationString)
+        }
     }
 
     private fun play(uri: Uri, listenersAlreadyNotified: Boolean, mediaId: Long? = null) {
@@ -363,7 +366,7 @@ abstract class Playback : MediaSessionCompat.Callback() {
         //TODO
     }
 
-    protected fun nowPlaying() {
+    protected fun nowPlaying(updateMetadata: Boolean = true) {
         if (inHotswapTransaction) {
             inHotswapTransaction = false
             for (call in pendingCalls)
@@ -376,6 +379,7 @@ abstract class Playback : MediaSessionCompat.Callback() {
                 PlaybackStateCompat.Builder().setActions(MusicPlaybackOptions.playbackActions.getActions())
                         .setState(playbackState, getCurrentPosInSong().toLong(), getPlaybackSpeed())
                         .build())
+        SERVICE!!.updateMetadata()
         SERVICE!!.startForeground()
     }
 

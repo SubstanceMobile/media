@@ -4,9 +4,6 @@ import android.app.Application
 import android.util.Log
 import com.google.android.gms.cast.CastMediaControlIntent
 import mobile.substance.sdk.music.core.MusicCoreOptions
-import mobile.substance.sdk.music.loading.Library
-import mobile.substance.sdk.music.loading.LibraryConfig
-import mobile.substance.sdk.music.loading.MusicType
 import mobile.substance.sdk.music.playback.MusicPlaybackOptions
 import java.lang.reflect.Field
 
@@ -19,11 +16,6 @@ class SDKApp : Application() {
 
     override fun onCreate() {
         super.onCreate()
-
-        Library.init(this, LibraryConfig()
-                .hookIntoActivityLifecycle(this)
-                .load(MusicType.SONGS, MusicType.ALBUMS, MusicType.ARTISTS, MusicType.GENRES, MusicType.PLAYLISTS))
-                .build()
 
         Thread() {
             run {

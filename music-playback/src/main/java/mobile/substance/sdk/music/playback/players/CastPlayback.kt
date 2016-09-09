@@ -131,7 +131,7 @@ object CastPlayback : Playback(), SessionManagerListener<Session>, RemoteMediaCl
 
         //Start the service and do some work!
         try {
-            val url = MusicPlaybackUtil.getUrlFromUri(uri)
+            val url = MusicCoreUtil.getUrlFromUri(uri)
 
             val song: Song? = if (mediaId != null) MusicData.findSongById(mediaId) else null
 
@@ -194,9 +194,7 @@ object CastPlayback : Playback(), SessionManagerListener<Session>, RemoteMediaCl
             if (!it.status.isSuccess) {
                 Toast.makeText(SERVICE!!, "Unable to resume", Toast.LENGTH_SHORT).show()
                 Log.d(TAG, it.status.statusMessage)
-            } else {
-                nowPlaying()
-            }
+            } else nowPlaying()
         }
     }
 
@@ -205,10 +203,7 @@ object CastPlayback : Playback(), SessionManagerListener<Session>, RemoteMediaCl
             if (!it.status.isSuccess) {
                 Toast.makeText(SERVICE!!, "Unable to resume", Toast.LENGTH_SHORT).show()
                 Log.d(TAG, it.status.statusMessage)
-            } else {
-                SERVICE!!.shutdownProgressThreadIfNecessary()
-                SERVICE!!.stopForeground(false)
-            }
+            } else nowPaused()
         }
     }
 

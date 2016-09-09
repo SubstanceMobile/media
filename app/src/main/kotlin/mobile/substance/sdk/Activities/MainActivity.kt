@@ -33,7 +33,10 @@ import com.github.javiersantos.materialstyleddialogs.MaterialStyledDialog
 import com.google.android.gms.cast.framework.CastButtonFactory
 import mobile.substance.sdk.R
 import mobile.substance.sdk.music.core.objects.Song
+import mobile.substance.sdk.music.core.utils.MusicCoreUtil
 import mobile.substance.sdk.music.loading.Library
+import mobile.substance.sdk.music.loading.LibraryConfig
+import mobile.substance.sdk.music.loading.MusicType
 import mobile.substance.sdk.music.playback.PlaybackRemote
 import mobile.substance.sdk.music.playback.service.PlaybackState
 
@@ -44,13 +47,21 @@ class MainActivity : NavigationDrawerActivity(), PlaybackRemote.RemoteCallback {
     private val currentSongImage: ImageView by bindView<ImageView>(R.id.activity_main_current_song_image)
     private val currentSongTitle: TextView by bindView<TextView>(R.id.activity_main_current_song_title)
     private val currentSongCard: CardView by bindView<CardView>(R.id.activity_main_current_song_card)
+    private val currentSongProgress: TextView by bindView<TextView>(R.id.activity_main_current_song_progress)
 
     override fun init(savedInstanceState: Bundle?) {
         super.init(savedInstanceState)
+
+        Library.init(this, LibraryConfig()
+                .hookIntoActivityLifecycle(this)
+                .load(MusicType.SONGS, MusicType.ALBUMS, MusicType.ARTISTS, MusicType.GENRES, MusicType.PLAYLISTS))
+                .build()
+
         navigationView.setNavigationItemSelectedListener { it ->
             drawerLayout.closeDrawer(GravityCompat.START)
             handleNavigationClick(it)
         }
+
         currentSongCard.setOnClickListener {
             val dialog = MaterialStyledDialog(this)
                     .setTitle(PlaybackRemote.getCurrentSong()!!.songTitle!!)
@@ -66,15 +77,19 @@ class MainActivity : NavigationDrawerActivity(), PlaybackRemote.RemoteCallback {
         }
     }
 
+    var duration: Int? = null
+
     override val drawer: DrawerLayout?
         get() = drawerLayout
 
     override fun onProgressChanged(progress: Int) {
         Log.d("MainActivity.kt", "onProgressChanged, we are at second ${(progress.toLong() / 1000).toString()}")
+        currentSongProgress.text = "${MusicCoreUtil.stringForTime(progress.toLong())} / ${MusicCoreUtil.stringForTime(duration?.toLong() ?: 0L)}"
     }
 
-    override fun onDurationChanged(duration: Int) {
+    override fun onDurationChanged(duration: Int, durationString: String) {
         Log.d("MainActivity.kt", "onDurationChanged(), duration is ${(duration.toLong() / 1000).toString()} seconds")
+        this.duration = duration
     }
 
     override fun onSongChanged(song: Song) {

@@ -23,18 +23,15 @@ import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.net.Uri
 import android.os.IBinder
 import android.support.v7.app.NotificationCompat
 import android.util.Log
 import com.google.android.gms.cast.framework.CastContext
-import mobile.substance.sdk.music.core.MusicCoreOptions
 import mobile.substance.sdk.music.core.dataLinkers.MusicData
 import mobile.substance.sdk.music.core.objects.Song
+import mobile.substance.sdk.music.core.utils.MusicCoreUtil
 import mobile.substance.sdk.music.playback.players.Playback
 import mobile.substance.sdk.music.playback.service.*
-import java.net.URL
 import java.util.*
 
 /**
@@ -94,7 +91,9 @@ object PlaybackRemote : ServiceConnection {
     }
 
     fun cleanup() {
-        if (isBound) context!!.unbindService(this)
+        if (isBound) try {
+            context!!.unbindService(this)
+        } catch (e: Exception) {}
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -115,20 +114,11 @@ object PlaybackRemote : ServiceConnection {
 
     interface RemoteCallback {
 
-        fun onReceivedIntent(intent: Intent) {
-            when {
-                intent.action.endsWith(".PLAY") -> resume()
-                intent.action.endsWith(".PAUSE") -> pause()
-                intent.action.endsWith(".skip.FORWARD") -> playNext()
-                intent.action.endsWith(".skip.BACKWARD") -> playPrevious()
-                intent.action.endsWith(".NOTIFICATION") -> context!!.startActivity(context!!.packageManager.getLaunchIntentForPackage(context!!.applicationContext.packageName))
-                intent.action.endsWith(".SEEK") -> seekTo(intent.getIntExtra("progress", 0))
-            }
-        }
+        fun onReceivedIntent(intent: Intent) = Unit
 
         fun onProgressChanged(progress: Int)
 
-        fun onDurationChanged(duration: Int)
+        fun onDurationChanged(duration: Int, durationString: String)
 
         fun onSongChanged(song: Song)
 
@@ -254,7 +244,7 @@ object PlaybackRemote : ServiceConnection {
     // Notification
     ///////////////////////////////////////////////////////////////////////////
 
-    private var notificationCreator: MediaNotification = DefaultMediaNotification()
+    internal var notificationCreator: MediaNotification = DefaultMediaNotification()
     private var notificationBuilder: NotificationCompat.Builder? = null
 
     fun setNotification(notification: MediaNotification) {
@@ -269,22 +259,9 @@ object PlaybackRemote : ServiceConnection {
         fun updateNotification(notification: Notification)
     }
 
-    internal fun getArtwork(): Bitmap? {
-        try {
-            val albumArtPath = MusicData.findAlbumById(getCurrentSong()?.songAlbumId!!)?.albumArtworkPath
-            if (albumArtPath != null && albumArtPath.length > 0) return BitmapFactory.decodeFile(albumArtPath)
-            if (getCurrentSong()?.hasExplicitArtwork!! && getCurrentSong()?.explicitArtworkPath!!.length > 0) {
-                val url = MusicPlaybackUtil.getUrlFromUri(Uri.parse(getCurrentSong()?.explicitArtworkPath))
-                if (url != null) BitmapFactory.decodeStream(URL(url).openStream()) else BitmapFactory.decodeFile(url)
-            }
-        } catch (e: Exception) { e.printStackTrace() }
-
-        return BitmapFactory.decodeResource(context?.resources, MusicCoreOptions.defaultArt)
-    }
-
     fun makeNotification(updateInterface: NotificationUpdateInterface): Notification {
 
-        val notification = PlaybackRemote.makeNotification(getArtwork())
+        val notification = PlaybackRemote.makeNotification(MusicCoreUtil.getArtwork(MusicQueue.getCurrentSong()!!, service!!))
         updateInterface.updateNotification(notification)
 
         return notification
