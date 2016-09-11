@@ -20,7 +20,7 @@ apply plugin: 'com.github.dcendents.android-maven'
 
 android {
     compileSdkVersion 24
-    buildToolsVersion "23.0.3"
+    buildToolsVersion "24.0.1"
 
     defaultConfig {
         minSdkVersion 17
@@ -42,9 +42,9 @@ android {
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     testCompile 'junit:junit:4.12'
-    compile project(path: ':music-core')
-    compile project(path: ':music-tags')
-    compile project(path: ':music-loading')
-    compile project(path: ':music-playback')
+    compile project(':music-core')
+    compile project(':music-tags')
+    compile project(':music-loading')
+    compile project(':music-playback')
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 }
