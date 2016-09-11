@@ -142,11 +142,16 @@ object PlaybackRemote : ServiceConnection {
     /**
      * Set the queue to the provided list and start playing from the provided position.
      */
-    fun play(songs: MutableList<Song>, position: Int) {
+    fun play(songs: List<Song>, position: Int) {
         var play = true
         //Make sure we are not already playing the first song in the list. If we are, then just keep playing and quietly update the queue in the background (unless specified otherwise)
         if (getCurrentSong() != null) play = songs[position].id != getCurrentSong()?.id
-        MusicQueue.set(songs, position)
+        if (songs is MutableList) MusicQueue.set(songs, position) else {
+            val mutableList = ArrayList<Song>()
+            mutableList.addAll(songs)
+            MusicQueue.set(mutableList, position)
+        }
+
         if (play) play()
     }
 
