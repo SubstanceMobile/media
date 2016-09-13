@@ -40,7 +40,7 @@ internal object MusicQueue {
             if (startAtPosition) {
                 return QUEUE!!.subList(POSITION + 1, QUEUE!!.lastIndex)
             } else return QUEUE!!
-        } else return Collections.emptyList();
+        } else return Collections.emptyList()
     }
 
     fun getCurrentSong(): Song? {

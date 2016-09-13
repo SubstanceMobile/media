@@ -2,6 +2,10 @@
   <library name="appcompat-v7-24.2.0">
     <ANNOTATIONS>
       <root url="jar://$PROJECT_DIR$/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/24.2.0/annotations.zip!/" />
+      <root url="jar://$PROJECT_DIR$/dynamic-colors/build/intermediates/exploded-aar/com.android.support/appcompat-v7/24.2.0/annotations.zip!/" />
+      <root url="jar://$PROJECT_DIR$/music-loading/build/intermediates/exploded-aar/com.android.support/appcompat-v7/24.2.0/annotations.zip!/" />
+      <root url="jar://$PROJECT_DIR$/music-playback/build/intermediates/exploded-aar/com.android.support/appcompat-v7/24.2.0/annotations.zip!/" />
+      <root url="jar://$PROJECT_DIR$/plugin-support/build/intermediates/exploded-aar/com.android.support/appcompat-v7/24.2.0/annotations.zip!/" />
       <root url="jar://$PROJECT_DIR$/theme-engine/build/intermediates/exploded-aar/com.android.support/appcompat-v7/24.2.0/annotations.zip!/" />
     </ANNOTATIONS>
     <CLASSES>

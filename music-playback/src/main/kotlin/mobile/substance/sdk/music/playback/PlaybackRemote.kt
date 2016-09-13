@@ -70,10 +70,9 @@ object PlaybackRemote : ServiceConnection {
         service = (binder as MusicService.ServiceBinder).service
         //TODO: Callback
         isBound = true
-        for (listener in SERVICE_BOUND_LISTENERS) {
+        for (listener in SERVICE_BOUND_LISTENERS)
             listener.respond(service)
-            SERVICE_BOUND_LISTENERS.remove(listener)
-        }
+        SERVICE_BOUND_LISTENERS.clear()
     }
 
     override fun onServiceDisconnected(name: ComponentName?) {
