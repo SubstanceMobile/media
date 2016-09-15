@@ -238,11 +238,19 @@ object PlaybackRemote : ServiceConnection {
 
     fun getCurrentSong(): Song? = MusicQueue.getCurrentSong()
 
-    fun getQueue(): List<Song>? = MusicQueue.getQueue(false)
-
-    fun getQueue(startAtPosition: Boolean): List<Song>? = MusicQueue.getQueue(startAtPosition)
+    fun getQueue(startAtPosition: Boolean = false): List<Song>? = MusicQueue.getQueue(startAtPosition)
 
     fun setQueue(queue: MutableList<Song>, position: Int) = MusicQueue.set(queue, position)
+
+    fun switchSongQueuePosition(fromPos: Int, toPos: Int, startsAtPosition: Boolean = false) {
+        val queue = MusicQueue.getMutableQueue()!!
+        queue.add(toPos, queue[if (startsAtPosition) MusicQueue.POSITION + 1 + fromPos else fromPos])
+        queue.removeAt(if (fromPos > toPos) if (startsAtPosition) MusicQueue.POSITION + 1 + fromPos else fromPos + 1 else if (startsAtPosition) MusicQueue.POSITION + 1 + fromPos else fromPos)
+    }
+
+    fun removeSongFromQueue(pos: Int, startsAtPosition: Boolean = false) = MusicQueue.getMutableQueue()!!.removeAt(if (startsAtPosition) MusicQueue.POSITION + 1 + pos else pos)
+
+
 
     ///////////////////////////////////////////////////////////////////////////
     // Notification

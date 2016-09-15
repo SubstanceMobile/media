@@ -24,10 +24,12 @@ import java.util.*
  * This is the class that stores the queue for the playback library
  */
 internal object MusicQueue {
-    private var POSITION: Int = 0
+    var POSITION: Int = 0
+    private set
+
     @Volatile private var QUEUE: MutableList<Song>? = ArrayList()
 
-    fun getQueue(startAtPosition: Boolean): List<Song> {
+    internal fun getQueue(startAtPosition: Boolean): List<Song> {
         if (QUEUE != null) {
             if (startAtPosition) {
                 return QUEUE!!.subList(POSITION + 1, QUEUE!!.lastIndex)
@@ -35,13 +37,10 @@ internal object MusicQueue {
         } else return emptyList()
     }
 
-    internal fun getMutableQueue(startAtPosition: Boolean): MutableList<Song>? {
-        if (QUEUE != null) {
-            if (startAtPosition) {
-                return QUEUE!!.subList(POSITION + 1, QUEUE!!.lastIndex)
-            } else return QUEUE!!
-        } else return Collections.emptyList()
+    internal fun getMutableQueue(): MutableList<Song>? {
+        if (QUEUE != null) return QUEUE!! else return Collections.emptyList()
     }
+
 
     fun getCurrentSong(): Song? {
         Log.d(MusicQueue::class.java.simpleName, "getCurrentSong(), Index is $POSITION")
@@ -65,5 +64,6 @@ internal object MusicQueue {
         QUEUE = songs
         POSITION = position
     }
+
 
 }

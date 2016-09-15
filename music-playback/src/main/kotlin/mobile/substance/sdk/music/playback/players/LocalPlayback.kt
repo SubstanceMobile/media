@@ -158,7 +158,7 @@ object LocalPlayback : Playback(),
         val to = time.toInt()
         wasPlayingBeforeAction = isPlaying()
         localPlayer?.pause()
-        if (to >= localPlayer!!.duration) localPlayer?.seekTo(to) else next()
+        if (to <= localPlayer!!.duration) localPlayer?.seekTo(to) else next()
         if (wasPlayingBeforeAction) localPlayer?.start()
     }
 
