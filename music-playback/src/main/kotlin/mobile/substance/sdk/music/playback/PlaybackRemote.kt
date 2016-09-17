@@ -70,8 +70,7 @@ object PlaybackRemote : ServiceConnection {
         service = (binder as MusicService.ServiceBinder).service
         //TODO: Callback
         isBound = true
-        for (listener in SERVICE_BOUND_LISTENERS)
-            listener.respond(service)
+        for (listener in SERVICE_BOUND_LISTENERS) listener.respond(service)
         SERVICE_BOUND_LISTENERS.clear()
     }
 
@@ -111,6 +110,12 @@ object PlaybackRemote : ServiceConnection {
         }
     })
 
+    fun requestUpdates(callback: RemoteCallback) = getService(object : ServiceLoadListener {
+        override fun respond(service: MusicService?) {
+            service!!.update(callback)
+        }
+    })
+
     interface RemoteCallback {
 
         fun onReceivedIntent(intent: Intent) = Unit
@@ -121,7 +126,9 @@ object PlaybackRemote : ServiceConnection {
 
         fun onSongChanged(song: Song)
 
-        fun onStateChanged(state: PlaybackState, isRepeating: Boolean)
+        fun onStateChanged(state: PlaybackState)
+
+        fun onRepeatingChanged(isRepeating: Boolean)
 
         fun onQueueChanged(queue: List<Song>)
 
@@ -232,6 +239,25 @@ object PlaybackRemote : ServiceConnection {
         play(songs, 0)
     }
 
+    /**
+     * Shuffle the current queue
+     */
+    fun shuffleQueue() {
+        val songs = ArrayList<Song>()
+        songs.addAll(MusicQueue.getQueue(true))
+        Collections.shuffle(songs)
+        play(songs, 0)
+    }
+
+    /**
+     * Set whether the playback engine shall loop or not
+     */
+    fun setRepeating(isRepeating: Boolean) = getService(object : ServiceLoadListener {
+        override fun respond(service: MusicService?) {
+            service!!.engine.setRepeating(true)
+        }
+    })
+
     ///////////////////////////////////////////////////////////////////////////
     // Queue
     ///////////////////////////////////////////////////////////////////////////
@@ -317,5 +343,7 @@ object PlaybackRemote : ServiceConnection {
     fun isReady() = isBound
 
     fun isPlaying() = service?.engine?.isPlaying()
+
+    fun isRepeating() = service?.engine?.isRepeating()
 
 }

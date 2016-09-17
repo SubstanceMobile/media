@@ -20,16 +20,18 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import mobile.substance.sdk.music.playback.PlaybackRemote
+import android.media.AudioManager
 
 /**
- * Audio noisy receiver. register() and unregister() to enable and disable this. For example, if you are currently playing music this should be registered
+ * Created by Julian on 17/09/16.
  */
-object HeadsetPlugReceiver : BroadcastReceiver() {
+object AudioBecomingNoisyReceiver : BroadcastReceiver() {
 
-    override fun onReceive(context: Context, intent: Intent) = PlaybackRemote.pause()
+    override fun onReceive(context: Context, intent: Intent) {
+        // TODO
+    }
 
-    infix fun register(context: Context) = context.registerReceiver(this, IntentFilter(Intent.ACTION_HEADSET_PLUG))
+    infix fun register(context: Context) = context.registerReceiver(this, IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY))
 
     infix fun unregister(context: Context) = context.unregisterReceiver(this)
 

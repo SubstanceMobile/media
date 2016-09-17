@@ -73,11 +73,23 @@ class MusicService : MediaBrowserServiceCompat(), CastStateListener {
         if (CALLBACKS.contains(callback)) CALLBACKS.remove(callback)
     }
 
+    fun update(callback: PlaybackRemote.RemoteCallback) {
+        val song = MusicQueue.getCurrentSong()!!
+        callback.onSongChanged(song)
+        callback.onDurationChanged(song.songDuration?.toInt() ?: 0, song.songDurationString)
+        callback.onStateChanged(if (engine.isPlaying())
+            PlaybackState.STATE_PLAYING
+        else if (MusicQueue.getCurrentSong() != null)
+            PlaybackState.STATE_PAUSED
+        else PlaybackState.STATE_IDLE)
+        callback.onRepeatingChanged(engine.isRepeating())
+    }
+
     ///////////////////////////////////////////////////////////////////////////
     // Playback Engine
     ///////////////////////////////////////////////////////////////////////////
 
-    internal fun callback(call: (PlaybackRemote.RemoteCallback) -> Any) {
+    internal fun callback(call: PlaybackRemote.RemoteCallback.() -> Any) {
         for (CALLBACK in CALLBACKS) call.invoke(CALLBACK)
     }
 
@@ -117,6 +129,9 @@ class MusicService : MediaBrowserServiceCompat(), CastStateListener {
             if (!wasPlaying) engine.pause()
             Log.d(TAG, "State restored")
         }
+
+        callback { onRepeatingChanged(false) }
+
         Log.d(TAG, "Engine transaction complete")
     }
 
@@ -126,6 +141,7 @@ class MusicService : MediaBrowserServiceCompat(), CastStateListener {
 
     private fun init() {
         HeadsetPlugReceiver register this
+        AudioBecomingNoisyReceiver register this
 
         notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         session = MediaSessionCompat(this, MusicService::class.java.simpleName)
@@ -133,6 +149,8 @@ class MusicService : MediaBrowserServiceCompat(), CastStateListener {
 
         session!!.setCallback(engine)
         sessionToken = session!!.sessionToken
+
+        if (MusicPlaybackOptions.defaultCallback != null) registerCallback(MusicPlaybackOptions.defaultCallback!!)
 
         if (MusicPlaybackOptions.isCastEnabled) {
             val instance = CastContext.getSharedInstance(this)
@@ -161,18 +179,17 @@ class MusicService : MediaBrowserServiceCompat(), CastStateListener {
                 }
                 try {
                     Handler(Looper.getMainLooper()).post {
-                        for (CALLBACK in CALLBACKS) {
-                            CALLBACK.onProgressChanged(engine.getCurrentPosInSong())
-                            CALLBACK.onStateChanged(
+                        callback {
+                            onProgressChanged(engine.getCurrentPosInSong())
+                            if (engine.playbackState != session?.controller?.playbackState?.state ?: PlaybackStateCompat.STATE_NONE)
+                                onStateChanged(
                                     if (engine.isPlaying())
                                         PlaybackState.STATE_PLAYING
                                     else if (MusicQueue.getCurrentSong() != null)
                                         PlaybackState.STATE_PAUSED
-                                    else PlaybackState.STATE_IDLE,
-                                    engine.isRepeating())
+                                    else PlaybackState.STATE_IDLE)
                         }
                     }
-
 
                     session?.setPlaybackState(
                             PlaybackStateCompat.Builder().setActions(MusicPlaybackOptions.playbackActions.getActions())
@@ -242,7 +259,12 @@ class MusicService : MediaBrowserServiceCompat(), CastStateListener {
     override fun onDestroy() {
         super.onDestroy()
         HeadsetPlugReceiver unregister this
+        AudioBecomingNoisyReceiver unregister this
         destroySession()
+        try {
+            if (MusicPlaybackOptions.defaultCallback != null) unregisterCallback(MusicPlaybackOptions.defaultCallback!!)
+        } catch (ignored: Exception) {
+        }
         if (MusicPlaybackOptions.isCastEnabled) CastContext.getSharedInstance(this).removeCastStateListener(this)
     }
 
@@ -274,8 +296,7 @@ class MusicService : MediaBrowserServiceCompat(), CastStateListener {
                     engine.stop()
                     PlaybackRemote.notificationCreator.onNotificationDismissed()
                 }
-                else -> for (callback in CALLBACKS)
-                    callback.onReceivedIntent(intent)
+                else -> callback { onReceivedIntent(intent) }
             }
         }
 

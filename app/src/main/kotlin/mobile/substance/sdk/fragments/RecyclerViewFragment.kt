@@ -24,8 +24,8 @@ import mobile.substance.sdk.R
 import mobile.substance.sdk.adapters.MusicAdapter
 import mobile.substance.sdk.music.core.objects.*
 import mobile.substance.sdk.music.loading.Library
-import mobile.substance.sdk.music.loading.MusicType
 import mobile.substance.sdk.music.loading.LibraryListener
+import mobile.substance.sdk.music.loading.MusicType
 
 /**
  * Created by Julian on 06/05/16.

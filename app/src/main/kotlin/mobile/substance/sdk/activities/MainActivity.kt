@@ -99,8 +99,12 @@ class MainActivity : NavigationDrawerActivity(), PlaybackRemote.RemoteCallback {
         Library.findAlbumById(song.songAlbumId!!)!!.requestArt(currentSongImage)
     }
 
-    override fun onStateChanged(state: PlaybackState, isRepeating: Boolean) {
-        Log.d("MainActivity.kt", "onStateChanged(), ${state.name} isRepeating: ${isRepeating.toString()}")
+    override fun onStateChanged(state: PlaybackState) {
+        Log.d("MainActivity.kt", "onStateChanged(), ${state.name}")
+    }
+
+    override fun onRepeatingChanged(isRepeating: Boolean) {
+        Log.d("MainActivity.kt", "onRepeatingChanged(), ${isRepeating.toString()}")
     }
 
     override fun onQueueChanged(queue: List<Song>) {

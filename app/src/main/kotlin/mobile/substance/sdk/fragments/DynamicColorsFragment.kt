@@ -60,7 +60,7 @@ class DynamicColorsFragment : NavigationDrawerFragment(), DynamicColorsCallback 
         texts[0].setTextColor(it.textColor)
         texts[1].setTextColor(it.textColor)
         texts[2].setTextColor(it.accentTextColor)
-        swipeRefresh!!.isRefreshing = false
+        swipeRefresh.isRefreshing = false
     }
 
     private val fab: FloatingActionButton by bindView<FloatingActionButton>(R.id.fragment_dynamic_colors_fab)
@@ -75,7 +75,7 @@ class DynamicColorsFragment : NavigationDrawerFragment(), DynamicColorsCallback 
         get() = R.layout.fragment_dynamic_colors
 
     override fun init(savedInstanceState: Bundle?) {
-        NavigationHelper.setupNavigation(drawerLayout!!, toolbar!!)
+        NavigationHelper.setupNavigation(drawerLayout!!, toolbar)
         toolbar.inflateMenu(R.menu.menu_dynamic_colors)
         toolbar.menu.findItem(R.id.menu_item_configure).isChecked = activity.getSharedPreferences("preferences", Context.MODE_PRIVATE).getBoolean("smartpicking", false)
         toolbar.setOnMenuItemClickListener {

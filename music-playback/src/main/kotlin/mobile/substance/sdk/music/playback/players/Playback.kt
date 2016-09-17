@@ -113,8 +113,8 @@ abstract class Playback : MediaSessionCompat.Callback() {
     fun play(song: Song, mediaId: Long? = null) {
         play(song.uri, false, mediaId ?: song.id)
         SERVICE!!.callback {
-            it.onSongChanged(song)
-            it.onDurationChanged(song.songDuration?.toInt() ?: 0, song.songDurationString)
+            onSongChanged(song)
+            onDurationChanged(song.songDuration?.toInt() ?: 0, song.songDurationString)
         }
     }
 
@@ -259,6 +259,7 @@ abstract class Playback : MediaSessionCompat.Callback() {
     fun stop() {
         if (inHotswapTransaction) {
             pendingCalls.add { stop() }
+            return
         }
 
         if (!manuallyHandleState) playbackState = STATE_STOPPED
@@ -337,6 +338,7 @@ abstract class Playback : MediaSessionCompat.Callback() {
 
     open fun setRepeating(repeating: Boolean) {
         this.repeating = repeating
+        SERVICE!!.callback { onRepeatingChanged(repeating) }
     }
 
     open fun isRepeating() = repeating

@@ -167,6 +167,7 @@ object LocalPlayback : Playback(),
     ////////////
 
     override fun setRepeating(repeating: Boolean) {
+        super.setRepeating(repeating)
         localPlayer?.isLooping = repeating
     }
 
