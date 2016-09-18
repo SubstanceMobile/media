@@ -36,8 +36,6 @@ import mobile.substance.sdk.music.playback.service.HeadsetPlugReceiver
 
 object CastPlayback : Playback(), SessionManagerListener<Session>, RemoteMediaClient.Listener {
 
-    private var repeating = false
-
     override fun onStatusUpdated() {
         when (remoteMediaClient?.mediaStatus?.playerState) {
             MediaStatus.PLAYER_STATE_IDLE -> {
@@ -222,16 +220,8 @@ object CastPlayback : Playback(), SessionManagerListener<Session>, RemoteMediaCl
         }
     }
 
-    override fun setRepeating(repeating: Boolean) {
-        this.repeating = repeating
-    }
-
     override fun isPlaying(): Boolean {
         return remoteMediaClient?.isPlaying ?: false
-    }
-
-    override fun isRepeating(): Boolean {
-        return repeating
     }
 
     override fun getCurrentPosInSong(): Int {

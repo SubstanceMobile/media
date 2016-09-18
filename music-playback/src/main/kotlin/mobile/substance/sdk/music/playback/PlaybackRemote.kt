@@ -254,7 +254,7 @@ object PlaybackRemote : ServiceConnection {
      */
     fun setRepeating(isRepeating: Boolean) = getService(object : ServiceLoadListener {
         override fun respond(service: MusicService?) {
-            service!!.engine.setRepeating(true)
+            service!!.engine.isRepeating = isRepeating
         }
     })
 
@@ -344,6 +344,6 @@ object PlaybackRemote : ServiceConnection {
 
     fun isPlaying() = service?.engine?.isPlaying()
 
-    fun isRepeating() = service?.engine?.isRepeating()
+    fun isRepeating() = service?.engine?.isRepeating
 
 }

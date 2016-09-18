@@ -33,6 +33,7 @@ import mobile.substance.sdk.music.playback.MusicPlaybackOptions
 import mobile.substance.sdk.music.playback.PlaybackRemote
 import mobile.substance.sdk.music.playback.service.MusicQueue
 import mobile.substance.sdk.music.playback.service.MusicService
+import mobile.substance.sdk.music.playback.service.PlaybackState
 import java.util.*
 
 abstract class Playback : MediaSessionCompat.Callback() {
@@ -218,7 +219,7 @@ abstract class Playback : MediaSessionCompat.Callback() {
      */
     fun next() {
         if (!manuallyHandleState) playbackState = STATE_SKIPPING_TO_NEXT
-        if (isRepeating() && callRepeatOnNext()) doRepeat() else doNext()
+        if (isRepeating && callRepeatOnNext) doRepeat() else doNext()
     }
 
     open fun doNext() = PlaybackRemote.playNext()
@@ -302,6 +303,17 @@ abstract class Playback : MediaSessionCompat.Callback() {
     ///////////////////////////////////////////////////////////////////////////
 
     internal var playbackState = STATE_NONE
+        set(value) {
+            field = value
+            SERVICE!!.callback {
+                onStateChanged(
+                        if (isPlaying())
+                            PlaybackState.STATE_PLAYING
+                        else if (MusicQueue.getCurrentSong() != null)
+                            PlaybackState.STATE_PAUSED
+                        else PlaybackState.STATE_IDLE)
+            }
+        }
 
     /**
      * Call this method to tell the system that you are currently buffering. Call this whenever you start buffering to make sure Android
@@ -334,18 +346,19 @@ abstract class Playback : MediaSessionCompat.Callback() {
     // Repeat
     ///////////////////////////////////////////////////////////////////////////
 
-    private var repeating = false
+    open var isRepeating = false
+        set(value) {
+            field = value
+            notifyRepeatingChanged()
+        }
 
-    open fun setRepeating(repeating: Boolean) {
-        this.repeating = repeating
-        SERVICE!!.callback { onRepeatingChanged(repeating) }
+    internal fun notifyRepeatingChanged() {
+        SERVICE!!.callback { onRepeatingChanged(isRepeating) }
     }
-
-    open fun isRepeating() = repeating
 
     open fun doRepeat() = play()
 
-    open fun callRepeatOnNext() = true
+    open val callRepeatOnNext = true
 
     ///////////////////////////////////////////////////////////////////////////
     // Others
@@ -368,7 +381,7 @@ abstract class Playback : MediaSessionCompat.Callback() {
         //TODO
     }
 
-    protected fun nowPlaying(updateMetadata: Boolean = true) {
+    protected fun nowPlaying() {
         if (inHotswapTransaction) {
             inHotswapTransaction = false
             for (call in pendingCalls)

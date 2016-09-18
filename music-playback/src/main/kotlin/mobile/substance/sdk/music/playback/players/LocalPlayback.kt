@@ -166,10 +166,12 @@ object LocalPlayback : Playback(),
     // Repeat //
     ////////////
 
-    override fun setRepeating(repeating: Boolean) {
-        super.setRepeating(repeating)
-        localPlayer?.isLooping = repeating
-    }
+    override var isRepeating: Boolean
+        get() = localPlayer?.isLooping ?: false
+        set(value) {
+            localPlayer?.isLooping = value
+            notifyRepeatingChanged()
+        }
 
     ///////////////////////////////////////////////////////////////////////////
     // Media Player Callbacks
@@ -223,8 +225,6 @@ object LocalPlayback : Playback(),
     ///////////////////////////////////////////////////////////////////////////
 
     override fun isPlaying() = localPlayer?.isPlaying ?: false
-
-    override fun isRepeating() = localPlayer?.isLooping ?: false
 
     override fun getCurrentPosInSong(): Int {
         try {

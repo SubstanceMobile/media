@@ -82,7 +82,7 @@ class MusicService : MediaBrowserServiceCompat(), CastStateListener {
         else if (MusicQueue.getCurrentSong() != null)
             PlaybackState.STATE_PAUSED
         else PlaybackState.STATE_IDLE)
-        callback.onRepeatingChanged(engine.isRepeating())
+        callback.onRepeatingChanged(engine.isRepeating)
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -179,16 +179,7 @@ class MusicService : MediaBrowserServiceCompat(), CastStateListener {
                 }
                 try {
                     Handler(Looper.getMainLooper()).post {
-                        callback {
-                            onProgressChanged(engine.getCurrentPosInSong())
-                            if (engine.playbackState != session?.controller?.playbackState?.state ?: PlaybackStateCompat.STATE_NONE)
-                                onStateChanged(
-                                    if (engine.isPlaying())
-                                        PlaybackState.STATE_PLAYING
-                                    else if (MusicQueue.getCurrentSong() != null)
-                                        PlaybackState.STATE_PAUSED
-                                    else PlaybackState.STATE_IDLE)
-                        }
+                        callback { onProgressChanged(engine.getCurrentPosInSong()) }
                     }
 
                     session?.setPlaybackState(
