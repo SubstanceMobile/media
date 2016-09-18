@@ -65,6 +65,8 @@ class MusicService : MediaBrowserServiceCompat(), CastStateListener {
 
     private var CALLBACKS = ArrayList<PlaybackRemote.RemoteCallback>()
 
+    private var oldState: PlaybackState = PlaybackState.STATE_IDLE
+
     fun registerCallback(callback: PlaybackRemote.RemoteCallback) {
         CALLBACKS.add(callback)
     }
@@ -178,8 +180,20 @@ class MusicService : MediaBrowserServiceCompat(), CastStateListener {
                     interrupt()
                 }
                 try {
+                    val newState = if (engine.isPlaying())
+                        PlaybackState.STATE_PLAYING
+                    else if (MusicQueue.getCurrentSong() != null)
+                        PlaybackState.STATE_PAUSED
+                    else PlaybackState.STATE_IDLE
+                    val update = newState != oldState
+                    if (update)
+                        oldState = newState
+
                     Handler(Looper.getMainLooper()).post {
-                        callback { onProgressChanged(engine.getCurrentPosInSong()) }
+                        callback {
+                            onProgressChanged(engine.getCurrentPosInSong())
+                            if (update) onStateChanged(newState)
+                        }
                     }
 
                     session?.setPlaybackState(
