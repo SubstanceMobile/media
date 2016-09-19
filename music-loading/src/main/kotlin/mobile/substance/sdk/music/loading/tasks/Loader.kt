@@ -26,7 +26,6 @@ import android.support.annotation.WorkerThread
 import android.util.Log
 import mobile.substance.sdk.music.core.objects.MediaObject
 import java.util.*
-import java.util.List
 
 /**
  * A class that needs to be extended in order to load a list of a certain type of object.
