@@ -32,7 +32,6 @@ import mobile.substance.sdk.music.core.objects.Song
 import mobile.substance.sdk.music.core.utils.MusicCoreUtil
 import mobile.substance.sdk.music.playback.MusicPlaybackUtil
 import mobile.substance.sdk.music.playback.cast.LocalServer
-import mobile.substance.sdk.music.playback.service.HeadsetPlugReceiver
 
 object CastPlayback : Playback(), SessionManagerListener<Session>, RemoteMediaClient.Listener {
 
@@ -119,9 +118,6 @@ object CastPlayback : Playback(), SessionManagerListener<Session>, RemoteMediaCl
         if (artworkServer?.isAlive!!)
             artworkServer?.stop()
 
-        //Register the broadcast receiver
-        HeadsetPlugReceiver register SERVICE!!
-
         //Notify the listeners if it hasn't already happened externally
         if (!listenersAlreadyNotified) {
             //TODO Work with listeners
@@ -139,7 +135,7 @@ object CastPlayback : Playback(), SessionManagerListener<Session>, RemoteMediaCl
 
                 if (mediaId != null)
                     try {
-                        artworkServer?.setUri(SERVICE!!, MusicData.findAlbumById(song?.songAlbumId!!)?.albumArtworkUri!!)
+                        artworkServer?.setUri(SERVICE!!, Uri.parse("content://" + MusicData.findAlbumById(song?.songAlbumId!!)?.albumArtworkPath))
                     } catch (ignored: KotlinNullPointerException) {}
                 val ipAddress = MusicPlaybackUtil.getIpAddressString(SERVICE!!)
                 val fileUrl = "http://$ipAddress:${MusicPlaybackUtil.SERVER_PORT_AUDIO}"
@@ -152,14 +148,14 @@ object CastPlayback : Playback(), SessionManagerListener<Session>, RemoteMediaCl
 
                 val mediaInfo = MediaInfo.Builder(fileUrl)
                         .setContentType("audio/*")
-                        .setMetadata(buildMetadata(artworkUrl, song?.metadata!!)) // TODO
+                        .setMetadata(buildMetadata(artworkUrl, song?.getMetadata()!!)) // TODO
                         .setStreamType(MediaInfo.STREAM_TYPE_BUFFERED)
                         .build()
                 doLoad(mediaInfo, true)
             } else {
                 val mediaInfo = MediaInfo.Builder(url)
                     .setContentType("audio/*")
-                    .setMetadata(buildMetadata(song?.explicitArtworkPath ?: "", song?.metadata!!)) // TODO
+                        .setMetadata(buildMetadata(song?.explicitArtworkPath ?: "", song?.getMetadata()!!)) // TODO
                     .setStreamType(MediaInfo.STREAM_TYPE_LIVE)
                     .build()
                 doLoad(mediaInfo, true)

@@ -27,7 +27,9 @@ import mobile.substance.sdk.music.playback.PlaybackRemote
  */
 object HeadsetPlugReceiver : BroadcastReceiver() {
 
-    override fun onReceive(context: Context, intent: Intent) = PlaybackRemote.pause()
+    override fun onReceive(context: Context, intent: Intent) {
+        if (intent.action == Intent.ACTION_HEADSET_PLUG && PlaybackRemote.isPlaying() ?: false) PlaybackRemote.pause()
+    }
 
     infix fun register(context: Context) = context.registerReceiver(this, IntentFilter(Intent.ACTION_HEADSET_PLUG))
 

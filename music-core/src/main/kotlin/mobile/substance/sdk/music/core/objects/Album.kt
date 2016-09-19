@@ -39,38 +39,28 @@ class Album : MediaObject() {
     override val isContextRequired: Boolean
         get() = true
 
+    override fun toMetadataCompat(source: MediaMetadataCompat): MediaMetadataCompat {
+        return MediaMetadataCompat.Builder(source)
+                .putString(MediaMetadataCompat.METADATA_KEY_TITLE, albumName)
+                .putString(MediaMetadataCompat.METADATA_KEY_ALBUM_ART_URI, albumArtworkPath)
+                .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, albumArtistName)
+                .putString(MediaMetadataCompat.METADATA_KEY_GENRE, albumGenreName)
+                .putLong(MediaMetadataCompat.METADATA_KEY_NUM_TRACKS, albumNumberOfSongs ?: 0)
+                .putLong(MediaMetadataCompat.METADATA_KEY_YEAR, albumYear ?: 0)
+                .build()
+    }
+
     ///////////////////////////////////////////////////////////////////////////
     // Title
     ///////////////////////////////////////////////////////////////////////////
 
-    var albumName: String?
-        get() = metadata?.getString(MediaMetadataCompat.METADATA_KEY_TITLE)
-        set(value) {
-            if(value != null) putString(MediaMetadataCompat.METADATA_KEY_TITLE, value)
-        }
+    var albumName: String? = null
 
     ///////////////////////////////////////////////////////////////////////////
     // Album Artwork
     ///////////////////////////////////////////////////////////////////////////
 
-    var albumArtworkPath: String?
-        get() {
-            val path = metadata?.getString(MediaMetadataCompat.METADATA_KEY_ALBUM_ART_URI)
-            if(path != null) return path else return ""
-        }
-        set(value) {
-            if (value != null) {
-                putString(MediaMetadataCompat.METADATA_KEY_ALBUM_ART_URI, value)
-                albumArtworkUri = Uri.parse("file://$value")
-                isAnimated = false
-            } else {
-                isAnimated = true
-            }
-        }
-
-    var albumArtworkUri: Uri? = null
-        private set
-
+    var albumArtworkPath: String? = null
 
     interface ArtRequest {
         fun respond(albumArt: Bitmap)
@@ -92,41 +82,25 @@ class Album : MediaObject() {
     // Artist
     ///////////////////////////////////////////////////////////////////////////
 
-    var albumArtistName: String?
-        get() = metadata?.getString(MediaMetadataCompat.METADATA_KEY_ALBUM_ARTIST)
-        set(value) {
-            if(value != null) putString(MediaMetadataCompat.METADATA_KEY_ALBUM_ARTIST, value)
-        }
+    var albumArtistName: String? = null
 
     ///////////////////////////////////////////////////////////////////////////
     // Genre
     ///////////////////////////////////////////////////////////////////////////
 
-    var albumGenreName: String?
-        get() = metadata?.getString(MediaMetadataCompat.METADATA_KEY_GENRE)
-        set(value) {
-            if(value != null) putString(MediaMetadataCompat.METADATA_KEY_GENRE, value)
-        }
+    var albumGenreName: String? = null
 
     ///////////////////////////////////////////////////////////////////////////
     // Year
     ///////////////////////////////////////////////////////////////////////////
 
-    var albumYear: Long?
-        get() = metadata?.getLong(MediaMetadataCompat.METADATA_KEY_YEAR)
-        set(value) {
-            if(value != null) putLong(MediaMetadataCompat.METADATA_KEY_YEAR, value)
-        }
+    var albumYear: Long? = null
 
     ///////////////////////////////////////////////////////////////////////////
     // Number Of Songs
     ///////////////////////////////////////////////////////////////////////////
 
-    var albumNumberOfSongs: Long?
-        get() = metadata?.getLong(MediaMetadataCompat.METADATA_KEY_NUM_TRACKS)
-        set(value) {
-            if(value != null) putLong(MediaMetadataCompat.METADATA_KEY_NUM_TRACKS, value)
-        }
+    var albumNumberOfSongs: Long? = null
 
     ///////////////////////////////////////////////////////////////////////////
     // Color Holding
@@ -135,7 +109,7 @@ class Album : MediaObject() {
     var colors: Any?
         get() = getData("album_colors")
         set(value) {
-            if(value != null) putData("album_colors", value)
+            if (value != null) putData("album_colors", value)
         }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -144,7 +118,7 @@ class Album : MediaObject() {
 
     class Builder @JvmOverloads constructor(private val album: Album = Album()) {
 
-        fun setAlbumId(id: Long): Builder {
+        fun setId(id: Long): Builder {
             this.album.id = id
             return this
         }

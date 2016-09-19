@@ -393,7 +393,7 @@ abstract class Playback : MediaSessionCompat.Callback() {
                 PlaybackStateCompat.Builder().setActions(MusicPlaybackOptions.playbackActions.getActions())
                         .setState(playbackState, getCurrentPosInSong().toLong(), getPlaybackSpeed())
                         .build())
-        SERVICE!!.updateNotification(PlaybackRemote.makeNotificaion())
+        SERVICE!!.updateNotification(PlaybackRemote.makeNotification())
     }
 
 }

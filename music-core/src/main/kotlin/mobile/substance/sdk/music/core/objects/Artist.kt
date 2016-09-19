@@ -19,7 +19,6 @@ package mobile.substance.sdk.music.core.objects
 import android.net.Uri
 import android.provider.MediaStore
 import android.support.v4.media.MediaMetadataCompat
-import java.util.*
 
 /**
  * Created by Adrian on 7/5/2015.
@@ -33,15 +32,18 @@ class Artist : MediaObject() {
     override val baseUri: Uri?
         get() = MediaStore.Audio.Artists.EXTERNAL_CONTENT_URI
 
+    override fun toMetadataCompat(source: MediaMetadataCompat): MediaMetadataCompat {
+        return MediaMetadataCompat.Builder(source)
+                .putString(MediaMetadataCompat.METADATA_KEY_TITLE, artistName)
+                .putString(MediaMetadataCompat.METADATA_KEY_ART_URI, artistImagePath)
+                .build()
+    }
+
     ///////////////////////////////////////////////////////////////////////////
     //This manages the strings
     ///////////////////////////////////////////////////////////////////////////
 
-    var artistName: String?
-        get() = metadata?.getString(MediaMetadataCompat.METADATA_KEY_TITLE)
-        set(value) {
-            if(value != null) putString(MediaMetadataCompat.METADATA_KEY_TITLE, value)
-        }
+    var artistName: String? = null
 
     var artistBio: String? = null
 
@@ -49,18 +51,11 @@ class Artist : MediaObject() {
     //This manages the image
     ///////////////////////////////////////////////////////////////////////////
 
-    var artistImagePath: String?
-        get() = metadata?.getString(MediaMetadataCompat.METADATA_KEY_ART_URI)
-        set(value) {
-            if(value != null) putString(MediaMetadataCompat.METADATA_KEY_ART_URI, value)
-        }
+    var artistImagePath: String? = null
 
     ///////////////////////////////////////////////////////////////////////////
     //This manages all of the lists
     ///////////////////////////////////////////////////////////////////////////
-
-    var artistAlbums: List<Album> = ArrayList() // <- Redundant!
-    var artistSongs: List<Song> = ArrayList() // <- Redundant!
 
     class Builder @JvmOverloads constructor(private val artist: Artist = Artist()) {
 
@@ -76,16 +71,6 @@ class Artist : MediaObject() {
 
         fun setId(id: Long): Builder {
             this.artist.id = id
-            return this
-        }
-
-        fun setSongs(songs: List<Song>): Builder {
-            this.artist.artistSongs = songs
-            return this
-        }
-
-        fun setAlbums(albums: List<Album>): Builder {
-            this.artist.artistAlbums = albums
             return this
         }
 

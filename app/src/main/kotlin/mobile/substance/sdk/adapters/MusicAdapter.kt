@@ -17,8 +17,8 @@
 package mobile.substance.sdk.adapters
 
 import android.content.Context
-import android.graphics.BitmapFactory
 import android.support.v7.widget.RecyclerView
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import com.bumptech.glide.Glide
@@ -121,8 +121,10 @@ class MusicAdapter<T : MediaObject>(private val type: MusicType) : RecyclerView.
     private fun bindSong(song: Song, holder: MusicViewHolder) {
         holder.title?.text = song.songTitle
         holder.subtitle?.text = song.songArtistName
-        holder.image!!.setImageBitmap(BitmapFactory.decodeFile(MusicData.findAlbumById(song.songAlbumId ?: 0)!!.albumArtworkPath))
-        // MusicData.findAlbumById(song.songAlbumId!!)?.requestArt(holder.image!!)
+        val album = MusicData.findAlbumById(song.songAlbumId!!)
+        Log.d("Binding Song", "Album ${album?.albumName}, id ${album?.id}, artworkPath ${album?.albumArtworkPath}")
+        album?.requestArt(holder.image!!)
+
 
         holder.itemView.setOnClickListener { it ->
             PlaybackRemote.play(song)

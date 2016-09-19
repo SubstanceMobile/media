@@ -38,7 +38,7 @@ class PlaylistsTask(context: Context, vararg params: Any) : Loader<Playlist>(con
 
         val p = Playlist.Builder()
                 .setName(name)
-                .setID(id)
+                .setId(id)
                 .build()
 
         Log.i("PlaylistsTask", "Loaded id $id")

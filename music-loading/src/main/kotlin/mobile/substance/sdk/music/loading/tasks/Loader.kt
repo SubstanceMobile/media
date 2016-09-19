@@ -26,6 +26,7 @@ import android.support.annotation.WorkerThread
 import android.util.Log
 import mobile.substance.sdk.music.core.objects.MediaObject
 import java.util.*
+import java.util.List
 
 /**
  * A class that needs to be extended in order to load a list of a certain type of object.
@@ -227,7 +228,8 @@ abstract class Loader<Return : MediaObject>(context: Context, vararg params: Any
                 do {
                     val obj = buildObject(cursor)
                     if (obj != null) {
-                        obj.setPosInList(cursor.position).setContext(context).lock()
+                        obj.positionInList = cursor.position
+                        obj.setContext(context).lock()
                         generated.add(obj)
                         notifyOneLoaded(obj)
                     }
@@ -248,7 +250,7 @@ abstract class Loader<Return : MediaObject>(context: Context, vararg params: Any
         @SafeVarargs
         override fun onProgressUpdate(vararg values: Return) {
             super.onProgressUpdate(*values)
-            for (`val` in values) mVerifyListener.onOneLoaded(`val`, `val`.getPosInList())
+            for (`val` in values) mVerifyListener.onOneLoaded(`val`, `val`.positionInList)
         }
 
         override fun onPostExecute(result: List<Return>) {

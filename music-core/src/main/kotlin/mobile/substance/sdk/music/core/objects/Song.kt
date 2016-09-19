@@ -18,8 +18,7 @@ package mobile.substance.sdk.music.core.objects
 
 import android.net.Uri
 import android.provider.MediaStore
-import android.support.v4.media.MediaBrowserCompat
-import android.support.v4.media.MediaMetadataCompat.*
+import android.support.v4.media.MediaMetadataCompat
 import mobile.substance.sdk.music.core.utils.MusicCoreUtil
 
 /**
@@ -36,15 +35,29 @@ class Song : MediaObject() {
 
     override val uri: Uri
         get() {
-            if(hasExplicitPath) return Uri.parse(explicitPath) else return super.uri
+            if (hasExplicitPath) return Uri.parse(explicitPath) else return super.uri
         }
 
     override val isContextRequired: Boolean
         get() = true
 
-    fun toMediaItem(): MediaBrowserCompat.MediaItem {
-        return MediaBrowserCompat.MediaItem(metadata!!.description, MediaBrowserCompat.MediaItem.FLAG_PLAYABLE)
+    override fun toMetadataCompat(source: MediaMetadataCompat): MediaMetadataCompat {
+        return MediaMetadataCompat.Builder(source)
+                .putString(MediaMetadataCompat.METADATA_KEY_TITLE, songTitle)
+                .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, songArtistName)
+                .putString(MediaMetadataCompat.METADATA_KEY_ALBUM, songAlbumName)
+                .putString(MediaMetadataCompat.METADATA_KEY_ART_URI, explicitArtworkPath) // This is just the explicit artwork path (if one exists), you still need to merge the album's artwork path in case that one is necessary
+                .putLong(MediaMetadataCompat.METADATA_KEY_DURATION, songDuration ?: 0)
+                .putLong(MediaMetadataCompat.METADATA_KEY_TRACK_NUMBER, songTrackNumber ?: 0)
+                .putLong(MediaMetadataCompat.METADATA_KEY_YEAR, songYear ?: 0)
+                .build()
     }
+
+    ///////////////////////////////////////////////////////////////////////////
+    // Title
+    ///////////////////////////////////////////////////////////////////////////
+
+    var songTitle: String? = null
 
     ///////////////////////////////////////////////////////////////////////////
     // Artist
@@ -52,21 +65,7 @@ class Song : MediaObject() {
 
     var songArtistId: Long? = null
 
-    var songArtistName: String?
-        get() = metadata?.getString(METADATA_KEY_ARTIST)
-        set(value) {
-            if(value != null) putString(METADATA_KEY_ARTIST, value)
-        }
-
-    ///////////////////////////////////////////////////////////////////////////
-    // Title
-    ///////////////////////////////////////////////////////////////////////////
-
-    var songTitle: String?
-        get() = metadata?.getString(METADATA_KEY_TITLE)
-        set(value) {
-            if(value != null) putString(METADATA_KEY_TITLE, value)
-        }
+    var songArtistName: String? = null
 
     ///////////////////////////////////////////////////////////////////////////
     // Album
@@ -74,69 +73,46 @@ class Song : MediaObject() {
 
     var songAlbumId: Long? = null
 
-    var songAlbumName: String?
-        get() = metadata?.getString(METADATA_KEY_ALBUM)
-        set(value) {
-            if(value != null) putString(METADATA_KEY_ALBUM, value)
-        }
+    var songAlbumName: String? = null
 
     ///////////////////////////////////////////////////////////////////////////
     // Explicit artwork
     ///////////////////////////////////////////////////////////////////////////
 
-    val hasExplicitArtwork: Boolean = explicitArtworkPath != null
+    var explicitArtworkPath: String? = null
 
-    var explicitArtworkPath: String?
-        get() = metadata?.getString(METADATA_KEY_ART_URI)
-        set(value) {
-            if(value != null) putString(METADATA_KEY_ART_URI, value)
-        }
+    val hasExplicitArtwork: Boolean
+        get() = explicitArtworkPath != null
 
     ///////////////////////////////////////////////////////////////////////////
     // Duration
     ///////////////////////////////////////////////////////////////////////////
 
-    var songDuration: Long?
-        get() = metadata?.getLong(METADATA_KEY_DURATION)
-        set(value) {
-            if(value != null) putLong(METADATA_KEY_DURATION, value)
-        }
+    var songDuration: Long? = null
 
     val songDurationString: String
         get() {
             val songDuration = songDuration
-            if(songDuration != null) return MusicCoreUtil.stringForTime(songDuration) else return "--:--"
+            if (songDuration != null) return MusicCoreUtil.stringForTime(songDuration) else return "--:--"
         }
 
     ///////////////////////////////////////////////////////////////////////////
     // Track number
     ///////////////////////////////////////////////////////////////////////////
 
-    var songTrackNumber: Long?
-        get() = metadata?.getLong(METADATA_KEY_TRACK_NUMBER)
-        set(value) {
-            if(value != null) putLong(METADATA_KEY_TRACK_NUMBER, value)
-        }
-
+    var songTrackNumber: Long? = null
 
     val songTrackNumberString: String
         get() {
             val trackNumber = songTrackNumber
-            if(trackNumber != null) return trackNumber.toString() else return "-"
+            if (trackNumber != null) return trackNumber.toString() else return "-"
         }
 
     ///////////////////////////////////////////////////////////////////////////
     // Year
     ///////////////////////////////////////////////////////////////////////////
 
-    var songYear: String?
-        get() {
-            val year = metadata?.getLong(METADATA_KEY_YEAR)
-            if(year != null) return year.toString() else return "-"
-        }
-        set(value) {
-            if(value != null) putLong(METADATA_KEY_YEAR, value.toLong())
-        }
+    var songYear: Long? = null
 
     ///////////////////////////////////////////////////////////////////////////
     // Explicit path
@@ -182,7 +158,7 @@ class Song : MediaObject() {
             return this
         }
 
-        fun setYear(year: String): Builder {
+        fun setYear(year: Long): Builder {
             this.song.songYear = year
             return this
         }

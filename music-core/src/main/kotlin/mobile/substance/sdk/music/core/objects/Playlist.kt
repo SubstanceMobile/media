@@ -32,15 +32,17 @@ class Playlist : MediaObject() {
     override val baseUri: Uri?
         get() = MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI
 
+    override fun toMetadataCompat(source: MediaMetadataCompat): MediaMetadataCompat {
+        return MediaMetadataCompat.Builder(source)
+                .putString(MediaMetadataCompat.METADATA_KEY_TITLE, playlistName)
+                .build()
+    }
+
     ///////////////////////////////////////////////////////////////////////////
     // Title
     ///////////////////////////////////////////////////////////////////////////
 
-    var playlistName: String?
-        get() = metadata?.getString(MediaMetadataCompat.METADATA_KEY_TITLE)
-        set(value) {
-            if(value != null) putString(MediaMetadataCompat.METADATA_KEY_TITLE, value)
-        }
+    var playlistName: String? = null
 
     ///////////////////////////////////////////////////////////////////////////
     // Builder
@@ -53,7 +55,7 @@ class Playlist : MediaObject() {
             return this
         }
 
-        fun setID(id: Long): Builder {
+        fun setId(id: Long): Builder {
             this.playlist.id = id
             return this
         }

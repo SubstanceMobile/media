@@ -37,8 +37,8 @@ class GenresTask(context: Context, vararg params: Any) : Loader<Genre>(context, 
         val id = cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Genres._ID))
 
         val g = Genre.Builder()
-                .setGenreName(name)
-                .setGenreId(id)
+                .setName(name)
+                .setId(id)
                 .build()
 
         Log.d("GenresTask", "Loaded id $id")

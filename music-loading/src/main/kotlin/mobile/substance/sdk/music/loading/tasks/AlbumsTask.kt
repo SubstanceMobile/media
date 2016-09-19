@@ -23,8 +23,6 @@ import android.net.Uri
 import android.os.Handler
 import android.provider.MediaStore
 import android.util.Log
-import mobile.substance.sdk.music.core.dataLinkers.MusicData
-
 import mobile.substance.sdk.music.core.objects.Album
 import mobile.substance.sdk.music.loading.Library
 
@@ -40,14 +38,14 @@ class AlbumsTask(context: Context, vararg params: Any) : Loader<Album>(context, 
 
         val a = Album.Builder()
                 .setName(name)
-                .setAlbumId(id)
+                .setId(id)
                 .setArtistName(artistName)
                 .setNumberOfSongs(numberOfSongs)
                 .setYear(year)
                 .setArtworkPath(artworkPath)
                 .build()
 
-        Log.d("AlbumsTask", "Loaded id $id with artwork path $artworkPath")
+        Log.d("AlbumsTask", "Loaded album $name, id $id with artwork path $artworkPath")
         return a
     }
 

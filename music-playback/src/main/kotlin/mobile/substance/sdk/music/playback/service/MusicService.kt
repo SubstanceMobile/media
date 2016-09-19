@@ -176,8 +176,7 @@ class MusicService : MediaBrowserServiceCompat(), CastStateListener {
                 try {
                     sleep(500)
                 } catch (e: InterruptedException) {
-                    e.printStackTrace()
-                    interrupt()
+                    break
                 }
                 try {
                     val newState = if (engine.isPlaying())
@@ -211,7 +210,7 @@ class MusicService : MediaBrowserServiceCompat(), CastStateListener {
     internal fun updateMetadata() {
         Thread() {
             run {
-                val source = MusicQueue.getCurrentSong()!!.metadata
+                val source = MusicQueue.getCurrentSong()!!.getMetadata()
                 session?.setMetadata(MediaMetadataCompat.Builder(source)
                         .putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, MusicCoreUtil.getArtwork(MusicQueue.getCurrentSong(), this))
                         .build())

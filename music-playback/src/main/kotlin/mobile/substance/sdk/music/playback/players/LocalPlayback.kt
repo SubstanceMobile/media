@@ -24,7 +24,6 @@ import android.os.Build
 import android.os.PowerManager
 import android.util.Log
 import mobile.substance.sdk.music.core.utils.MusicCoreUtil
-import mobile.substance.sdk.music.playback.service.HeadsetPlugReceiver
 
 
 object LocalPlayback : Playback(),
@@ -85,9 +84,6 @@ object LocalPlayback : Playback(),
 
         localPlayer?.reset() // Necessary step to be able to setDataSource() again
 
-        //Register the broadcast receiver
-        HeadsetPlugReceiver register SERVICE!!
-
         //Notify the listeners if it hasn't already happened externally
         if (!listenersAlreadyNotified) {
             //TODO Work with listeners
@@ -120,7 +116,6 @@ object LocalPlayback : Playback(),
         if (!isPlaying()) {
             if (!updateFocus or requestAudioFocus()) {
                 localPlayer?.start()
-                HeadsetPlugReceiver register SERVICE!!
                 nowPlaying()
             } else Log.e(TAG, "AudioFocus denied")
         } else Log.e(TAG, "It seems like resume was called while you are playing. It is recommended you do some debugging.")
@@ -135,7 +130,6 @@ object LocalPlayback : Playback(),
     fun doPause(updateFocus: Boolean) {
         if (updateFocus) giveUpAudioFocus()
         localPlayer?.pause()
-        HeadsetPlugReceiver unregister SERVICE!!
         nowPaused()
     }
 

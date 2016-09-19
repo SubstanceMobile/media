@@ -29,15 +29,17 @@ class Genre : MediaObject() {
     override val baseUri: Uri?
         get() = MediaStore.Audio.Genres.EXTERNAL_CONTENT_URI
 
+    override fun toMetadataCompat(source: MediaMetadataCompat): MediaMetadataCompat {
+        return MediaMetadataCompat.Builder(source)
+                .putString(MediaMetadataCompat.METADATA_KEY_TITLE, genreName)
+                .build()
+    }
+
     ///////////////////////////////////////////////////////////////////////////
     // Name
     ///////////////////////////////////////////////////////////////////////////
 
-    var genreName: String?
-        get() = metadata?.getString(MediaMetadataCompat.METADATA_KEY_TITLE)
-        set(value) {
-            if(value != null) putString(MediaMetadataCompat.METADATA_KEY_TITLE, value)
-        }
+    var genreName: String? = null
 
     ///////////////////////////////////////////////////////////////////////////
     // Builder
@@ -45,12 +47,12 @@ class Genre : MediaObject() {
 
     class Builder @JvmOverloads constructor(private val genre: Genre = Genre()) {
 
-        fun setGenreName(genreName: String): Builder {
+        fun setName(genreName: String): Builder {
             this.genre.genreName = genreName
             return this
         }
 
-        fun setGenreId(genreId: Long): Builder {
+        fun setId(genreId: Long): Builder {
             this.genre.id = genreId
             return this
         }
