@@ -33,6 +33,7 @@ import mobile.substance.sdk.music.playback.MusicPlaybackOptions
 import mobile.substance.sdk.music.playback.PlaybackRemote
 import mobile.substance.sdk.music.playback.service.MusicQueue
 import mobile.substance.sdk.music.playback.service.MusicService
+import mobile.substance.sdk.music.playback.service.PlaybackState
 import java.util.*
 
 abstract class Playback : MediaSessionCompat.Callback() {
@@ -302,6 +303,14 @@ abstract class Playback : MediaSessionCompat.Callback() {
     ///////////////////////////////////////////////////////////////////////////
 
     internal var playbackState = STATE_NONE
+        set(value) {
+            field = value
+            when (field) {
+                PlaybackStateCompat.STATE_PAUSED -> SERVICE!!.callback { onStateChanged(PlaybackState.STATE_PAUSED) }
+                PlaybackStateCompat.STATE_PLAYING -> SERVICE!!.callback { onStateChanged(PlaybackState.STATE_PLAYING) }
+                PlaybackStateCompat.STATE_NONE -> SERVICE!!.callback { onStateChanged(PlaybackState.STATE_IDLE) }
+            }
+        }
 
     /**
      * Call this method to tell the system that you are currently buffering. Call this whenever you start buffering to make sure Android
