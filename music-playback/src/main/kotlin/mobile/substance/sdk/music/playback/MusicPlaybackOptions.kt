@@ -27,7 +27,7 @@ object MusicPlaybackOptions {
      * This is a very simple interface you can override to include your own actions. It is recommended you set this and use it.
      */
     interface PlaybackActions {
-        fun getActions() = PlaybackStateCompat.ACTION_PLAY_PAUSE or PlaybackStateCompat.ACTION_PLAY or PlaybackStateCompat.ACTION_PAUSE
+        fun getActions() = PlaybackStateCompat.ACTION_PLAY_PAUSE or PlaybackStateCompat.ACTION_PLAY or PlaybackStateCompat.ACTION_PAUSE or PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS or PlaybackStateCompat.ACTION_SKIP_TO_NEXT or PlaybackStateCompat.ACTION_PLAY_FROM_MEDIA_ID
     }
 
     var playbackActions = object : PlaybackActions {}

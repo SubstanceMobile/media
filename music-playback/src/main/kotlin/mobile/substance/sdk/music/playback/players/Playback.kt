@@ -114,6 +114,7 @@ abstract class Playback : MediaSessionCompat.Callback() {
     fun play(song: Song, mediaId: Long? = null) {
         play(song.uri, false, mediaId ?: song.id)
         SERVICE!!.callback {
+            if (!(SERVICE!!.getMediaSession()?.isActive ?: false)) SERVICE!!.getMediaSession()?.isActive = true
             onSongChanged(song)
             onDurationChanged(song.songDuration?.toInt() ?: 0, song.songDurationString)
         }
@@ -265,6 +266,7 @@ abstract class Playback : MediaSessionCompat.Callback() {
 
         if (!manuallyHandleState) playbackState = STATE_STOPPED
         doStop()
+        SERVICE!!.getMediaSession()?.isActive = false
     }
 
     abstract fun doStop()
