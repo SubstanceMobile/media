@@ -120,7 +120,8 @@ class Song : MediaObject() {
 
     var explicitPath: String? = null
 
-    val hasExplicitPath: Boolean = explicitPath != null
+    val hasExplicitPath: Boolean
+        get() = explicitPath != null
 
     ///////////////////////////////////////////////////////////////////////////
     // Builder
