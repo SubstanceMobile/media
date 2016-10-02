@@ -65,6 +65,21 @@ object Library : MusicLibraryData {
     private var LOADER_PLAYLISTS: Loader<Playlist>? = null
     private var LOADER_GENRES: Loader<Genre>? = null
 
+    private val buildFinishedListeners = ArrayList<() -> Any>()
+    private val buildState: Array<Boolean>
+        get() = arrayOf(LOADER_SONGS?.isFinished ?: true,
+                LOADER_ALBUMS?.isFinished ?: true,
+                LOADER_PLAYLISTS?.isFinished ?: true,
+                LOADER_ARTISTS?.isFinished ?: true,
+                LOADER_GENRES?.isFinished ?: true)
+
+    private fun checkIsFinished() {
+        if (buildState.all { it }) {
+            buildFinishedListeners.forEach { it.invoke() }
+            buildFinishedListeners.clear()
+        }
+    }
+
     @JvmOverloads fun init(context: Context, libraryConfig: LibraryConfig = LibraryConfig()): Library {
         Library.context = context.applicationContext
         if (libraryConfig.hookData) MusicData.hook(this)
@@ -81,6 +96,7 @@ object Library : MusicLibraryData {
                     Log.d(Library.javaClass.simpleName, "Completed building songs")
                     songs = result.toMutableList()
                     for (listener in listeners) listener.onSongsCompleted(result)
+                    checkIsFinished()
                 }
             })
             LOADER_SONGS = songsTask
@@ -96,6 +112,7 @@ object Library : MusicLibraryData {
                     Log.d(Library.javaClass.simpleName, "Completed building albums")
                     albums = result.toMutableList()
                     for (listener in listeners) listener.onAlbumsCompleted(result)
+                    checkIsFinished()
                 }
             })
             LOADER_ALBUMS = albumsTask
@@ -111,6 +128,7 @@ object Library : MusicLibraryData {
                     Log.d(Library.javaClass.simpleName, "Completed building playlists")
                     playlists = result.toMutableList()
                     for (listener in listeners) listener.onPlaylistsCompleted(result)
+                    checkIsFinished()
                 }
             })
             LOADER_PLAYLISTS = playlistsTask
@@ -126,6 +144,7 @@ object Library : MusicLibraryData {
                     Log.d(Library.javaClass.simpleName, "Completed building artists")
                     artists = result.toMutableList()
                     for (listener in listeners) listener.onArtistsCompleted(result)
+                    checkIsFinished()
                 }
             })
             LOADER_ARTISTS = artistsTask
@@ -141,6 +160,7 @@ object Library : MusicLibraryData {
                     Log.d(Library.javaClass.simpleName, "Completed building genres")
                     genres = result.toMutableList()
                     for (listener in listeners) listener.onGenresCompleted(result)
+                    checkIsFinished()
                 }
             })
             LOADER_GENRES = genresTask
@@ -245,6 +265,10 @@ object Library : MusicLibraryData {
 
     fun unregisterListener(listener: LibraryListener) {
         listeners.remove(listener)
+    }
+
+    fun registerBuildFinishedListener(listener: () -> Any) {
+        buildFinishedListeners.add(listener)
     }
 
     /////////////////

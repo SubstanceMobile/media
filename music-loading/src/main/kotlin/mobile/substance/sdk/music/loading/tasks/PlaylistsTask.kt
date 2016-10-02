@@ -35,10 +35,12 @@ class PlaylistsTask(context: Context, vararg params: Any) : Loader<Playlist>(con
     override fun buildObject(cursor: Cursor): Playlist? {
         val name = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Playlists.NAME))
         val id = cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Playlists._ID))
+        val dateAdded = cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Playlists.DATE_ADDED))
 
         val p = Playlist.Builder()
                 .setName(name)
                 .setId(id)
+                .setDateAdded(dateAdded)
                 .build()
 
         Log.i("PlaylistsTask", "Loaded id $id")

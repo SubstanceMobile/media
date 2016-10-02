@@ -124,6 +124,12 @@ class Song : MediaObject() {
         get() = explicitPath != null
 
     ///////////////////////////////////////////////////////////////////////////
+    // Date of addition
+    ///////////////////////////////////////////////////////////////////////////
+
+    var dateAdded: Long? = null
+
+    ///////////////////////////////////////////////////////////////////////////
     // Builder
     ///////////////////////////////////////////////////////////////////////////
 
@@ -171,6 +177,11 @@ class Song : MediaObject() {
 
         fun setDuration(duration: Long): Builder {
             this.song.songDuration = duration
+            return this
+        }
+
+        fun setDateAdded(dateAdded: Long): Builder {
+            this.song.dateAdded = dateAdded
             return this
         }
 

@@ -45,6 +45,12 @@ class Playlist : MediaObject() {
     var playlistName: String? = null
 
     ///////////////////////////////////////////////////////////////////////////
+    // Date of addition
+    ///////////////////////////////////////////////////////////////////////////
+
+    var dateAdded: Long? = null
+
+    ///////////////////////////////////////////////////////////////////////////
     // Builder
     ///////////////////////////////////////////////////////////////////////////
 
@@ -57,6 +63,11 @@ class Playlist : MediaObject() {
 
         fun setId(id: Long): Builder {
             this.playlist.id = id
+            return this
+        }
+
+        fun setDateAdded(dateAdded: Long): Builder {
+            this.playlist.dateAdded = dateAdded
             return this
         }
 

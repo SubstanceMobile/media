@@ -42,6 +42,7 @@ class SongsTask(context: Context, vararg params: Any) : Loader<Song>(context, pa
         val albumName = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM))
         val artistId = cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST_ID))
         val year = cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Media.YEAR))
+        val dateAdded = cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Media.DATE_ADDED))
 
         val s = Song.Builder()
                 .setId(id)
@@ -53,6 +54,7 @@ class SongsTask(context: Context, vararg params: Any) : Loader<Song>(context, pa
                 .setTrackNumber(trackNumber)
                 .setYear(year)
                 .setDuration(duration)
+                .setDateAdded(dateAdded)
                 .build()
 
         Log.i("SongsTask", "Loaded id $id")

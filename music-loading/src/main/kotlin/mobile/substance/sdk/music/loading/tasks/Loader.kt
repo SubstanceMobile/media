@@ -41,6 +41,9 @@ abstract class Loader<Return : MediaObject>(context: Context, vararg params: Any
         protected set
     protected var runParams: Array<Any>
 
+    val isFinished: Boolean
+        get() = task?.status?.equals(AsyncTask.Status.FINISHED) ?: false
+
     ///////////////////////////////////////////////////////////////////////////
     // Used for generating the Cursor
     ///////////////////////////////////////////////////////////////////////////

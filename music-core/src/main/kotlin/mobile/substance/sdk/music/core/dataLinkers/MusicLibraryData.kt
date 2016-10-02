@@ -204,4 +204,20 @@ interface MusicLibraryData {
         QueryTask(callback).execute({ findSongsForGenre(genre) })
     }
 
+    ///////////////////////////////////////////////////////////////////////////
+    // Other methods
+    ///////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Retrieves the items that include a dateAdded property, ordered by descending date
+     */
+    fun getLastAddedObjects(): List<MediaObject> {
+        val objects = ArrayList<MediaObject>()
+        objects.addAll(getSongs())
+        objects.addAll(getPlaylists())
+        return objects.sortedByDescending {
+            if (it is Song) it.dateAdded else (it as Playlist).dateAdded
+        }
+    }
+
 }
