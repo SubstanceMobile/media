@@ -74,11 +74,13 @@ object Library : MusicLibraryData {
                 LOADER_GENRES?.isFinished ?: true)
 
     private fun checkIsFinished() {
-        if (buildState.all { it }) {
+        if (isBuilt()) {
             buildFinishedListeners.forEach { it.invoke() }
             buildFinishedListeners.clear()
         }
     }
+
+    fun isBuilt(): Boolean = buildState.all { it }
 
     @JvmOverloads fun init(context: Context, libraryConfig: LibraryConfig = LibraryConfig()): Library {
         Library.context = context.applicationContext
@@ -267,7 +269,12 @@ object Library : MusicLibraryData {
         listeners.remove(listener)
     }
 
-    fun registerBuildFinishedListener(listener: () -> Any) {
+    fun registerBuildFinishedListener(listener: () -> Any, checkNow: Boolean = false) {
+        if (checkNow)
+            if (isBuilt()) {
+                listener.invoke()
+                return
+            }
         buildFinishedListeners.add(listener)
     }
 
