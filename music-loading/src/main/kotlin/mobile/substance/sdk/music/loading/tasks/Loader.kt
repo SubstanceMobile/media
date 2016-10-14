@@ -41,8 +41,10 @@ abstract class Loader<Return : MediaObject>(context: Context, vararg params: Any
         protected set
     protected var runParams: Array<Any>
 
-    val isFinished: Boolean
-        get() = task?.status?.equals(AsyncTask.Status.FINISHED) ?: false
+    /**
+     * Tells whether the loading did finish at least once in its lifetime
+     */
+    var finishedOnce: Boolean = false
 
     ///////////////////////////////////////////////////////////////////////////
     // Used for generating the Cursor
@@ -257,6 +259,8 @@ abstract class Loader<Return : MediaObject>(context: Context, vararg params: Any
 
         override fun onPostExecute(result: List<Return>) {
             super.onPostExecute(result)
+            if (!finishedOnce)
+                finishedOnce = true
             sort(result)
             mVerifyListener.onCompleted(result)
             if (!observerLock) registerMediaStoreListener()

@@ -67,11 +67,11 @@ object Library : MusicLibraryData {
 
     private val buildFinishedListeners = ArrayList<() -> Any>()
     private val buildState: Array<Boolean>
-        get() = arrayOf(LOADER_SONGS?.isFinished ?: true,
-                LOADER_ALBUMS?.isFinished ?: true,
-                LOADER_PLAYLISTS?.isFinished ?: true,
-                LOADER_ARTISTS?.isFinished ?: true,
-                LOADER_GENRES?.isFinished ?: true)
+        get() = arrayOf(LOADER_SONGS?.finishedOnce ?: true,
+                LOADER_ALBUMS?.finishedOnce ?: true,
+                LOADER_PLAYLISTS?.finishedOnce ?: true,
+                LOADER_ARTISTS?.finishedOnce ?: true,
+                LOADER_GENRES?.finishedOnce ?: true)
 
     private fun checkIsFinished() {
         if (isBuilt()) {
@@ -80,7 +80,7 @@ object Library : MusicLibraryData {
         }
     }
 
-    fun isBuilt(): Boolean = buildState.all { it }
+    fun isBuilt(): Boolean = buildState.all { it } && context != null // Makes sure we've been initialized
 
     @JvmOverloads fun init(context: Context, libraryConfig: LibraryConfig = LibraryConfig()): Library {
         Library.context = context.applicationContext
