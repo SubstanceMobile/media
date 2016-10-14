@@ -58,17 +58,17 @@ object MusicData : MusicLibraryData {
         val results = ArrayList<T>()
         if (T::class.java == Song::class.java)
             getSongs().forEach {
-                if (it.songTitle?.contains(query) ?: false)
+                if (it.songTitle?.contains(query, true) ?: false)
                     results.add(it as T)
             }
         if (T::class.java == Album::class.java)
             getAlbums().forEach {
-                if (it.albumName?.contains(query) ?: false)
+                if (it.albumName?.contains(query, true) ?: false)
                     results.add(it as T)
             }
         if (T::class.java == Artist::class.java)
             getArtists().forEach {
-                if (it.artistName?.contains(query) ?: false)
+                if (it.artistName?.contains(query, true) ?: false)
                     results.add(it as T)
             }
 
