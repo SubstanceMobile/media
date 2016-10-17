@@ -16,48 +16,65 @@
 
 package mobile.substance.sdk.music.playback.players
 
+import android.content.ContentUris
 import android.net.Uri
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
 import android.widget.Toast
+import com.google.android.gms.cast.CastStatusCodes
 import com.google.android.gms.cast.MediaInfo
 import com.google.android.gms.cast.MediaMetadata
 import com.google.android.gms.cast.MediaStatus
 import com.google.android.gms.cast.framework.*
 import com.google.android.gms.cast.framework.media.RemoteMediaClient
+import com.google.android.gms.common.api.Status
 import com.google.android.gms.common.images.WebImage
 import mobile.substance.sdk.music.core.dataLinkers.MusicData
 import mobile.substance.sdk.music.core.objects.Song
 import mobile.substance.sdk.music.core.utils.MusicCoreUtil
 import mobile.substance.sdk.music.playback.MusicPlaybackUtil
 import mobile.substance.sdk.music.playback.cast.LocalServer
+import org.json.JSONObject
+import java.io.File
+import java.io.FileInputStream
+import java.io.InputStream
+import java.net.InetAddress
+import java.net.ServerSocket
 
-object CastPlayback : Playback(), SessionManagerListener<Session>, RemoteMediaClient.Listener {
+object CastPlayback : Playback(), SessionManagerListener<Session>, RemoteMediaClient.Listener, RemoteMediaClient.ProgressListener {
+
+    override fun onProgressUpdated(p0: Long, p1: Long) {
+        passThroughPlaybackProgress(p0)
+    }
 
     override fun onStatusUpdated() {
-        when (remoteMediaClient?.mediaStatus?.playerState) {
-            MediaStatus.PLAYER_STATE_IDLE -> {
-                playbackState = PlaybackStateCompat.STATE_NONE
-                when (remoteMediaClient!!.mediaStatus.idleReason) {
-                    MediaStatus.IDLE_REASON_ERROR -> {
-
+        try {
+            when (remoteMediaClient?.mediaStatus?.playerState) {
+                MediaStatus.PLAYER_STATE_IDLE -> {
+                    when (remoteMediaClient!!.mediaStatus.idleReason) {
+                        MediaStatus.IDLE_REASON_ERROR -> notifyError()
+                        MediaStatus.IDLE_REASON_FINISHED -> {
+                            notifyIdle()
+                            next()
+                        }
                     }
-                    MediaStatus.IDLE_REASON_FINISHED -> next()
+                }
+                MediaStatus.PLAYER_STATE_BUFFERING -> {
+                    notifyBuffering()
+                }
+                MediaStatus.PLAYER_STATE_PAUSED -> {
+                    notifyPaused()
+                }
+                MediaStatus.PLAYER_STATE_PLAYING -> {
+                    notifyPlaying()
+                }
+                MediaStatus.PLAYER_STATE_UNKNOWN -> {
+                    notifyIdle()
                 }
             }
-            MediaStatus.PLAYER_STATE_BUFFERING -> {
-                playbackState = PlaybackStateCompat.STATE_BUFFERING
-            }
-            MediaStatus.PLAYER_STATE_PAUSED -> {
-                playbackState = PlaybackStateCompat.STATE_PAUSED
-            }
-            MediaStatus.PLAYER_STATE_PLAYING -> {
-                playbackState = PlaybackStateCompat.STATE_PLAYING
-            }
-            MediaStatus.PLAYER_STATE_UNKNOWN -> {
-                playbackState = PlaybackStateCompat.STATE_NONE
-            }
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 
@@ -80,14 +97,12 @@ object CastPlayback : Playback(), SessionManagerListener<Session>, RemoteMediaCl
     private var castSession: CastSession? = null
     private var sessionManager: SessionManager? = null
     private var remoteMediaClient: RemoteMediaClient? = null
+    private var overrideIsPlaying = false
 
-    private var fileServer: LocalServer? = null
-    private var artworkServer: LocalServer? = null
+    private var fileServer = LocalServer()
+    // private var artworkServer = AsyncHttpServer()
 
     override fun init() {
-        fileServer = LocalServer(MusicPlaybackUtil.SERVER_TYPE_AUDIO)
-        artworkServer = LocalServer(MusicPlaybackUtil.SERVER_TYPE_ARTWORK)
-
         sessionManager = CastContext.getSharedInstance(SERVICE!!).sessionManager
         castSession = sessionManager?.currentCastSession
         sessionManager?.addSessionManagerListener(this)
@@ -99,9 +114,15 @@ object CastPlayback : Playback(), SessionManagerListener<Session>, RemoteMediaCl
 
     override fun configPlayer() {
         remoteMediaClient?.addListener(this)
+        remoteMediaClient?.addProgressListener(this, 500)
     }
 
-    override fun doPlay(uri: Uri, listenersAlreadyNotified: Boolean, mediaId: Long?) {
+    private fun doPlay(fileUri: Uri, artworkUri: Uri?, metadata: MediaMetadataCompat?) {
+
+        /*if (metadata == null) {
+            metadata = retrieveMetadata(fileUri)
+        }*/
+
         //Clear out the player if a song is being played right now.
         if (isPlaying()) {
             remoteMediaClient?.stop()
@@ -113,111 +134,108 @@ object CastPlayback : Playback(), SessionManagerListener<Session>, RemoteMediaCl
                     }
         }
 
-        if (fileServer?.isAlive!!)
-            fileServer?.stop()
-        if (artworkServer?.isAlive!!)
-            artworkServer?.stop()
+        fileServer.stop()
+        // artworkServer.stop()
 
-        //Notify the listeners if it hasn't already happened externally
-        if (!listenersAlreadyNotified) {
-            //TODO Work with listeners
-        }
-
-        //Start the service and do some work!
         try {
-            val url = MusicCoreUtil.getUrlFromUri(uri)
-
-            val song: Song? = if (mediaId != null) MusicData.findSongById(mediaId) else null
+            val url = MusicCoreUtil.getUrlFromUri(fileUri)
 
             if (url == null) {
 
-                fileServer?.setUri(SERVICE!!, uri)
+                val filePath = MusicCoreUtil.getFilePath(SERVICE!!, fileUri)
+                val fileType = filePath?.substring(filePath.lastIndexOf(".") + 1)
 
-                if (mediaId != null)
-                    try {
-                        artworkServer?.setUri(SERVICE!!, Uri.parse("content://" + MusicData.findAlbumById(song?.songAlbumId!!)?.albumArtworkPath))
-                    } catch (ignored: KotlinNullPointerException) {}
-                val ipAddress = MusicPlaybackUtil.getIpAddressString(SERVICE!!)
-                val fileUrl = "http://$ipAddress:${MusicPlaybackUtil.SERVER_PORT_AUDIO}"
-                val artworkUrl = "http://$ipAddress:${MusicPlaybackUtil.SERVER_PORT_ARTWORK}"
+                fileServer.paths = Pair(filePath, MusicCoreUtil.getFilePath(SERVICE!!, artworkUri ?: Uri.EMPTY))
+                fileServer.start()
 
-                Log.d(TAG, "Serving local files for Cast playback... Here are the urls: $fileUrl $artworkUrl")
+                val baseUrl = "http://${MusicPlaybackUtil.getIpAddressString(SERVICE!!)}:${MusicPlaybackUtil.SERVER_PORT}/"
+                val audioUrl = baseUrl + MusicPlaybackUtil.URL_PATH_PART_AUDIO + "/" + fileUri.toString().hashCode()
+                val artworkUrl = baseUrl + MusicPlaybackUtil.URL_PATH_PART_ARTWORK + "/" + artworkUri.toString().hashCode()
 
-                fileServer?.start()
-                artworkServer?.start()
+                Log.d(TAG, "Serving files. URLS: audio: $audioUrl artwork: $artworkUrl")
 
-                val mediaInfo = MediaInfo.Builder(fileUrl)
-                        .setContentType("audio/*")
-                        .setMetadata(buildMetadata(artworkUrl, song?.getMetadata()!!)) // TODO
-                        .setStreamType(MediaInfo.STREAM_TYPE_BUFFERED)
+                val mediaInfo = MediaInfo.Builder(audioUrl)
+                        .setContentType("audio/$fileType")
+                        .setMetadata(buildMetadata(artworkUrl, metadata ?: MediaMetadataCompat.Builder().build()))
+                        .setStreamType(MediaInfo.STREAM_TYPE_NONE)
                         .build()
                 doLoad(mediaInfo, true)
             } else {
                 val mediaInfo = MediaInfo.Builder(url)
-                    .setContentType("audio/*")
-                        .setMetadata(buildMetadata(song?.explicitArtworkPath ?: "", song?.getMetadata()!!)) // TODO
-                    .setStreamType(MediaInfo.STREAM_TYPE_LIVE)
-                    .build()
+                        .setContentType("audio/*")
+                        .setMetadata(buildMetadata(artworkUri.toString(), metadata ?: MediaMetadataCompat.Builder().build()))
+                        .setStreamType(MediaInfo.STREAM_TYPE_LIVE)
+                        .build()
                 doLoad(mediaInfo, true)
             }
         } catch (e: Exception) {
-            Log.e(TAG, "Unable to play " + MusicCoreUtil.getFilePath(SERVICE!!, uri), e)
+            Log.e(TAG, "Unable to play $fileUri", e)
         }
     }
 
+    override fun doPlay(song: Song) {
+        val artworkUri: String? = MusicData.findAlbumById(song.songAlbumId ?: 0)?.albumArtworkPath
+        doPlay(song.uri, if (artworkUri == null) Uri.parse(song.explicitArtworkPath.orEmpty()) else Uri.parse("file://$artworkUri"), song.getMetadata())
+    }
+
+    override fun doPlay(fileUri: Uri, artworkUri: Uri?) = doPlay(fileUri, artworkUri, null)
+
     private fun doLoad(info: MediaInfo, autoplay: Boolean) {
+        remoteMediaClient?.stop()
         remoteMediaClient?.load(info, autoplay)?.setResultCallback {
             if (!(it.status?.isSuccess ?: false)) {
-                Toast.makeText(SERVICE!!, "Unable to start playback", Toast.LENGTH_SHORT).show()
-                Log.d(TAG, it.status?.statusMessage.toString())
-            } else nowPlaying()
+                logStatus(it.status, "Playback failed")
+            } else notifyPlaying()
         }
     }
 
     private fun buildMetadata(imageUrl: String, base: MediaMetadataCompat): MediaMetadata {
-        val metadata = MediaMetadata()
+        val metadata = MediaMetadata(MediaMetadata.MEDIA_TYPE_MUSIC_TRACK)
         metadata.addImage(WebImage(Uri.parse(imageUrl)))
         metadata.putString(MediaMetadata.KEY_TITLE, base.getString(MediaMetadataCompat.METADATA_KEY_TITLE))
-        metadata.putString(MediaMetadata.KEY_ALBUM_TITLE, base.getString(MediaMetadataCompat.METADATA_KEY_ALBUM))
         metadata.putString(MediaMetadata.KEY_ARTIST, base.getString(MediaMetadataCompat.METADATA_KEY_ARTIST))
+        metadata.putString(MediaMetadata.KEY_ALBUM_TITLE, base.getString(MediaMetadataCompat.METADATA_KEY_ALBUM))
         return metadata
     }
 
     override fun doResume() {
         remoteMediaClient?.play()?.setResultCallback {
-            if (!it.status.isSuccess) {
-                Toast.makeText(SERVICE!!, "Unable to resume", Toast.LENGTH_SHORT).show()
-                Log.d(TAG, it.status.statusMessage)
-            } else nowPlaying()
+            if (!it.status.isSuccess) logStatus(it.status, "Resume failed")
         }
     }
 
     override fun doPause() {
         remoteMediaClient?.pause()?.setResultCallback {
-            if (!it.status.isSuccess) {
-                Toast.makeText(SERVICE!!, "Unable to resume", Toast.LENGTH_SHORT).show()
-                Log.d(TAG, it.status.statusMessage)
-            } else nowPaused()
+            if (!it.status.isSuccess) logStatus(it.status, "Pause failed")
         }
     }
 
     override fun doStop() {
-        fileServer?.stop()
-        artworkServer?.stop()
+        fileServer.stop()
         sessionManager?.removeSessionManagerListener(this)
+        remoteMediaClient = null
     }
 
     override fun doSeek(time: Long) {
         remoteMediaClient?.seek(time)?.setResultCallback {
-            if (!it.status.isSuccess) {
-                Toast.makeText(SERVICE!!, "Unable to resume", Toast.LENGTH_SHORT).show()
-                Log.d(TAG, it.status.statusMessage.toString())
-            }
+            if (!it.status.isSuccess) logStatus(it.status, "Seek failed")
         }
     }
 
+    private fun logStatus(status: Status, toast: String) {
+        Log.d(TAG, "Google Cast returned unsuccessful. Code: ${status.statusCode}; Message: ${status.statusMessage}")
+        var toastMessage: String? = null
+        when (status.statusCode) {
+            CastStatusCodes.FAILED -> toastMessage = toast
+            CastStatusCodes.INTERNAL_ERROR -> toastMessage = status.statusMessage ?: "Internal error at the cast receiver"
+            CastStatusCodes.TIMEOUT -> toastMessage = "Cast connection timed out"
+            CastStatusCodes.UNKNOWN_ERROR -> toastMessage = "Unknown error"
+        }
+        Toast.makeText(SERVICE!!, toastMessage ?: return, Toast.LENGTH_SHORT).show()
+    }
+
     override fun isPlaying(): Boolean {
-        return remoteMediaClient?.isPlaying ?: false
+        return (remoteMediaClient?.isPlaying ?: false) || overrideIsPlaying
     }
 
     override fun getCurrentPosInSong(): Int {
@@ -231,7 +249,7 @@ object CastPlayback : Playback(), SessionManagerListener<Session>, RemoteMediaCl
     override fun onSessionEnding(p0: Session?) {}
 
     override fun onSessionEnded(p0: Session?, p1: Int) {
-        SERVICE?.replacePlaybackEngine(LocalPlayback, shouldHotSwap(), true)
+        SERVICE?.replacePlaybackEngine(LocalPlayback, true, true)
     }
 
     override fun onSessionStarted(p0: Session?, p1: String?) {}
@@ -244,9 +262,7 @@ object CastPlayback : Playback(), SessionManagerListener<Session>, RemoteMediaCl
 
     override fun onSessionResuming(p0: Session?, p1: String?) {}
 
-    private fun isSongLoaded(): Boolean = false
-
-    private fun shouldHotSwap(): Boolean = isPlaying() && isSongLoaded()
+    override fun isPlayerNecessary(): Boolean = remoteMediaClient == null
 
     override val playerCreatedOnClassCreation: Boolean = false
 

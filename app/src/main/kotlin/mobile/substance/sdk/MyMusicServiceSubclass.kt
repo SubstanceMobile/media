@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-package mobile.substance.sdk.music.playback.service
+package mobile.substance.sdk
 
-// TODO: Julian you understand more then me what this does please describe it.
-enum class PlaybackState {
-    STATE_PLAYING, STATE_PAUSED, STATE_IDLE
-}
+import mobile.substance.sdk.music.playback.service.MusicService
+
+class MyMusicServiceSubclass : MusicService()

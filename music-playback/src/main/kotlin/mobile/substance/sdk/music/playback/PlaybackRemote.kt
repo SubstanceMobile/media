@@ -39,6 +39,7 @@ import java.util.*
  */
 object PlaybackRemote : ServiceConnection {
     private var context: Context? = null
+    private var serviceClass: Class<*> = MusicService::class.java
     private var service: MusicService? = null
     private var isBound = false
 
@@ -53,22 +54,21 @@ object PlaybackRemote : ServiceConnection {
     }
 
     private fun getService(listener: ServiceLoadListener) {
-        val running = if (context != null) MusicPlaybackUtil.isServiceRunning(context!!) else false
+        val running = if (context != null) MusicPlaybackUtil.isServiceRunning(context!!, serviceClass) else false
         if (running && isBound) {
             listener.respond(service)
             return
         }
         if (!running) {
             Log.d("getService()", "Looks like the service is not running. Starting it now...")
-            context?.startService(Intent(context, MusicService::class.java))
+            context?.startService(Intent(context, serviceClass))
         }
-        if (!isBound) context?.bindService(Intent(context, MusicService::class.java), this, Activity.BIND_ADJUST_WITH_ACTIVITY)
+        if (!isBound) context?.bindService(Intent(context, serviceClass), this, Activity.BIND_ADJUST_WITH_ACTIVITY)
         SERVICE_BOUND_LISTENERS.add(listener)
     }
 
     override fun onServiceConnected(name: ComponentName?, binder: IBinder?) {
         service = (binder as MusicService.ServiceBinder).service
-        //TODO: Callback
         isBound = true
         for (listener in SERVICE_BOUND_LISTENERS) listener.respond(service)
         SERVICE_BOUND_LISTENERS.clear()
@@ -83,7 +83,8 @@ object PlaybackRemote : ServiceConnection {
     // Main
     ///////////////////////////////////////////////////////////////////////////
 
-    fun init(context: Context) {
+    fun <S : MusicService> init(serviceClass: Class<S>, context: Context) {
+        this.serviceClass = serviceClass
         this.context = context
         if (MusicPlaybackOptions.isCastEnabled) CastContext.getSharedInstance(context)
     }
@@ -302,13 +303,13 @@ object PlaybackRemote : ServiceConnection {
 
     internal fun makeNotification(albumArt: Bitmap?): Notification {
         if (notificationBuilder == null) notificationBuilder = notificationCreator.createNotification(context!!, getMediaSession(),
-                MusicPlaybackUtil.getPendingIntent(context!!, MusicPlaybackUtil.Action.PLAY),
-                MusicPlaybackUtil.getPendingIntent(context!!, MusicPlaybackUtil.Action.PAUSE),
-                MusicPlaybackUtil.getPendingIntent(context!!, MusicPlaybackUtil.Action.SKIP_FORWARD),
-                MusicPlaybackUtil.getPendingIntent(context!!, MusicPlaybackUtil.Action.SKIP_BACKWARD),
-                MusicPlaybackUtil.getPendingIntent(context!!, MusicPlaybackUtil.Action.NOTIFICATION),
-                MusicPlaybackUtil.getPendingIntent(context!!, MusicPlaybackUtil.Action.STOP))
-        notificationCreator.populate(getCurrentSong()!!, notificationBuilder!!, getMediaSession(), MusicPlaybackUtil.getPendingIntent(context!!, MusicPlaybackUtil.Action.PLAY), MusicPlaybackUtil.getPendingIntent(context!!, MusicPlaybackUtil.Action.PAUSE))
+                MusicPlaybackUtil.getPendingIntent(context!!, MusicPlaybackUtil.Action.PLAY, serviceClass),
+                MusicPlaybackUtil.getPendingIntent(context!!, MusicPlaybackUtil.Action.PAUSE, serviceClass),
+                MusicPlaybackUtil.getPendingIntent(context!!, MusicPlaybackUtil.Action.SKIP_FORWARD, serviceClass),
+                MusicPlaybackUtil.getPendingIntent(context!!, MusicPlaybackUtil.Action.SKIP_BACKWARD, serviceClass),
+                MusicPlaybackUtil.getPendingIntent(context!!, MusicPlaybackUtil.Action.NOTIFICATION, serviceClass),
+                MusicPlaybackUtil.getPendingIntent(context!!, MusicPlaybackUtil.Action.STOP, serviceClass))
+        notificationCreator.populate(getCurrentSong()!!, notificationBuilder!!, getMediaSession(), MusicPlaybackUtil.getPendingIntent(context!!, MusicPlaybackUtil.Action.PLAY, serviceClass), MusicPlaybackUtil.getPendingIntent(context!!, MusicPlaybackUtil.Action.PAUSE, serviceClass))
         if (albumArt != null) notificationCreator.loadArt(albumArt, notificationBuilder!!)
         return notificationCreator.buildNotif(notificationBuilder!!)
     }

@@ -21,9 +21,14 @@ import android.media.AudioManager
 import android.media.MediaPlayer
 import android.net.Uri
 import android.os.Build
+import android.os.Handler
+import android.os.Looper
 import android.os.PowerManager
+import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
+import mobile.substance.sdk.music.core.MusicApiError
 import mobile.substance.sdk.music.core.utils.MusicCoreUtil
+import mobile.substance.sdk.music.playback.MusicPlaybackOptions
 
 
 object LocalPlayback : Playback(),
@@ -77,30 +82,25 @@ object LocalPlayback : Playback(),
     // Play TODO //
     ///////////////
 
-    override fun doPlay(uri: Uri, listenersAlreadyNotified: Boolean, mediaId: Long?) {
+    override fun doPlay(fileUri: Uri, artworkUri: Uri?) {
         //Stop the media player if a song is being played right now.
         if (isPlaying())
             localPlayer?.stop()
 
         localPlayer?.reset() // Necessary step to be able to setDataSource() again
 
-        //Notify the listeners if it hasn't already happened externally
-        if (!listenersAlreadyNotified) {
-            //TODO Work with listeners
-        }
-
         //Start the service and do some work!
         try {
-            val url = MusicCoreUtil.getUrlFromUri(uri)
+            val url = MusicCoreUtil.getUrlFromUri(fileUri)
             Log.d("Checking url validity", url.toString())
             if (url == null)
-                localPlayer?.setDataSource(SERVICE!!.applicationContext, uri)
+                localPlayer?.setDataSource(SERVICE!!.applicationContext, fileUri)
             else {
                 localPlayer?.setDataSource(url)
-                triggerStartBuffer()
+                notifyBuffering()
             }
         } catch (e: Exception) {
-            Log.e(TAG, "Unable to play " + MusicCoreUtil.getFilePath(SERVICE!!, uri), e)
+            Log.e(TAG, "Unable to play " + MusicCoreUtil.getFilePath(SERVICE!!, fileUri), e)
         } finally {
             localPlayer?.prepareAsync()
         }
@@ -116,7 +116,8 @@ object LocalPlayback : Playback(),
         if (!isPlaying()) {
             if (!updateFocus or requestAudioFocus()) {
                 localPlayer?.start()
-                nowPlaying()
+                notifyPlaying()
+                startProgressThread()
             } else Log.e(TAG, "AudioFocus denied")
         } else Log.e(TAG, "It seems like resume was called while you are playing. It is recommended you do some debugging.")
     }
@@ -130,7 +131,8 @@ object LocalPlayback : Playback(),
     fun doPause(updateFocus: Boolean) {
         if (updateFocus) giveUpAudioFocus()
         localPlayer?.pause()
-        nowPaused()
+        notifyPaused()
+        shutdownProgressThread()
     }
 
     //////////
@@ -142,6 +144,7 @@ object LocalPlayback : Playback(),
     fun doStop(updateFocus: Boolean) {
         if (updateFocus) giveUpAudioFocus()
         localPlayer?.destroy()
+        notifyIdle()
     }
 
     //////////
@@ -152,8 +155,10 @@ object LocalPlayback : Playback(),
         val to = time.toInt()
         wasPlayingBeforeAction = isPlaying()
         localPlayer?.pause()
-        if (to <= localPlayer!!.duration) localPlayer?.seekTo(to) else next()
-        if (wasPlayingBeforeAction) localPlayer?.start()
+        if (to <= localPlayer!!.duration) {
+            localPlayer?.seekTo(to)
+            if (wasPlayingBeforeAction) localPlayer?.start()
+        } else next()
     }
 
     ////////////
@@ -168,20 +173,60 @@ object LocalPlayback : Playback(),
         }
 
     ///////////////////////////////////////////////////////////////////////////
+    // Progress Thread
+    ///////////////////////////////////////////////////////////////////////////
+
+    private var progressThread: ProgressThread? = null
+
+    class ProgressThread : Thread() {
+        override fun run() {
+            while (!interrupted()) {
+                try {
+                    sleep(500)
+                } catch (e: InterruptedException) {
+                    break
+                }
+                try {
+                    passThroughPlaybackProgress()
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    interrupt()
+                }
+            }
+        }
+    }
+
+    internal fun startProgressThread() {
+        if (progressThread == null) progressThread = ProgressThread() else if (progressThread?.isAlive ?: false) return
+        progressThread?.start()
+    }
+
+    internal fun shutdownProgressThread() {
+        if (progressThread == null) return
+        if (!(progressThread?.isInterrupted ?: false))
+            progressThread?.interrupt()
+        progressThread = null
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
     // Media Player Callbacks
     // STATUS: TODO
     ///////////////////////////////////////////////////////////////////////////
 
     override fun onPrepared(mp: MediaPlayer?) {
-        triggerEndBuffer()
         resume()
     }
 
     //Not checking it it is looping because onCompletion is never actually called if it is looping.
-    override fun onCompletion(mp: MediaPlayer?) = next()
+    override fun onCompletion(mp: MediaPlayer?) {
+        notifyIdle()
+        shutdownProgressThread()
+        next()
+    }
 
     override fun onError(mp: MediaPlayer?, what: Int, extra: Int): Boolean {
-        SERVICE!!.shutdownProgressThreadIfNecessary()
+        notifyError()
+        shutdownProgressThread()
         //TODO: Handle this with some some sort of callback
         return true
     }

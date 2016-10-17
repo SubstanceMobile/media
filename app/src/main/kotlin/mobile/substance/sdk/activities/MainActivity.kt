@@ -31,6 +31,7 @@ import butterknife.bindView
 import com.afollestad.materialdialogs.MaterialDialog
 import com.github.javiersantos.materialstyleddialogs.MaterialStyledDialog
 import com.google.android.gms.cast.framework.CastButtonFactory
+import mobile.substance.sdk.MyMusicServiceSubclass
 import mobile.substance.sdk.R
 import mobile.substance.sdk.music.core.objects.Song
 import mobile.substance.sdk.music.core.utils.MusicCoreUtil
@@ -83,12 +84,10 @@ class MainActivity : NavigationDrawerActivity(), PlaybackRemote.RemoteCallback {
         get() = drawerLayout
 
     override fun onProgressChanged(progress: Int) {
-        Log.d("MainActivity.kt", "onProgressChanged, we are at second ${(progress.toLong() / 1000).toString()}")
         currentSongProgress.text = "${MusicCoreUtil.stringForTime(progress.toLong())} / ${MusicCoreUtil.stringForTime(duration?.toLong() ?: 0L)}"
     }
 
     override fun onDurationChanged(duration: Int, durationString: String) {
-        Log.d("MainActivity.kt", "onDurationChanged(), duration is ${(duration.toLong() / 1000).toString()} seconds")
         this.duration = duration
     }
 
@@ -96,7 +95,7 @@ class MainActivity : NavigationDrawerActivity(), PlaybackRemote.RemoteCallback {
         Log.d("MainActivity.kt", "onSongChanged(), title: ${song.songTitle}, artist: ${song.songArtistName}")
         if (currentSongCard.translationY != 0.0f) currentSongCard.animate().translationY(0.0f).setDuration(200).start()
         currentSongTitle.text = song.songTitle
-        Library.findAlbumById(song.songAlbumId!!)!!.requestArt(currentSongImage)
+        Library.findAlbumById(song.songAlbumId ?: 0)?.requestArt(currentSongImage)
     }
 
     override fun onStateChanged(state: PlaybackState) {
@@ -104,11 +103,9 @@ class MainActivity : NavigationDrawerActivity(), PlaybackRemote.RemoteCallback {
     }
 
     override fun onRepeatingChanged(isRepeating: Boolean) {
-        Log.d("MainActivity.kt", "onRepeatingChanged(), ${isRepeating.toString()}")
     }
 
     override fun onQueueChanged(queue: List<Song>) {
-        Log.d("MainActivity.kt", "onQueueChanged(), Queue has a size of ${queue.size.toString()}")
     }
 
     override val layoutResId: Int = R.layout.activity_main
@@ -122,8 +119,9 @@ class MainActivity : NavigationDrawerActivity(), PlaybackRemote.RemoteCallback {
     override fun onStart() {
         super.onStart()
         Log.d("MainActivity.kt", "onStart()")
-        PlaybackRemote.init(this)
+        PlaybackRemote.init(MyMusicServiceSubclass::class.java, this)
         PlaybackRemote.registerCallback(this)
+        if (PlaybackRemote.getCurrentSong() != null) PlaybackRemote.requestUpdates(this)
     }
 
     override fun onStop() {

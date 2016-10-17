@@ -111,8 +111,8 @@ abstract class Playback : MediaSessionCompat.Callback() {
 
     fun play() = play(MusicQueue.getCurrentSong()!!)
 
-    fun play(song: Song, mediaId: Long? = null) {
-        play(song.uri, false, mediaId ?: song.id)
+    fun play(song: Song) {
+        doPlay(song)
         SERVICE!!.callback {
             if (!(SERVICE!!.getMediaSession()?.isActive ?: false)) SERVICE!!.getMediaSession()?.isActive = true
             onSongChanged(song)
@@ -120,22 +120,31 @@ abstract class Playback : MediaSessionCompat.Callback() {
         }
     }
 
-    private fun play(uri: Uri, listenersAlreadyNotified: Boolean, mediaId: Long? = null) {
+    private fun play(uri: Uri) {
         createPlayerIfNecessary(true)
-        if (!manuallyHandleState) playbackState = STATE_PLAYING
-        doPlay(uri, listenersAlreadyNotified, mediaId)
+        var mediaId: Long? = null
+        if (uri.scheme == "content") mediaId = MusicCoreUtil.findByMediaId(ContentUris.parseId(uri), MusicData.getAlbums(), MusicData.getSongs())?.id
+        val artworkPath = MusicData.findAlbumById(MusicData.findSongById(mediaId ?: 0)?.songAlbumId ?: 0)?.albumArtworkPath
+        doPlay(uri, if (artworkPath != null) Uri.parse("file://$artworkPath") else null)
     }
-
-    abstract fun doPlay(uri: Uri, listenersAlreadyNotified: Boolean, mediaId: Long? = null)
 
     override fun onPlayFromUri(uri: Uri?, extras: Bundle?) {
         //TODO change the listener already notified to a variable
-        if (uri != null) {
-            var mediaId: Long? = null
-            if (uri.scheme == "content") mediaId = MusicCoreUtil.findByMediaId(ContentUris.parseId(uri), MusicData.getAlbums(), MusicData.getSongs())?.id
-            play(uri, false, mediaId)
-        }
+        if (uri != null) play(uri)
     }
+
+    override fun onPlayFromMediaId(mediaId: String?, extras: Bundle?) {
+        val song = MusicData.findSongById(mediaId!!.toLong())
+        if (song != null) play(song) else Log.d(TAG, "onPlayFromMediaId: no song with such ID exists")
+    }
+
+    open fun doPlay(song: Song) {
+        val artworkPath: String? = MusicData.findAlbumById(song.songAlbumId ?: 0)?.albumArtworkPath ?: song.explicitArtworkPath
+        val artworkUri: Uri? = Uri.parse("file://$artworkPath")
+        doPlay(song.uri, artworkUri)
+    }
+
+    abstract fun doPlay(fileUri: Uri, artworkUri: Uri?)
 
     ////////////
     // Resume //
@@ -147,7 +156,6 @@ abstract class Playback : MediaSessionCompat.Callback() {
             return
         }
 
-        if (!manuallyHandleState) playbackState = STATE_PLAYING
         doResume()
     }
 
@@ -160,15 +168,6 @@ abstract class Playback : MediaSessionCompat.Callback() {
     ///////////
     // Other //
     ///////////
-
-    private fun playFromMediaId(mediaId: Long?) {
-
-    }
-
-    override fun onPlayFromMediaId(mediaId: String?, extras: Bundle?) {
-        val song = MusicData.findSongById(mediaId!!.toLong())
-        if (song != null) play(song) else Log.d(TAG, "onPlayFromMediaId: no song with such ID exists")
-    }
 
     override fun onPlayFromSearch(query: String?, extras: Bundle?) {
         query ?: return
@@ -202,7 +201,6 @@ abstract class Playback : MediaSessionCompat.Callback() {
             return
         }
 
-        if (!manuallyHandleState) playbackState = STATE_PAUSED
         doPause()
     }
 
@@ -219,7 +217,6 @@ abstract class Playback : MediaSessionCompat.Callback() {
      * callRepeatOnNext to be false.
      */
     fun next() {
-        if (!manuallyHandleState) playbackState = STATE_SKIPPING_TO_NEXT
         if (isRepeating && callRepeatOnNext) doRepeat() else doNext()
     }
 
@@ -264,9 +261,7 @@ abstract class Playback : MediaSessionCompat.Callback() {
             return
         }
 
-        if (!manuallyHandleState) playbackState = STATE_STOPPED
         doStop()
-        SERVICE!!.getMediaSession()?.isActive = false
     }
 
     abstract fun doStop()
@@ -285,13 +280,7 @@ abstract class Playback : MediaSessionCompat.Callback() {
             return
         }
 
-        if (time.toInt() > getCurrentPosInSong()) {
-            if (!manuallyHandleState) playbackState = STATE_FAST_FORWARDING
-            doSeek(time)
-        } else if (time.toInt() < getCurrentPosInSong()) {
-            if (!manuallyHandleState) playbackState = STATE_REWINDING
-            doSeek(time)
-        } else if (!manuallyHandleState) playbackState = STATE_PLAYING
+        if (time.toInt() > getCurrentPosInSong() || time.toInt() < getCurrentPosInSong()) doSeek(time)
     }
 
     abstract fun doSeek(time: Long)
@@ -305,41 +294,7 @@ abstract class Playback : MediaSessionCompat.Callback() {
     ///////////////////////////////////////////////////////////////////////////
 
     internal var playbackState = STATE_NONE
-        set(value) {
-            field = value
-            when (field) {
-                PlaybackStateCompat.STATE_PAUSED -> SERVICE!!.callback { onStateChanged(PlaybackState.STATE_PAUSED) }
-                PlaybackStateCompat.STATE_PLAYING -> SERVICE!!.callback { onStateChanged(PlaybackState.STATE_PLAYING) }
-                PlaybackStateCompat.STATE_NONE -> SERVICE!!.callback { onStateChanged(PlaybackState.STATE_IDLE) }
-            }
-        }
-
-    /**
-     * Call this method to tell the system that you are currently buffering. Call this whenever you start buffering to make sure Android
-     * can properly handle your current state.
-     */
-    fun triggerStartBuffer() {
-        playbackState = STATE_BUFFERING
-    }
-
-    /**
-     * Call this method to tell the system that you are done buffering and you are now playing.
-     */
-    fun triggerEndBuffer() {
-        playbackState = STATE_PLAYING
-    }
-
-    /**
-     * Call this method to set the playback state. This can also be used as triggerEndBuffer() that just sets a state other then playing.
-     */
-    fun setState(@State state: Int) {
-        if (manuallyHandleState) playbackState = state
-    }
-
-    /**
-     * Override this to disable playback state being set automatically.
-     */
-    open val manuallyHandleState: Boolean = false
+        private set
 
     ///////////////////////////////////////////////////////////////////////////
     // Repeat
@@ -380,31 +335,70 @@ abstract class Playback : MediaSessionCompat.Callback() {
         //TODO
     }
 
-    protected fun nowPlaying() {
+    ///////////////////////////////////////////////////////////////////////////
+    // State handling
+    ///////////////////////////////////////////////////////////////////////////
+
+    private fun passThroughPlaybackState() = SERVICE!!.updatePlaybackState()
+
+    protected fun passThroughPlaybackProgress(progress: Long? = null) = SERVICE!!.updatePlaybackProgress(progress)
+
+    /**
+     * Update the MediaSession's state to buffering
+     */
+    protected fun notifyBuffering() {
+        Log.d(TAG, "notifyBuffering()")
+        playbackState = PlaybackStateCompat.STATE_BUFFERING
+        passThroughPlaybackState()
+    }
+
+    /**
+     * Update the MediaSession's state to error and trigger UI changes
+     */
+    protected fun notifyError() {
+        Log.d(TAG, "notifyError()")
+        playbackState = PlaybackStateCompat.STATE_ERROR
+        passThroughPlaybackState()
+        SERVICE!!.stopForeground(false)
+        SERVICE!!.updateNotification(PlaybackRemote.makeNotification())
+    }
+
+    /**
+     * Update the MediaSession's state to playing and trigger UI changes
+     */
+    protected fun notifyPlaying() {
+        Log.d(TAG, "notifyPlaying()")
+        playbackState = PlaybackStateCompat.STATE_PLAYING
         if (inHotswapTransaction) {
             inHotswapTransaction = false
             for (call in pendingCalls)
                 call.invoke()
             pendingCalls.clear()
         }
-        SERVICE!!.startProgressThread()
-        // Set the state because the thread takes a few ms to make its first run
-        SERVICE!!.getMediaSession()?.setPlaybackState(
-                PlaybackStateCompat.Builder().setActions(MusicPlaybackOptions.playbackActions.getActions())
-                        .setState(playbackState, getCurrentPosInSong().toLong(), getPlaybackSpeed())
-                        .build())
+        passThroughPlaybackState()
         SERVICE!!.updateMetadata()
         SERVICE!!.startForeground()
     }
 
-    protected fun nowPaused() {
-        SERVICE!!.shutdownProgressThreadIfNecessary()
+    /**
+     * Update the MediaSession's state to paused and trigger UI changes
+     */
+    protected fun notifyPaused() {
+        Log.d(TAG, "notifyPaused()")
+        playbackState = PlaybackStateCompat.STATE_PAUSED
         SERVICE!!.stopForeground(false)
-        SERVICE!!.getMediaSession()?.setPlaybackState(
-                PlaybackStateCompat.Builder().setActions(MusicPlaybackOptions.playbackActions.getActions())
-                        .setState(playbackState, getCurrentPosInSong().toLong(), getPlaybackSpeed())
-                        .build())
+        passThroughPlaybackState()
         SERVICE!!.updateNotification(PlaybackRemote.makeNotification())
+    }
+
+    /**
+     * Update the MediaSession's state to idle/none and trigger UI changes
+     */
+    protected fun notifyIdle() {
+        Log.d(TAG, "notifyIdle()")
+        playbackState = PlaybackStateCompat.STATE_NONE
+        passThroughPlaybackState()
+        SERVICE!!.stopForeground(true)
     }
 
 }

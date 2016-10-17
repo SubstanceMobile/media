@@ -40,7 +40,17 @@ class MusicAdapter<T : MediaObject>(private val type: MusicType) : RecyclerView.
     init {
         Library.registerListener(this)
 
-        if (type == MusicType.SONGS) items = MusicData.getSongs() as List<T>
+        if (type == MusicType.SONGS) {
+            val extra = Song.Builder()
+                    .setTitle("SWR 3")
+                    .setArtistName("Der deutsche Staat")
+                    .build()
+            extra.explicitPath = "http://stream.dar.fm/10731"
+            val songs = arrayListOf(extra)
+            songs.addAll(MusicData.getSongs())
+            items = songs as List<T>
+
+        }
         if (type == MusicType.ALBUMS) items = MusicData.getAlbums() as List<T>
         if (type == MusicType.ARTISTS) items = MusicData.getArtists() as List<T>
         if (type == MusicType.PLAYLISTS) items = MusicData.getPlaylists() as List<T>
@@ -95,7 +105,7 @@ class MusicAdapter<T : MediaObject>(private val type: MusicType) : RecyclerView.
     override fun onBindViewHolder(holder: MusicViewHolder?, position: Int) {
         val item = items!!.get(position)
         when (item) {
-            is Song -> bindSong(item, holder!!)
+            is Song -> bindSong(item, holder!!, position)
             is Album -> bindAlbum(item, holder!!)
             is Artist -> bindArtist(item, holder!!)
             is Genre -> bindGenre(item, holder!!)
@@ -118,16 +128,16 @@ class MusicAdapter<T : MediaObject>(private val type: MusicType) : RecyclerView.
         album.requestArt(holder.image!!)
     }
 
-    private fun bindSong(song: Song, holder: MusicViewHolder) {
+    private fun bindSong(song: Song, holder: MusicViewHolder, position: Int) {
         holder.title?.text = song.songTitle
         holder.subtitle?.text = song.songArtistName
-        val album = MusicData.findAlbumById(song.songAlbumId!!)
+        val album = MusicData.findAlbumById(song.songAlbumId ?: 0)
         Log.d("Binding Song", "Album ${album?.albumName}, id ${album?.id}, artworkPath ${album?.albumArtworkPath}")
         album?.requestArt(holder.image!!)
 
 
         holder.itemView.setOnClickListener { it ->
-            PlaybackRemote.play(song)
+            PlaybackRemote.play(items as List<Song>, position)
         }
     }
 

@@ -22,7 +22,6 @@ import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.os.*
 import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaBrowserServiceCompat
@@ -35,13 +34,14 @@ import com.google.android.gms.cast.framework.CastState
 import com.google.android.gms.cast.framework.CastStateListener
 import mobile.substance.sdk.music.core.utils.MusicCoreUtil
 import mobile.substance.sdk.music.playback.MusicPlaybackOptions
+import mobile.substance.sdk.music.playback.MusicPlaybackUtil
 import mobile.substance.sdk.music.playback.PlaybackRemote
 import mobile.substance.sdk.music.playback.players.CastPlayback
 import mobile.substance.sdk.music.playback.players.LocalPlayback
 import mobile.substance.sdk.music.playback.players.Playback
 import java.util.*
 
-class MusicService : MediaBrowserServiceCompat(), CastStateListener {
+open class MusicService : MediaBrowserServiceCompat(), CastStateListener {
 
     override fun onCastStateChanged(p0: Int) {
         if (p0 == CastState.CONNECTED) replacePlaybackEngine(CastPlayback, engine.isPlaying() || engine.getCurrentPosInSong() > 0, true)
@@ -66,8 +66,6 @@ class MusicService : MediaBrowserServiceCompat(), CastStateListener {
     private var session: MediaSessionCompat? = null
 
     private var CALLBACKS = ArrayList<PlaybackRemote.RemoteCallback>()
-
-    private var oldState: PlaybackState = PlaybackState.STATE_IDLE
 
     fun registerCallback(callback: PlaybackRemote.RemoteCallback) {
         CALLBACKS.add(callback)
@@ -123,7 +121,7 @@ class MusicService : MediaBrowserServiceCompat(), CastStateListener {
             //Time to hotswap some data back in so as far as the user is concerned the engine is the same. In fact, the song they are currently listening to will resume
             if (!trustedSource) Log.d(TAG, "Since you are hotswapping players, this might be a setting that the user can change. If this is the case please display some sort of confirmation to the user that the option has actually changed because they will most likely not be able to notice the change in engine (since you are hotswapping")
             //Tells the engine that it should wait until it's actually playing before executing further playback tasks (Only one's that control the actual state, e.g. pause/resume, seek, stop). This is done in favor of asynchronous playbacks, e.g. CastPlayback
-            //We mustn't & don't want to have the Service slowing down the UIThread in order to await async operations. How do we handle this? Have a look at the "pendingCalls" variable and the nowPlaying() function in Playback.kt
+            //We mustn't & don't want to have the Service slowing down the UIThread in order to await async operations. How do we handle this? Have a look at the "pendingCalls" variable and the notifyPlaying() function in Playback.kt
             engine.inHotswapTransaction = true
             //Resume the current queue
             engine.play()
@@ -148,7 +146,7 @@ class MusicService : MediaBrowserServiceCompat(), CastStateListener {
         AudioBecomingNoisyReceiver register this
 
         notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        session = MediaSessionCompat(this, MusicService::class.java.simpleName)
+        session = MediaSessionCompat(this, this.javaClass.simpleName)
         session!!.setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS or MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS)
         session!!.setSessionActivity(PendingIntent.getActivity(this, UNIQUE_ID, packageManager.getLaunchIntentForPackage(applicationContext.packageName), PendingIntent.FLAG_CANCEL_CURRENT))
         session!!.setCallback(engine)
@@ -166,58 +164,32 @@ class MusicService : MediaBrowserServiceCompat(), CastStateListener {
         engine.init(this)
     }
 
-    ///////////////////////////////////////////////////////////////////////////
-    // Progress Thread
-    ///////////////////////////////////////////////////////////////////////////
+    internal fun updatePlaybackState(callback: Boolean = false) {
+        session?.setPlaybackState(
+                PlaybackStateCompat.Builder().setActions(MusicPlaybackOptions.playbackActions.getActions())
+                        .setState(engine.playbackState, engine.getCurrentPosInSong().toLong(), engine.getPlaybackSpeed())
+                        .build())
+        if (callback)
+            Handler(Looper.getMainLooper()).post { callback { onStateChanged(MusicPlaybackUtil.simplify(engine.playbackState)) } }
+    }
 
-    private var progressThread: ProgressThread? = null
-
-    inner class ProgressThread : Thread() {
-        override fun run() {
-            while (!interrupted()) {
-                try {
-                    sleep(500)
-                } catch (e: InterruptedException) {
-                    break
-                }
-                try {
-                    Handler(Looper.getMainLooper()).post {
-                        callback { onProgressChanged(engine.getCurrentPosInSong()) }
-                    }
-
-                    session?.setPlaybackState(
-                            PlaybackStateCompat.Builder().setActions(MusicPlaybackOptions.playbackActions.getActions())
-                                    .setState(engine.playbackState, engine.getCurrentPosInSong().toLong(), engine.getPlaybackSpeed())
-                                    .build())
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    interrupt()
-                }
-            }
-        }
+    internal fun updatePlaybackProgress(progress: Long? = null) {
+        session?.setPlaybackState(
+                PlaybackStateCompat.Builder().setActions(MusicPlaybackOptions.playbackActions.getActions())
+                        .setState(engine.playbackState, progress ?: engine.getCurrentPosInSong().toLong(), engine.getPlaybackSpeed())
+                        .build())
+        Handler(Looper.getMainLooper()).post { callback { onProgressChanged(progress?.toInt() ?: engine.getCurrentPosInSong()) } }
     }
 
     internal fun updateMetadata() {
         Thread() {
             run {
-                val source = MusicQueue.getCurrentSong()!!.getMetadata()
+                val source = MusicQueue.getCurrentSong()?.getMetadata() ?: return@Thread
                 session?.setMetadata(MediaMetadataCompat.Builder(source)
                         .putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, MusicCoreUtil.getArtwork(MusicQueue.getCurrentSong(), this))
                         .build())
             }
         }.start()
-    }
-
-    internal fun startProgressThread() {
-        if (progressThread == null) progressThread = ProgressThread() else if (progressThread?.isAlive ?: false) return
-        progressThread?.start()
-    }
-
-    internal fun shutdownProgressThreadIfNecessary() {
-        if (progressThread == null) return
-        if (!(progressThread?.isInterrupted ?: false))
-            progressThread?.interrupt()
-        progressThread = null
     }
 
     ///////////////////////////////////////////////////////////////////////////
