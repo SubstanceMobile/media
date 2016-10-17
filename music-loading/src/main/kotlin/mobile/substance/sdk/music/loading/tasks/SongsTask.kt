@@ -56,8 +56,6 @@ class SongsTask(context: Context, vararg params: Any) : Loader<Song>(context, pa
                 .setDuration(duration)
                 .setDateAdded(dateAdded)
                 .build()
-
-        Log.i("SongsTask", "Loaded id $id")
         return s
     }
 

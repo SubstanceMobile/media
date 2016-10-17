@@ -53,7 +53,7 @@ abstract class Loader<Return : MediaObject>(context: Context, vararg params: Any
     private var task: LoadTask? = null
     //Currently loaded data. When calling update() this will be set, then emptied
     private var currentData: List<Return> = ArrayList()
-    private val mVerifyListener = object : TaskListener<Return> {
+    private val verifyListener = object : TaskListener<Return> {
         override fun onOneLoaded(item: Return, pos: Int) {
             /*if (!currentData.contains(item)) */
             for (listener in listeners) listener.onOneLoaded(item, pos)
@@ -203,9 +203,9 @@ abstract class Loader<Return : MediaObject>(context: Context, vararg params: Any
     /**
      * The listener for [Loader] events
 
-     * @param  What type of variable should be passed to the listener. When extending [Loader], you will specify what this should be
+     * @param Return type of variable should be passed to the listener. When extending [Loader], you will specify what this should be
      */
-    interface TaskListener<Return> {
+    interface TaskListener<in Return> {
         fun onOneLoaded(item: Return, pos: Int)
 
         fun onCompleted(result: List<Return>)
@@ -254,7 +254,7 @@ abstract class Loader<Return : MediaObject>(context: Context, vararg params: Any
         @SafeVarargs
         override fun onProgressUpdate(vararg values: Return) {
             super.onProgressUpdate(*values)
-            for (`val` in values) mVerifyListener.onOneLoaded(`val`, `val`.positionInList)
+            for (`val` in values) verifyListener.onOneLoaded(`val`, `val`.positionInList)
         }
 
         override fun onPostExecute(result: List<Return>) {
@@ -262,7 +262,7 @@ abstract class Loader<Return : MediaObject>(context: Context, vararg params: Any
             if (!finishedOnce)
                 finishedOnce = true
             sort(result)
-            mVerifyListener.onCompleted(result)
+            verifyListener.onCompleted(result)
             if (!observerLock) registerMediaStoreListener()
             if (updatedQueue) update(result)
 

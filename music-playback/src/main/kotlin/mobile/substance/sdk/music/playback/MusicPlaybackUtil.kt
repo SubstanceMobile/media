@@ -22,11 +22,8 @@ import android.content.Context
 import android.content.Intent
 import android.net.wifi.WifiManager
 import android.support.v4.media.session.PlaybackStateCompat
-import android.util.Log
-import fi.iki.elonen.NanoHTTPD
 import mobile.substance.sdk.music.playback.service.MusicService
 import mobile.substance.sdk.music.playback.service.PlaybackState
-import java.io.*
 import java.math.BigInteger
 import java.net.InetAddress
 import java.net.UnknownHostException
@@ -79,8 +76,8 @@ object MusicPlaybackUtil {
         when (action) {
             Action.PLAY -> return packageName + "PLAY"
             Action.PAUSE -> return packageName + "PAUSE"
-            Action.SKIP_FORWARD -> return packageName + "skip.FORWARD"
-            Action.SKIP_BACKWARD -> return packageName + "skip.BACKWARD"
+            Action.SKIP_FORWARD -> return packageName + "SKIP_FORWARD"
+            Action.SKIP_BACKWARD -> return packageName + "SKIP_BACKWARD"
             Action.SEEK -> return packageName + "SEEK"
             Action.STOP -> return packageName + "STOP"
             Action.NOTIFICATION -> return packageName + "NOTIFICATION"

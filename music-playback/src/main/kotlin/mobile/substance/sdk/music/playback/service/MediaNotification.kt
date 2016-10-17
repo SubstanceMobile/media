@@ -69,7 +69,7 @@ interface MediaNotification {
     /**
      * Override this if you want to call something when (or after) the notification is built.
      */
-    fun buildNotif(builder: NotificationCompat.Builder) = builder.build()
+    fun buildNotification(builder: NotificationCompat.Builder): Notification = builder.build()
 
     ///////////////////////////////////////////////////////////////////////////
     // Callbacks
@@ -104,7 +104,11 @@ class DefaultMediaNotification : MediaNotification {
                 .addAction(R.drawable.ic_skip_previous_white_24dp, "Skip Backward", prevIntent)
                 .addAction(if (isPlaying) R.drawable.ic_pause_white_24dp else R.drawable.ic_play_arrow_white_24dp, if (isPlaying) "Pause Playback" else "Resume Playback", if (isPlaying) pauseIntent else playIntent)
                 .addAction(R.drawable.ic_skip_next_white_24dp, "Skip Forward", nextIntent)
-                .setStyle(NotificationCompat.MediaStyle().setShowActionsInCompactView(0, 1, 2).setShowCancelButton(true).setCancelButtonIntent(removedIntent).setMediaSession(session?.sessionToken))
+                .setStyle(NotificationCompat.MediaStyle()
+                        .setShowActionsInCompactView(0, 1, 2)
+                        .setShowCancelButton(true)
+                        .setCancelButtonIntent(removedIntent)
+                        .setMediaSession(session?.sessionToken))
                 as NotificationCompat.Builder
     }
 

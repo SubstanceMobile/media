@@ -17,6 +17,7 @@
 package mobile.substance.sdk.adapters
 
 import android.content.Context
+import android.net.Uri
 import android.support.v7.widget.RecyclerView
 import android.util.Log
 import android.view.LayoutInflater
@@ -42,10 +43,11 @@ class MusicAdapter<T : MediaObject>(private val type: MusicType) : RecyclerView.
 
         if (type == MusicType.SONGS) {
             val extra = Song.Builder()
-                    .setTitle("SWR 3")
-                    .setArtistName("Der deutsche Staat")
+                    .setTitle("Substance - Single")
+                    .setArtistName("Just kidding :D")
                     .build()
-            extra.explicitPath = "http://stream.dar.fm/10731"
+            extra.explicitUri = Uri.parse("http://stream.dar.fm/8824")
+            extra.explicitArtworkUri = Uri.parse("http://avatars0.githubusercontent.com/u/9950281?v=3&s=200")
             val songs = arrayListOf(extra)
             songs.addAll(MusicData.getSongs())
             items = songs as List<T>

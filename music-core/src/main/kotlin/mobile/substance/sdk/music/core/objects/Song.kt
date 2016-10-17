@@ -34,9 +34,8 @@ class Song : MediaObject() {
         get() = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
 
     override val uri: Uri
-        get() {
-            if (hasExplicitPath) return Uri.parse(explicitPath) else return super.uri
-        }
+        get() = if (hasExplicitPath) explicitUri ?: Uri.EMPTY else super.uri
+
 
     override val isContextRequired: Boolean
         get() = true
@@ -46,7 +45,7 @@ class Song : MediaObject() {
                 .putString(MediaMetadataCompat.METADATA_KEY_TITLE, songTitle)
                 .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, songArtistName)
                 .putString(MediaMetadataCompat.METADATA_KEY_ALBUM, songAlbumName)
-                .putString(MediaMetadataCompat.METADATA_KEY_ART_URI, explicitArtworkPath) // This is just the explicit artwork path (if one exists), you still need to merge the album's artwork path in case that one is necessary
+                .putString(MediaMetadataCompat.METADATA_KEY_ART_URI, explicitArtworkUri.toString()) // This is just the explicit artwork path (if one exists), you still need to merge the album's artwork path in case that one is necessary
                 .putLong(MediaMetadataCompat.METADATA_KEY_DURATION, songDuration ?: 0)
                 .putLong(MediaMetadataCompat.METADATA_KEY_TRACK_NUMBER, songTrackNumber ?: 0)
                 .putLong(MediaMetadataCompat.METADATA_KEY_YEAR, songYear ?: 0)
@@ -79,10 +78,10 @@ class Song : MediaObject() {
     // Explicit artwork
     ///////////////////////////////////////////////////////////////////////////
 
-    var explicitArtworkPath: String? = null
+    var explicitArtworkUri: Uri? = null
 
     val hasExplicitArtwork: Boolean
-        get() = explicitArtworkPath != null
+        get() = explicitArtworkUri != null
 
     ///////////////////////////////////////////////////////////////////////////
     // Duration
@@ -118,10 +117,10 @@ class Song : MediaObject() {
     // Explicit path
     ///////////////////////////////////////////////////////////////////////////
 
-    var explicitPath: String? = null
+    var explicitUri: Uri? = null
 
     val hasExplicitPath: Boolean
-        get() = explicitPath != null
+        get() = explicitUri != null
 
     ///////////////////////////////////////////////////////////////////////////
     // Date of addition

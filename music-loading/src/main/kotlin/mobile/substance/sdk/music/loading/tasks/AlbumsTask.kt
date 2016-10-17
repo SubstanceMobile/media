@@ -44,8 +44,6 @@ class AlbumsTask(context: Context, vararg params: Any) : Loader<Album>(context, 
                 .setYear(year)
                 .setArtworkPath(artworkPath)
                 .build()
-
-        Log.d("AlbumsTask", "Loaded album $name, id $id with artwork path $artworkPath")
         return a
     }
 

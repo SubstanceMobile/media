@@ -17,21 +17,12 @@
 package mobile.substance.sdk.music.playback.cast
 
 import android.content.Context
-import com.google.android.gms.cast.Cast
-import com.google.android.gms.cast.CastDevice
-import com.google.android.gms.cast.LaunchOptions
-import com.google.android.gms.cast.MediaMetadata
 import com.google.android.gms.cast.framework.CastOptions
 import com.google.android.gms.cast.framework.OptionsProvider
-import com.google.android.gms.cast.framework.Session
 import com.google.android.gms.cast.framework.SessionProvider
 import com.google.android.gms.cast.framework.media.CastMediaOptions
-import com.google.android.gms.cast.framework.media.ImagePicker
-import com.google.android.gms.cast.framework.media.NotificationOptions
-import com.google.android.gms.common.images.WebImage
 import mobile.substance.sdk.music.playback.MusicPlaybackOptions
 
-//TODO: Julian explain this
 class CastOptionsProvider : OptionsProvider {
 
     override fun getAdditionalSessionProviders(p0: Context?): MutableList<SessionProvider>? {
@@ -44,11 +35,7 @@ class CastOptionsProvider : OptionsProvider {
                 .setEnableReconnectionService(true)
                 .setResumeSavedSession(true)
                 .setCastMediaOptions(CastMediaOptions.Builder()
-                        .setImagePicker(object : ImagePicker() {
-                            override fun onPickImage(p0: MediaMetadata?, p1: Int): WebImage? {
-                                return p0?.images?.last()
-                            }
-                        })
+                        .setNotificationOptions(null)
                         .build())
                 .build()
     }

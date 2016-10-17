@@ -97,12 +97,12 @@ open class MusicService : MediaBrowserServiceCompat(), CastStateListener {
 
     var engine: Playback = LocalPlayback
 
-    internal fun replacePlaybackEngine(newEngine: Playback, hotswap: Boolean, trustedSource: Boolean = false) {
+    internal fun replacePlaybackEngine(newEngine: Playback, hotSwap: Boolean, trustedSource: Boolean = false) {
         var oldPos = 0
         var wasPlaying = false
 
         if (!trustedSource) Log.d(TAG, "DANGEROUS: Replacing playback engine with custom code. Make sure you debug extensively") else Log.d(TAG, "Service is requesting to replace engines internally. Hotswapping players")
-        if (hotswap) {
+        if (hotSwap) {
             //Since we are hotswapping we need to save some data
             if (engine.isPlaying()) {
                 engine.pause()
@@ -116,13 +116,13 @@ open class MusicService : MediaBrowserServiceCompat(), CastStateListener {
         engine = newEngine
         engine.init(this)
         session?.setCallback(newEngine)
-        Log.d(TAG, "Engine is set. Restoring previous properties = $hotswap")
-        if (hotswap) {
+        Log.d(TAG, "Engine is set. Restoring previous properties = $hotSwap")
+        if (hotSwap) {
             //Time to hotswap some data back in so as far as the user is concerned the engine is the same. In fact, the song they are currently listening to will resume
             if (!trustedSource) Log.d(TAG, "Since you are hotswapping players, this might be a setting that the user can change. If this is the case please display some sort of confirmation to the user that the option has actually changed because they will most likely not be able to notice the change in engine (since you are hotswapping")
             //Tells the engine that it should wait until it's actually playing before executing further playback tasks (Only one's that control the actual state, e.g. pause/resume, seek, stop). This is done in favor of asynchronous playbacks, e.g. CastPlayback
             //We mustn't & don't want to have the Service slowing down the UIThread in order to await async operations. How do we handle this? Have a look at the "pendingCalls" variable and the notifyPlaying() function in Playback.kt
-            engine.inHotswapTransaction = true
+            engine.isInHotSwapTransaction = true
             //Resume the current queue
             engine.play()
             //Seek back to where we were before
@@ -186,7 +186,7 @@ open class MusicService : MediaBrowserServiceCompat(), CastStateListener {
             run {
                 val source = MusicQueue.getCurrentSong()?.getMetadata() ?: return@Thread
                 session?.setMetadata(MediaMetadataCompat.Builder(source)
-                        .putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, MusicCoreUtil.getArtwork(MusicQueue.getCurrentSong(), this))
+                        .putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, MusicCoreUtil.getArtwork(MusicQueue.getCurrentSong()!!, this))
                         .build())
             }
         }.start()
@@ -202,7 +202,7 @@ open class MusicService : MediaBrowserServiceCompat(), CastStateListener {
         session = null
     }
 
-    override fun onGetRoot(clientPackageName: String, clientUid: Int, rootHints: Bundle?): BrowserRoot? = null //We don't use this
+    override fun onGetRoot(clientPackageName: String, clientUid: Int, rootHints: Bundle?): BrowserRoot? = null // We don't use this
 
     override fun onLoadChildren(parentId: String, result: Result<List<MediaBrowserCompat.MediaItem>>) {
 
@@ -235,10 +235,10 @@ open class MusicService : MediaBrowserServiceCompat(), CastStateListener {
     }
 
     fun startForeground() = startForeground(UNIQUE_ID, PlaybackRemote.makeNotification(object : PlaybackRemote.NotificationUpdateInterface {
-        override fun updateNotification(notification: Notification): Unit = updateNotification(notif = notification)
+        override fun updateNotification(notification: Notification): Unit = notify(notification = notification)
     }))
 
-    fun updateNotification(notif: Notification) = notificationManager!!.notify(UNIQUE_ID, notif)
+    fun notify(notification: Notification) = notificationManager!!.notify(UNIQUE_ID, notification)
 
     fun kill() {
         destroySession()
@@ -250,15 +250,16 @@ open class MusicService : MediaBrowserServiceCompat(), CastStateListener {
         Log.d(TAG, "onStartCommand()")
 
         if (intent.action != null) {
+            val action = intent.action
             when {
-                intent.action.endsWith(".PLAY") -> PlaybackRemote.resume()
-                intent.action.endsWith(".PAUSE") -> PlaybackRemote.pause()
-                intent.action.endsWith(".skip.FORWARD") -> PlaybackRemote.playNext()
-                intent.action.endsWith(".skip.BACKWARD") -> PlaybackRemote.playPrevious()
-                intent.action.endsWith(".NOTIFICATION") -> PlaybackRemote.notificationCreator.onNotificationClicked()
-                intent.action.endsWith(".SEEK") -> PlaybackRemote.seekTo(intent.getIntExtra("progress", 0))
-                intent.action.endsWith(".STOP") -> {
-                    stopForeground(true)
+                action.endsWith("NOTIFICATION") -> startActivity(packageManager.getLaunchIntentForPackage(applicationContext.packageName))
+                action.endsWith("PLAY") -> PlaybackRemote.resume()
+                action.endsWith("PAUSE") -> PlaybackRemote.pause()
+                action.endsWith("SKIP_FORWARD") -> PlaybackRemote.playNext()
+                action.endsWith("SKIP_BACKWARD") -> PlaybackRemote.playPrevious()
+                action.endsWith("NOTIFICATION") -> PlaybackRemote.notificationCreator.onNotificationClicked()
+                action.endsWith("SEEK") -> PlaybackRemote.seekTo(intent.getIntExtra("progress", 0))
+                action.endsWith("STOP") -> {
                     engine.stop()
                     PlaybackRemote.notificationCreator.onNotificationDismissed()
                 }

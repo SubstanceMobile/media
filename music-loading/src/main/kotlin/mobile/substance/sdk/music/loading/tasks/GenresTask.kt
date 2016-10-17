@@ -40,8 +40,6 @@ class GenresTask(context: Context, vararg params: Any) : Loader<Genre>(context, 
                 .setName(name)
                 .setId(id)
                 .build()
-
-        Log.d("GenresTask", "Loaded id $id")
         return g
     }
 

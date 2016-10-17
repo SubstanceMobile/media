@@ -25,8 +25,10 @@ import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
+import android.os.NetworkOnMainThreadException
 import android.provider.DocumentsContract
 import android.provider.MediaStore
+import android.support.annotation.WorkerThread
 import android.util.TypedValue
 import android.webkit.URLUtil
 import mobile.substance.sdk.music.core.MusicCoreOptions
@@ -42,7 +44,7 @@ object MusicCoreUtil {
      * Convenience method that simplifies calling intents and such
 
      * @param cxt The context to start the activity from
-     * *
+     *
      * @param url The url so start
      */
     fun startUrl(cxt: Context, url: String) {
@@ -53,7 +55,7 @@ object MusicCoreUtil {
      * Formats strings to match time. Is either hh:mm:ss or mm:ss
 
      * @param time The raw time in ms
-     * *
+     *
      * @return The formatted string value
      */
     @SuppressLint("DefaultLocale")
@@ -90,20 +92,43 @@ object MusicCoreUtil {
     // Bitmap retrieval
     ///////////////////////////////////////////////////////////////////////////
 
-    fun getArtwork(song: Song?, context: Context): Bitmap? {
+    /**
+     * Convenience method that simplifies getting the artwork for a specific song. Needs to be called from a worker thread
+     * in order not to cause a @code NetworkOnMainThreadException
+     *
+     * @param song song to get artwork of
+     *
+     * @param context required for the default artwork drawable fallback
+     *
+     * @return The retrieved Bitmap; null if a NetworkOnMainThreadException has been caught
+     */
+    @WorkerThread
+    fun getArtwork(song: Song, context: Context): Bitmap? {
         try {
-            val albumArtPath = MusicData.findAlbumById(song?.songAlbumId!!)?.albumArtworkPath
+            val albumArtPath = MusicData.findAlbumById(song.songAlbumId ?: 0)?.albumArtworkPath
             if (albumArtPath != null && albumArtPath.length > 0) return BitmapFactory.decodeFile(albumArtPath)
-            if (song?.hasExplicitArtwork!! && song?.explicitArtworkPath!!.length > 0) {
-                val url = getUrlFromUri(Uri.parse(song?.explicitArtworkPath))
-                if (url != null) BitmapFactory.decodeStream(URL(url).openStream()) else BitmapFactory.decodeFile(url)
+            if (song.hasExplicitArtwork && song.explicitArtworkUri!! != Uri.EMPTY) {
+                val url = getUrlFromUri(song.explicitArtworkUri!!)
+                return if (url != null) BitmapFactory.decodeStream(URL(url).openStream()) else BitmapFactory.decodeFile(song.explicitArtworkUri!!.path)
             }
-        } catch (e: Exception) { e.printStackTrace() }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            if (e is NetworkOnMainThreadException) return null
+        }
 
         return BitmapFactory.decodeResource(context.resources, MusicCoreOptions.defaultArt)
     }
 
-    @JvmStatic fun getFilePath(context: Context, uri: Uri): String? {
+    /**
+     * Convenience method to get the file path of a content Uri
+     *
+     * @param context required to access the contentResolver
+     *
+     * @param uri the uri to get the file path of
+     *
+     * @return the file path
+     */
+    fun getFilePath(context: Context, uri: Uri): String? {
         if (isKitKat && DocumentsContract.isDocumentUri(context, uri)) {
             if (isExternalStorageDocument(uri)) {
                 val docId : String= DocumentsContract.getDocumentId(uri)

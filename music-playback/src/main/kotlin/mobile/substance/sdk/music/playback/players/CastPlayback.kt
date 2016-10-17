@@ -97,12 +97,16 @@ object CastPlayback : Playback(), SessionManagerListener<Session>, RemoteMediaCl
     private var castSession: CastSession? = null
     private var sessionManager: SessionManager? = null
     private var remoteMediaClient: RemoteMediaClient? = null
+
     private var overrideIsPlaying = false
+    private var overridePosition: Int? = null
 
     private var fileServer = LocalServer()
     // private var artworkServer = AsyncHttpServer()
 
     override fun init() {
+        overrideIsPlaying = false
+        overridePosition = null
         sessionManager = CastContext.getSharedInstance(SERVICE!!).sessionManager
         castSession = sessionManager?.currentCastSession
         sessionManager?.addSessionManagerListener(this)
@@ -121,21 +125,10 @@ object CastPlayback : Playback(), SessionManagerListener<Session>, RemoteMediaCl
 
         /*if (metadata == null) {
             metadata = retrieveMetadata(fileUri)
-        }*/
+        }*/ // TODO
 
-        //Clear out the player if a song is being played right now.
-        if (isPlaying()) {
-            remoteMediaClient?.stop()
-                    ?.setResultCallback {
-                        if (!it.status.isSuccess) {
-                            Toast.makeText(SERVICE!!, "Unable to stop", Toast.LENGTH_SHORT).show()
-                            Log.d(TAG, it.status.statusMessage.toString())
-                        }
-                    }
-        }
-
+        remoteMediaClient?.stop()
         fileServer.stop()
-        // artworkServer.stop()
 
         try {
             val url = MusicCoreUtil.getUrlFromUri(fileUri)
@@ -161,9 +154,19 @@ object CastPlayback : Playback(), SessionManagerListener<Session>, RemoteMediaCl
                         .build()
                 doLoad(mediaInfo, true)
             } else {
+
+                var artworkUrl: String? = null
+
+                if (artworkUri != null && MusicCoreUtil.getUrlFromUri(artworkUri) == null) {
+                    fileServer.paths = Pair(null, MusicCoreUtil.getFilePath(SERVICE!!, artworkUri))
+                    fileServer.start()
+                    artworkUrl = "http://${MusicPlaybackUtil.getIpAddressString(SERVICE!!)}:${MusicPlaybackUtil.SERVER_PORT}/${MusicPlaybackUtil.URL_PATH_PART_ARTWORK}/${artworkUri.toString().hashCode()}"
+                    Log.d(TAG, "Serving file. URL: artwork: $artworkUrl")
+                }
+
                 val mediaInfo = MediaInfo.Builder(url)
                         .setContentType("audio/*")
-                        .setMetadata(buildMetadata(artworkUri.toString(), metadata ?: MediaMetadataCompat.Builder().build()))
+                        .setMetadata(buildMetadata(artworkUrl ?: artworkUri.toString(), metadata ?: MediaMetadataCompat.Builder().build()))
                         .setStreamType(MediaInfo.STREAM_TYPE_LIVE)
                         .build()
                 doLoad(mediaInfo, true)
@@ -174,14 +177,13 @@ object CastPlayback : Playback(), SessionManagerListener<Session>, RemoteMediaCl
     }
 
     override fun doPlay(song: Song) {
-        val artworkUri: String? = MusicData.findAlbumById(song.songAlbumId ?: 0)?.albumArtworkPath
-        doPlay(song.uri, if (artworkUri == null) Uri.parse(song.explicitArtworkPath.orEmpty()) else Uri.parse("file://$artworkUri"), song.getMetadata())
+        val artworkPath: String? = MusicData.findAlbumById(song.songAlbumId ?: 0)?.albumArtworkPath
+        doPlay(song.uri, if (artworkPath == null) song.explicitArtworkUri else Uri.parse("file://$artworkPath"), song.getMetadata())
     }
 
     override fun doPlay(fileUri: Uri, artworkUri: Uri?) = doPlay(fileUri, artworkUri, null)
 
     private fun doLoad(info: MediaInfo, autoplay: Boolean) {
-        remoteMediaClient?.stop()
         remoteMediaClient?.load(info, autoplay)?.setResultCallback {
             if (!(it.status?.isSuccess ?: false)) {
                 logStatus(it.status, "Playback failed")
@@ -212,7 +214,9 @@ object CastPlayback : Playback(), SessionManagerListener<Session>, RemoteMediaCl
 
     override fun doStop() {
         fileServer.stop()
+        castSession = null
         sessionManager?.removeSessionManagerListener(this)
+        remoteMediaClient?.removeProgressListener(this)
         remoteMediaClient = null
     }
 
@@ -239,17 +243,20 @@ object CastPlayback : Playback(), SessionManagerListener<Session>, RemoteMediaCl
     }
 
     override fun getCurrentPosInSong(): Int {
-        return remoteMediaClient?.approximateStreamPosition?.toInt() ?: 0
+        return if (overrideIsPlaying) overridePosition ?: 0 else remoteMediaClient?.approximateStreamPosition?.toInt() ?: 0
     }
 
     override fun onSessionResumeFailed(p0: Session?, p1: Int) {}
 
     override fun onSessionStartFailed(p0: Session?, p1: Int) {}
 
-    override fun onSessionEnding(p0: Session?) {}
+    override fun onSessionEnding(p0: Session?) {
+        overrideIsPlaying = true
+        overridePosition = remoteMediaClient?.approximateStreamPosition?.toInt()
+        SERVICE?.replacePlaybackEngine(LocalPlayback, true, true)
+    }
 
     override fun onSessionEnded(p0: Session?, p1: Int) {
-        SERVICE?.replacePlaybackEngine(LocalPlayback, true, true)
     }
 
     override fun onSessionStarted(p0: Session?, p1: String?) {}
@@ -261,9 +268,5 @@ object CastPlayback : Playback(), SessionManagerListener<Session>, RemoteMediaCl
     override fun onSessionSuspended(p0: Session?, p1: Int) {}
 
     override fun onSessionResuming(p0: Session?, p1: String?) {}
-
-    override fun isPlayerNecessary(): Boolean = remoteMediaClient == null
-
-    override val playerCreatedOnClassCreation: Boolean = false
 
 }

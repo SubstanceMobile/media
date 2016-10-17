@@ -23,7 +23,9 @@ import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.graphics.Bitmap
+import android.os.Handler
 import android.os.IBinder
+import android.os.Looper
 import android.support.v7.app.NotificationCompat
 import android.util.Log
 import com.google.android.gms.cast.framework.CastContext
@@ -260,19 +262,17 @@ object PlaybackRemote : ServiceConnection {
 
     fun getCurrentSong(): Song? = MusicQueue.getCurrentSong()
 
-    fun getQueue(startAtPosition: Boolean = false): List<Song>? = MusicQueue.getQueue(startAtPosition)
+    fun getQueue(startAtCurrentPosition: Boolean = false): List<Song>? = MusicQueue.getQueue(startAtCurrentPosition)
 
     fun setQueue(queue: MutableList<Song>, position: Int) = MusicQueue.set(queue, position)
 
-    fun switchSongQueuePosition(fromPos: Int, toPos: Int, startsAtPosition: Boolean = false) {
+    fun switchSongQueuePosition(fromPos: Int, toPos: Int, startAtCurrentPosition: Boolean = false) {
         val queue = MusicQueue.getMutableQueue()!!
-        queue.add(toPos, queue[if (startsAtPosition) MusicQueue.POSITION + 1 + fromPos else fromPos])
-        queue.removeAt(if (fromPos > toPos) if (startsAtPosition) MusicQueue.POSITION + 1 + fromPos else fromPos + 1 else if (startsAtPosition) MusicQueue.POSITION + 1 + fromPos else fromPos)
+        queue.add(toPos, queue[if (startAtCurrentPosition) MusicQueue.POSITION + 1 + fromPos else fromPos])
+        queue.removeAt(if (fromPos > toPos) if (startAtCurrentPosition) MusicQueue.POSITION + 1 + fromPos else fromPos + 1 else if (startAtCurrentPosition) MusicQueue.POSITION + 1 + fromPos else fromPos)
     }
 
-    fun removeSongFromQueue(pos: Int, startsAtPosition: Boolean = false) = MusicQueue.getMutableQueue()!!.removeAt(if (startsAtPosition) MusicQueue.POSITION + 1 + pos else pos)
-
-
+    fun removeSongFromQueue(pos: Int, startsAtCurrentPosition: Boolean = false) = MusicQueue.getMutableQueue()!!.removeAt(if (startsAtCurrentPosition) MusicQueue.POSITION + 1 + pos else pos)
 
     ///////////////////////////////////////////////////////////////////////////
     // Notification
@@ -295,23 +295,39 @@ object PlaybackRemote : ServiceConnection {
 
     fun makeNotification(updateInterface: NotificationUpdateInterface): Notification {
 
-        val notification = PlaybackRemote.makeNotification(MusicCoreUtil.getArtwork(MusicQueue.getCurrentSong()!!, service!!))
+        val artwork = MusicCoreUtil.getArtwork(MusicQueue.getCurrentSong()!!, service!!)
+        val notification = makeNotification(artwork)
         updateInterface.updateNotification(notification)
+
+        if (artwork == null) {
+            Thread {
+                run {
+                    try {
+                        val inetArtwork = MusicCoreUtil.getArtwork(MusicQueue.getCurrentSong()!!, service!!)
+                        Log.d(PlaybackRemote::class.java.simpleName, "New try, seperate Thread! Is it still null? ${inetArtwork == null}, ${inetArtwork?.byteCount}")
+                        Handler(Looper.getMainLooper()).post { updateInterface.updateNotification(makeNotification(inetArtwork)) }
+                    } catch (ignored: Exception) {
+                    }
+                }
+            }.start()
+        }
 
         return notification
     }
 
     internal fun makeNotification(albumArt: Bitmap?): Notification {
-        if (notificationBuilder == null) notificationBuilder = notificationCreator.createNotification(context!!, getMediaSession(),
-                MusicPlaybackUtil.getPendingIntent(context!!, MusicPlaybackUtil.Action.PLAY, serviceClass),
-                MusicPlaybackUtil.getPendingIntent(context!!, MusicPlaybackUtil.Action.PAUSE, serviceClass),
-                MusicPlaybackUtil.getPendingIntent(context!!, MusicPlaybackUtil.Action.SKIP_FORWARD, serviceClass),
-                MusicPlaybackUtil.getPendingIntent(context!!, MusicPlaybackUtil.Action.SKIP_BACKWARD, serviceClass),
-                MusicPlaybackUtil.getPendingIntent(context!!, MusicPlaybackUtil.Action.NOTIFICATION, serviceClass),
-                MusicPlaybackUtil.getPendingIntent(context!!, MusicPlaybackUtil.Action.STOP, serviceClass))
+        if (notificationBuilder == null) {
+            notificationBuilder = notificationCreator.createNotification(context!!, getMediaSession(),
+                    MusicPlaybackUtil.getPendingIntent(context!!, MusicPlaybackUtil.Action.PLAY, serviceClass),
+                    MusicPlaybackUtil.getPendingIntent(context!!, MusicPlaybackUtil.Action.PAUSE, serviceClass),
+                    MusicPlaybackUtil.getPendingIntent(context!!, MusicPlaybackUtil.Action.SKIP_FORWARD, serviceClass),
+                    MusicPlaybackUtil.getPendingIntent(context!!, MusicPlaybackUtil.Action.SKIP_BACKWARD, serviceClass),
+                    MusicPlaybackUtil.getPendingIntent(context!!, MusicPlaybackUtil.Action.NOTIFICATION, serviceClass),
+                    MusicPlaybackUtil.getPendingIntent(context!!, MusicPlaybackUtil.Action.STOP, serviceClass))
+        }
         notificationCreator.populate(getCurrentSong()!!, notificationBuilder!!, getMediaSession(), MusicPlaybackUtil.getPendingIntent(context!!, MusicPlaybackUtil.Action.PLAY, serviceClass), MusicPlaybackUtil.getPendingIntent(context!!, MusicPlaybackUtil.Action.PAUSE, serviceClass))
         if (albumArt != null) notificationCreator.loadArt(albumArt, notificationBuilder!!)
-        return notificationCreator.buildNotif(notificationBuilder!!)
+        return notificationCreator.buildNotification(notificationBuilder!!)
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -330,8 +346,8 @@ object PlaybackRemote : ServiceConnection {
      * position, and current song between players to ensure consistent playback. If you have an option in your settings activity for setting a custom player, it is recommended
      * that you use hotswap and notify the user that the change has actually been made, as it might not be obvious to the user that the transaction has actually happened.
      */
-    @JvmOverloads fun setCustomPlaybackEngineForService(engine: Playback, hotswap: Boolean = true) = getService(object : ServiceLoadListener {
-        override fun respond(service: MusicService?) = service!!.replacePlaybackEngine(engine, hotswap, false)
+    @JvmOverloads fun setCustomPlaybackEngineForService(engine: Playback, hotSwap: Boolean = true) = getService(object : ServiceLoadListener {
+        override fun respond(service: MusicService?) = service!!.replacePlaybackEngine(engine, hotSwap, false)
     })
 
     fun getMediaSession() = service!!.getMediaSession()

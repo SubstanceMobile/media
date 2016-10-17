@@ -42,8 +42,6 @@ class PlaylistsTask(context: Context, vararg params: Any) : Loader<Playlist>(con
                 .setId(id)
                 .setDateAdded(dateAdded)
                 .build()
-
-        Log.i("PlaylistsTask", "Loaded id $id")
         return p
     }
 

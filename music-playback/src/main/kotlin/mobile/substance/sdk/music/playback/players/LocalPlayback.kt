@@ -51,7 +51,6 @@ object LocalPlayback : Playback(),
             stop()
             reset()
             release()
-            tripPlayerNecessity()
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -113,11 +112,14 @@ object LocalPlayback : Playback(),
     override fun doResume() = doResume(true)
 
     fun doResume(updateFocus: Boolean) {
+        Log.d(TAG, "We should start playing now!")
         if (!isPlaying()) {
             if (!updateFocus or requestAudioFocus()) {
+
                 localPlayer?.start()
                 notifyPlaying()
                 startProgressThread()
+                Log.d(TAG, "We should be playing now!")
             } else Log.e(TAG, "AudioFocus denied")
         } else Log.e(TAG, "It seems like resume was called while you are playing. It is recommended you do some debugging.")
     }
@@ -144,6 +146,7 @@ object LocalPlayback : Playback(),
     fun doStop(updateFocus: Boolean) {
         if (updateFocus) giveUpAudioFocus()
         localPlayer?.destroy()
+        shutdownProgressThread()
         notifyIdle()
     }
 
@@ -176,13 +179,13 @@ object LocalPlayback : Playback(),
     // Progress Thread
     ///////////////////////////////////////////////////////////////////////////
 
-    private var progressThread: ProgressThread? = null
+    private var progressThread: Thread? = null
 
-    class ProgressThread : Thread() {
+    class ProgressRunnable : Runnable {
         override fun run() {
-            while (!interrupted()) {
+            while (!Thread.interrupted()) {
                 try {
-                    sleep(500)
+                    Thread.sleep(500)
                 } catch (e: InterruptedException) {
                     break
                 }
@@ -190,14 +193,14 @@ object LocalPlayback : Playback(),
                     passThroughPlaybackProgress()
                 } catch (e: Exception) {
                     e.printStackTrace()
-                    interrupt()
+                    Thread.currentThread().interrupt()
                 }
             }
         }
     }
 
     internal fun startProgressThread() {
-        if (progressThread == null) progressThread = ProgressThread() else if (progressThread?.isAlive ?: false) return
+        if (progressThread == null) progressThread = Thread(ProgressRunnable()) else if (progressThread?.isAlive ?: false) return
         progressThread?.start()
     }
 
@@ -213,9 +216,7 @@ object LocalPlayback : Playback(),
     // STATUS: TODO
     ///////////////////////////////////////////////////////////////////////////
 
-    override fun onPrepared(mp: MediaPlayer?) {
-        resume()
-    }
+    override fun onPrepared(mp: MediaPlayer?) = doResume()
 
     //Not checking it it is looping because onCompletion is never actually called if it is looping.
     override fun onCompletion(mp: MediaPlayer?) {
@@ -235,7 +236,7 @@ object LocalPlayback : Playback(),
     // Audio Focus
     ///////////////////////////////////////////////////////////////////////////
 
-    fun requestAudioFocus() = (audioManager!!.requestAudioFocus(this, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN)).equals(AudioManager.AUDIOFOCUS_REQUEST_GRANTED)
+    fun requestAudioFocus() = (audioManager!!.requestAudioFocus(this, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN)) == AudioManager.AUDIOFOCUS_REQUEST_GRANTED
 
     fun giveUpAudioFocus() = audioManager!!.abandonAudioFocus(this)
 
@@ -273,6 +274,4 @@ object LocalPlayback : Playback(),
             return 0
         }
     }
-
-    override val playerCreatedOnClassCreation: Boolean = false
 }

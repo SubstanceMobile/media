@@ -50,7 +50,7 @@ abstract class Playback : MediaSessionCompat.Callback() {
         Log.i(TAG, "Service has been set. We are now initialized")
 
         init()
-        createPlayerIfNecessary(false)
+        createPlayer()
         configPlayer()
     }
 
@@ -61,30 +61,10 @@ abstract class Playback : MediaSessionCompat.Callback() {
     ///////////////////////////////////////////////////////////////////////////
 
     private var pendingCalls: MutableList<() -> Unit> = ArrayList()
-    var inHotswapTransaction = false
-    private var firstPlayer = true
-    private var playerReleased = false
+    var isInHotSwapTransaction = false
 
     /**
-     * Override this to specify that the player instance was NOT created when your playback class was created. Otherwise don't
-     */
-    open val playerCreatedOnClassCreation: Boolean = true
-
-    /**
-     * It is recommended that you don't call this method, as the library calls it itself where necessary. Only call this
-     * if you know what you are doing
-     */
-    fun createPlayerIfNecessary(config: Boolean) {
-        if (isPlayerNecessary()) {
-            createPlayer()
-            if (config) configPlayer()
-            firstPlayer = false
-            playerReleased = false
-        }
-    }
-
-    /**
-     * Override it if you need it, BUT do not call this method. This method is called where it is usually most necessary (on all of the actions that can induce playback)
+     * Do not call this method. This method is called where it is usually most necessary (on all of the actions that can induce playback)
      * If you do want to call it make sure you know what you are doing.
      */
     open fun createPlayer() {}
@@ -94,12 +74,6 @@ abstract class Playback : MediaSessionCompat.Callback() {
      * If you do want to call it make sure you know what you are doing.
      */
     open fun configPlayer() {}
-
-    open fun isPlayerNecessary() = firstPlayer and !playerCreatedOnClassCreation or playerReleased
-
-    fun tripPlayerNecessity() {
-        playerReleased = true
-    }
 
     ///////////////////////////////////////////////////////////////////////////
     // Play
@@ -121,11 +95,10 @@ abstract class Playback : MediaSessionCompat.Callback() {
     }
 
     private fun play(uri: Uri) {
-        createPlayerIfNecessary(true)
         var mediaId: Long? = null
         if (uri.scheme == "content") mediaId = MusicCoreUtil.findByMediaId(ContentUris.parseId(uri), MusicData.getAlbums(), MusicData.getSongs())?.id
-        val artworkPath = MusicData.findAlbumById(MusicData.findSongById(mediaId ?: 0)?.songAlbumId ?: 0)?.albumArtworkPath
-        doPlay(uri, if (artworkPath != null) Uri.parse("file://$artworkPath") else null)
+        val song = MusicData.findSongById(mediaId ?: 0)
+        doPlay(uri, if (song?.hasExplicitArtwork ?: false) song?.explicitArtworkUri else Uri.parse("file://" + MusicData.findAlbumById(song?.songAlbumId ?: 0)?.albumArtworkPath))
     }
 
     override fun onPlayFromUri(uri: Uri?, extras: Bundle?) {
@@ -139,9 +112,8 @@ abstract class Playback : MediaSessionCompat.Callback() {
     }
 
     open fun doPlay(song: Song) {
-        val artworkPath: String? = MusicData.findAlbumById(song.songAlbumId ?: 0)?.albumArtworkPath ?: song.explicitArtworkPath
-        val artworkUri: Uri? = Uri.parse("file://$artworkPath")
-        doPlay(song.uri, artworkUri)
+        val artworkPath: String? = MusicData.findAlbumById(song.songAlbumId ?: 0)?.albumArtworkPath
+        doPlay(song.uri, if (artworkPath == null) song.explicitArtworkUri else Uri.parse("file://$artworkPath"))
     }
 
     abstract fun doPlay(fileUri: Uri, artworkUri: Uri?)
@@ -151,7 +123,7 @@ abstract class Playback : MediaSessionCompat.Callback() {
     ////////////
 
     fun resume() {
-        if (inHotswapTransaction) {
+        if (isInHotSwapTransaction) {
             pendingCalls.add { resume() }
             return
         }
@@ -196,7 +168,7 @@ abstract class Playback : MediaSessionCompat.Callback() {
     ///////////////////////////////////////////////////////////////////////////
 
     fun pause() {
-        if (inHotswapTransaction) {
+        if (isInHotSwapTransaction) {
             pendingCalls.add { pause() }
             return
         }
@@ -256,7 +228,7 @@ abstract class Playback : MediaSessionCompat.Callback() {
     ///////////////////////////////////////////////////////////////////////////
 
     fun stop() {
-        if (inHotswapTransaction) {
+        if (isInHotSwapTransaction) {
             pendingCalls.add { stop() }
             return
         }
@@ -275,7 +247,7 @@ abstract class Playback : MediaSessionCompat.Callback() {
     ///////////////////////////////////////////////////////////////////////////
 
     fun seek(time: Long) {
-        if (inHotswapTransaction) {
+        if (isInHotSwapTransaction) {
             pendingCalls.add { seek(time) }
             return
         }
@@ -360,7 +332,7 @@ abstract class Playback : MediaSessionCompat.Callback() {
         playbackState = PlaybackStateCompat.STATE_ERROR
         passThroughPlaybackState()
         SERVICE!!.stopForeground(false)
-        SERVICE!!.updateNotification(PlaybackRemote.makeNotification())
+        SERVICE!!.notify(PlaybackRemote.makeNotification())
     }
 
     /**
@@ -369,8 +341,8 @@ abstract class Playback : MediaSessionCompat.Callback() {
     protected fun notifyPlaying() {
         Log.d(TAG, "notifyPlaying()")
         playbackState = PlaybackStateCompat.STATE_PLAYING
-        if (inHotswapTransaction) {
-            inHotswapTransaction = false
+        if (isInHotSwapTransaction) {
+            isInHotSwapTransaction = false
             for (call in pendingCalls)
                 call.invoke()
             pendingCalls.clear()
@@ -388,7 +360,7 @@ abstract class Playback : MediaSessionCompat.Callback() {
         playbackState = PlaybackStateCompat.STATE_PAUSED
         SERVICE!!.stopForeground(false)
         passThroughPlaybackState()
-        SERVICE!!.updateNotification(PlaybackRemote.makeNotification())
+        SERVICE!!.notify(PlaybackRemote.makeNotification())
     }
 
     /**

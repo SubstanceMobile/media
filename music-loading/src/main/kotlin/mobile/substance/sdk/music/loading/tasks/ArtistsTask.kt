@@ -40,8 +40,6 @@ class ArtistsTask(context: Context, vararg params: Any) : Loader<Artist>(context
                 .setName(name)
                 .setId(id)
                 .build()
-
-        Log.d("ArtistsTask", "Loaded id $id")
         return a
     }
 

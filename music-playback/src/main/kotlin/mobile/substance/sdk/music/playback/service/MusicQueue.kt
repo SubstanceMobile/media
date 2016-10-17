@@ -43,7 +43,7 @@ internal object MusicQueue {
 
 
     fun getCurrentSong(): Song? {
-        if (QUEUE != null && QUEUE!!.size > 0) return QUEUE!!.get(POSITION)
+        if (QUEUE != null && QUEUE!!.size > 0) return QUEUE!![POSITION]
         return null
     }
 
