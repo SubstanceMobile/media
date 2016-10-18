@@ -147,6 +147,7 @@ object PlaybackRemote : ServiceConnection {
         //Make sure we are not already playing the first song in the list. If we are, then just keep playing and quietly update the queue in the background (unless specified otherwise)
         if (getCurrentSong() != null) play = songs[position].id != getCurrentSong()?.id
         MusicQueue.set(songs.toMutableList(), position)
+        getService { it?.callback { onQueueChanged(MusicQueue.getQueue(false)) } }
         if (play) play()
     }
 
@@ -246,7 +247,10 @@ object PlaybackRemote : ServiceConnection {
 
     fun getQueue(startAtCurrentPosition: Boolean = false): List<Song>? = MusicQueue.getQueue(startAtCurrentPosition)
 
-    fun setQueue(queue: MutableList<Song>, position: Int) = MusicQueue.set(queue, position)
+    fun setQueue(queue: MutableList<Song>, position: Int) {
+        MusicQueue.set(queue, position)
+        getService { it?.callback { onQueueChanged(MusicQueue.getQueue(false)) } }
+    }
 
     fun switchSongQueuePosition(fromPosition: Int, toPosition: Int, startAtCurrentPosition: Boolean = false) {
         val queue = MusicQueue.getMutableQueue()!!
