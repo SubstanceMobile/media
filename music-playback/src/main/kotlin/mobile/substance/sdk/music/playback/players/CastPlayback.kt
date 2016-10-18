@@ -16,10 +16,8 @@
 
 package mobile.substance.sdk.music.playback.players
 
-import android.content.ContentUris
 import android.net.Uri
 import android.support.v4.media.MediaMetadataCompat
-import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
 import android.widget.Toast
 import com.google.android.gms.cast.CastStatusCodes
@@ -35,12 +33,6 @@ import mobile.substance.sdk.music.core.objects.Song
 import mobile.substance.sdk.music.core.utils.MusicCoreUtil
 import mobile.substance.sdk.music.playback.MusicPlaybackUtil
 import mobile.substance.sdk.music.playback.cast.LocalServer
-import org.json.JSONObject
-import java.io.File
-import java.io.FileInputStream
-import java.io.InputStream
-import java.net.InetAddress
-import java.net.ServerSocket
 
 object CastPlayback : Playback(), SessionManagerListener<Session>, RemoteMediaClient.Listener, RemoteMediaClient.ProgressListener {
 
@@ -184,6 +176,7 @@ object CastPlayback : Playback(), SessionManagerListener<Session>, RemoteMediaCl
     override fun doPlay(fileUri: Uri, artworkUri: Uri?) = doPlay(fileUri, artworkUri, null)
 
     private fun doLoad(info: MediaInfo, autoplay: Boolean) {
+        notifyBuffering()
         remoteMediaClient?.load(info, autoplay)?.setResultCallback {
             if (!(it.status?.isSuccess ?: false)) {
                 logStatus(it.status, "Playback failed")
@@ -230,10 +223,27 @@ object CastPlayback : Playback(), SessionManagerListener<Session>, RemoteMediaCl
         Log.d(TAG, "Google Cast returned unsuccessful. Code: ${status.statusCode}; Message: ${status.statusMessage}")
         var toastMessage: String? = null
         when (status.statusCode) {
-            CastStatusCodes.FAILED -> toastMessage = toast
-            CastStatusCodes.INTERNAL_ERROR -> toastMessage = status.statusMessage ?: "Internal error at the cast receiver"
+            CastStatusCodes.FAILED -> {
+                toastMessage = toast
+                notifyError()
+            }
+            CastStatusCodes.INTERNAL_ERROR -> {
+                toastMessage = status.statusMessage ?: "Internal error at the cast receiver"
+                notifyError()
+            }
             CastStatusCodes.TIMEOUT -> toastMessage = "Cast connection timed out"
-            CastStatusCodes.UNKNOWN_ERROR -> toastMessage = "Unknown error"
+            CastStatusCodes.UNKNOWN_ERROR -> {
+                toastMessage = "Unknown error"
+                notifyError()
+            }
+            CastStatusCodes.INVALID_REQUEST -> {
+                toastMessage = "Error: Invalid request"
+                notifyError()
+            }
+            CastStatusCodes.NETWORK_ERROR -> {
+                toastMessage = "Network error"
+                notifyError()
+            }
         }
         Toast.makeText(SERVICE!!, toastMessage ?: return, Toast.LENGTH_SHORT).show()
     }
@@ -245,6 +255,8 @@ object CastPlayback : Playback(), SessionManagerListener<Session>, RemoteMediaCl
     override fun getCurrentPosInSong(): Int {
         return if (overrideIsPlaying) overridePosition ?: 0 else remoteMediaClient?.approximateStreamPosition?.toInt() ?: 0
     }
+
+    override val repeatOnNext: Boolean = true
 
     override fun onSessionResumeFailed(p0: Session?, p1: Int) {}
 

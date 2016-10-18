@@ -21,14 +21,10 @@ import android.media.AudioManager
 import android.media.MediaPlayer
 import android.net.Uri
 import android.os.Build
-import android.os.Handler
-import android.os.Looper
 import android.os.PowerManager
-import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
-import mobile.substance.sdk.music.core.MusicApiError
 import mobile.substance.sdk.music.core.utils.MusicCoreUtil
-import mobile.substance.sdk.music.playback.MusicPlaybackOptions
+import mobile.substance.sdk.music.playback.RepeatModes
 
 
 object LocalPlayback : Playback(),
@@ -92,15 +88,11 @@ object LocalPlayback : Playback(),
         try {
             val url = MusicCoreUtil.getUrlFromUri(fileUri)
             Log.d("Checking url validity", url.toString())
-            if (url == null)
-                localPlayer?.setDataSource(SERVICE!!.applicationContext, fileUri)
-            else {
-                localPlayer?.setDataSource(url)
-                notifyBuffering()
-            }
+            if (url == null) localPlayer?.setDataSource(SERVICE!!.applicationContext, fileUri) else localPlayer?.setDataSource(url)
         } catch (e: Exception) {
             Log.e(TAG, "Unable to play " + MusicCoreUtil.getFilePath(SERVICE!!, fileUri), e)
         } finally {
+            notifyBuffering()
             localPlayer?.prepareAsync()
         }
     }
@@ -112,14 +104,11 @@ object LocalPlayback : Playback(),
     override fun doResume() = doResume(true)
 
     fun doResume(updateFocus: Boolean) {
-        Log.d(TAG, "We should start playing now!")
         if (!isPlaying()) {
             if (!updateFocus or requestAudioFocus()) {
-
                 localPlayer?.start()
                 notifyPlaying()
                 startProgressThread()
-                Log.d(TAG, "We should be playing now!")
             } else Log.e(TAG, "AudioFocus denied")
         } else Log.e(TAG, "It seems like resume was called while you are playing. It is recommended you do some debugging.")
     }
@@ -168,12 +157,12 @@ object LocalPlayback : Playback(),
     // Repeat //
     ////////////
 
-    override var isRepeating: Boolean
-        get() = localPlayer?.isLooping ?: false
-        set(value) {
-            localPlayer?.isLooping = value
-            notifyRepeatingChanged()
+    override fun onRepeatModeChanged(mode: Int) {
+        when (mode) {
+            RepeatModes.REPEAT_DISABLED -> localPlayer?.isLooping = false
+            RepeatModes.REPEAT_ENABLED -> localPlayer?.isLooping = true
         }
+    }
 
     ///////////////////////////////////////////////////////////////////////////
     // Progress Thread

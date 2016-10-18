@@ -34,8 +34,8 @@ import com.google.android.gms.cast.framework.CastState
 import com.google.android.gms.cast.framework.CastStateListener
 import mobile.substance.sdk.music.core.utils.MusicCoreUtil
 import mobile.substance.sdk.music.playback.MusicPlaybackOptions
-import mobile.substance.sdk.music.playback.MusicPlaybackUtil
 import mobile.substance.sdk.music.playback.PlaybackRemote
+import mobile.substance.sdk.music.playback.RepeatModes
 import mobile.substance.sdk.music.playback.players.CastPlayback
 import mobile.substance.sdk.music.playback.players.LocalPlayback
 import mobile.substance.sdk.music.playback.players.Playback
@@ -79,12 +79,8 @@ open class MusicService : MediaBrowserServiceCompat(), CastStateListener {
         val song = MusicQueue.getCurrentSong()!!
         callback.onSongChanged(song)
         callback.onDurationChanged(song.songDuration?.toInt() ?: 0, song.songDurationString)
-        callback.onStateChanged(if (engine.isPlaying())
-            PlaybackState.STATE_PLAYING
-        else if (MusicQueue.getCurrentSong() != null)
-            PlaybackState.STATE_PAUSED
-        else PlaybackState.STATE_IDLE)
-        callback.onRepeatingChanged(engine.isRepeating)
+        callback.onStateChanged(engine.playbackState)
+        callback.onRepeatingChanged(engine.repeatMode)
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -132,7 +128,8 @@ open class MusicService : MediaBrowserServiceCompat(), CastStateListener {
             Log.d(TAG, "State restored")
         }
 
-        callback { onRepeatingChanged(false) }
+        // Reset old values that become deprecated with a new engine
+        callback { onRepeatingChanged(RepeatModes.REPEAT_DISABLED) }
 
         Log.d(TAG, "Engine transaction complete")
     }
@@ -165,12 +162,18 @@ open class MusicService : MediaBrowserServiceCompat(), CastStateListener {
     }
 
     internal fun updatePlaybackState(callback: Boolean = false) {
+        val playbackState = engine.playbackState
         session?.setPlaybackState(
                 PlaybackStateCompat.Builder().setActions(MusicPlaybackOptions.playbackActions.getActions())
-                        .setState(engine.playbackState, engine.getCurrentPosInSong().toLong(), engine.getPlaybackSpeed())
+                        .setState(playbackState, engine.getCurrentPosInSong().toLong(), engine.getPlaybackSpeed())
                         .build())
-        if (callback)
-            Handler(Looper.getMainLooper()).post { callback { onStateChanged(MusicPlaybackUtil.simplify(engine.playbackState)) } }
+        if (callback) {
+            callback {
+                onStateChanged(playbackState)
+                if (playbackState == PlaybackStateCompat.STATE_ERROR) onError()
+                if (playbackState == PlaybackStateCompat.STATE_BUFFERING) onBufferStarted()
+            }
+        }
     }
 
     internal fun updatePlaybackProgress(progress: Long? = null) {

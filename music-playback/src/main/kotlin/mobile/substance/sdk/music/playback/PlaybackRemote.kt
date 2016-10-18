@@ -33,7 +33,10 @@ import mobile.substance.sdk.music.core.dataLinkers.MusicData
 import mobile.substance.sdk.music.core.objects.Song
 import mobile.substance.sdk.music.core.utils.MusicCoreUtil
 import mobile.substance.sdk.music.playback.players.Playback
-import mobile.substance.sdk.music.playback.service.*
+import mobile.substance.sdk.music.playback.service.DefaultMediaNotification
+import mobile.substance.sdk.music.playback.service.MediaNotification
+import mobile.substance.sdk.music.playback.service.MusicQueue
+import mobile.substance.sdk.music.playback.service.MusicService
 import java.util.*
 
 /**
@@ -49,16 +52,12 @@ object PlaybackRemote : ServiceConnection {
     // Manages Connections
     ///////////////////////////////////////////////////////////////////////////
 
-    private val SERVICE_BOUND_LISTENERS: MutableList<ServiceLoadListener> = arrayListOf()
+    private val SERVICE_BOUND_LISTENERS: MutableList<(MusicService?) -> Unit> = arrayListOf()
 
-    private interface ServiceLoadListener {
-        fun respond(service: MusicService?)
-    }
-
-    private fun getService(listener: ServiceLoadListener) {
+    private fun getService(listener: (MusicService?) -> Unit) {
         val running = if (context != null) MusicPlaybackUtil.isServiceRunning(context!!, serviceClass) else false
         if (running && isBound) {
-            listener.respond(service)
+            listener.invoke(service)
             return
         }
         if (!running) {
@@ -72,7 +71,7 @@ object PlaybackRemote : ServiceConnection {
     override fun onServiceConnected(name: ComponentName?, binder: IBinder?) {
         service = (binder as MusicService.ServiceBinder).service
         isBound = true
-        for (listener in SERVICE_BOUND_LISTENERS) listener.respond(service)
+        for (listener in SERVICE_BOUND_LISTENERS) listener.invoke(service)
         SERVICE_BOUND_LISTENERS.clear()
     }
 
@@ -101,23 +100,11 @@ object PlaybackRemote : ServiceConnection {
     // Callback
     ///////////////////////////////////////////////////////////////////////////
 
-    fun registerCallback(callback: RemoteCallback) = getService(object : ServiceLoadListener {
-        override fun respond(service: MusicService?) {
-            service!!.registerCallback(callback)
-        }
-    })
+    fun registerCallback(callback: RemoteCallback) = getService { it!!.registerCallback(callback) }
 
-    fun unregisterCallback(callback: RemoteCallback) = getService(object : ServiceLoadListener {
-        override fun respond(service: MusicService?) {
-            service!!.unregisterCallback(callback)
-        }
-    })
+    fun unregisterCallback(callback: RemoteCallback) = getService { it!!.unregisterCallback(callback) }
 
-    fun requestUpdates(callback: RemoteCallback) = getService(object : ServiceLoadListener {
-        override fun respond(service: MusicService?) {
-            service!!.update(callback)
-        }
-    })
+    fun requestUpdates(callback: RemoteCallback) = getService { it!!.update(callback) }
 
     interface RemoteCallback {
 
@@ -129,11 +116,17 @@ object PlaybackRemote : ServiceConnection {
 
         fun onSongChanged(song: Song)
 
-        fun onStateChanged(state: PlaybackState)
+        fun onStateChanged(state: Int)
 
-        fun onRepeatingChanged(isRepeating: Boolean)
+        fun onRepeatingChanged(mode: Int)
 
         fun onQueueChanged(queue: List<Song>)
+
+        fun onError()
+
+        fun onBufferStarted() = Unit
+
+        fun onBufferFinished() = Unit
 
     }
 
@@ -141,12 +134,10 @@ object PlaybackRemote : ServiceConnection {
     // Controls
     ///////////////////////////////////////////////////////////////////////////
 
-    internal fun play() = getService(object : ServiceLoadListener {
-        override fun respond(service: MusicService?) {
-            //Calling play using direct access to playback object because calling play on the MediaController will resume and cause unintended behaviour
-            service!!.engine.play()
-        }
-    })
+    internal fun play() = getService {
+        //Calling play using direct access to playback object because calling play on the MediaController will resume and cause unintended behaviour
+        it!!.engine.play()
+    }
 
     /**
      * Set the queue to the provided list and start playing from the provided position.
@@ -167,9 +158,7 @@ object PlaybackRemote : ServiceConnection {
             play(arrayListOf(song), 0)
         } else {
             //Connect to the service and start playing music. This is not recommended and may cause unpredictable behaviour
-            getService(object : ServiceLoadListener {
-                override fun respond(service: MusicService?) = service!!.engine.play(song)
-            })
+            getService { it!!.engine.play(song) }
         }
     }
 
@@ -192,39 +181,25 @@ object PlaybackRemote : ServiceConnection {
     /**
      * Resume playback if it was previously paused
      */
-    fun resume() = getService(object : ServiceLoadListener {
-        override fun respond(service: MusicService?) {
-            //Calling play on the MediaController will actually call resume on the service
-            service!!.control()!!.transportControls!!.play()
-        }
-    })
+    fun resume() = getService {
+        // Calling play on the MediaController will actually call resume on the service
+        it!!.control()!!.transportControls!!.play()
+    }
 
     /**
      * Pause playback
      */
-    fun pause() = getService(object : ServiceLoadListener {
-        override fun respond(service: MusicService?) {
-            service!!.control()!!.transportControls.pause()
-        }
-    })
+    fun pause() = getService { it!!.control()!!.transportControls.pause() }
 
     /**
      * Stop playback
      */
-    fun stop() = getService(object : ServiceLoadListener {
-        override fun respond(service: MusicService?) {
-            service!!.control()!!.transportControls.stop()
-        }
-    })
+    fun stop() = getService { it!!.control()!!.transportControls.stop() }
 
     /**
      * Seek playback to the specified position
      */
-    fun seekTo(progress: Int) = getService(object : ServiceLoadListener {
-        override fun respond(service: MusicService?) {
-            service!!.control()!!.transportControls.seekTo(progress.toLong())
-        }
-    })
+    fun seekTo(progress: Int) = getService { it!!.control()!!.transportControls.seekTo(progress.toLong()) }
 
     /**
      * Shuffle the hooked songs
@@ -250,11 +225,18 @@ object PlaybackRemote : ServiceConnection {
     /**
      * Set whether the playback engine shall loop or not
      */
-    fun setRepeating(isRepeating: Boolean) = getService(object : ServiceLoadListener {
-        override fun respond(service: MusicService?) {
-            service!!.engine.isRepeating = isRepeating
+    fun setRepeatMode(mode: Int) = getService { it!!.engine.repeatMode = mode }
+
+    /**
+     * Switch the repeat mode in the recurring order [RepeatModes.REPEAT_DISABLED] -> [RepeatModes.REPEAT_ONCE] -> [RepeatModes.REPEAT_ENABLED]
+     */
+    fun switchRepeatMode() = getService {
+        when (it?.engine?.repeatMode) {
+            RepeatModes.REPEAT_DISABLED -> it?.engine?.repeatMode = RepeatModes.REPEAT_ONCE
+            RepeatModes.REPEAT_ONCE -> it?.engine?.repeatMode = RepeatModes.REPEAT_ENABLED
+            RepeatModes.REPEAT_ENABLED -> it?.engine?.repeatMode = RepeatModes.REPEAT_DISABLED
         }
-    })
+    }
 
     ///////////////////////////////////////////////////////////////////////////
     // Queue
@@ -266,10 +248,10 @@ object PlaybackRemote : ServiceConnection {
 
     fun setQueue(queue: MutableList<Song>, position: Int) = MusicQueue.set(queue, position)
 
-    fun switchSongQueuePosition(fromPos: Int, toPos: Int, startAtCurrentPosition: Boolean = false) {
+    fun switchSongQueuePosition(fromPosition: Int, toPosition: Int, startAtCurrentPosition: Boolean = false) {
         val queue = MusicQueue.getMutableQueue()!!
-        queue.add(toPos, queue[if (startAtCurrentPosition) MusicQueue.POSITION + 1 + fromPos else fromPos])
-        queue.removeAt(if (fromPos > toPos) if (startAtCurrentPosition) MusicQueue.POSITION + 1 + fromPos else fromPos + 1 else if (startAtCurrentPosition) MusicQueue.POSITION + 1 + fromPos else fromPos)
+        queue.add(toPosition, queue[if (startAtCurrentPosition) MusicQueue.POSITION + 1 + fromPosition else fromPosition])
+        queue.removeAt(if (fromPosition > toPosition) if (startAtCurrentPosition) MusicQueue.POSITION + 1 + fromPosition else fromPosition + 1 else if (startAtCurrentPosition) MusicQueue.POSITION + 1 + fromPosition else fromPosition)
     }
 
     fun removeSongFromQueue(pos: Int, startsAtCurrentPosition: Boolean = false) = MusicQueue.getMutableQueue()!!.removeAt(if (startsAtCurrentPosition) MusicQueue.POSITION + 1 + pos else pos)
@@ -346,9 +328,7 @@ object PlaybackRemote : ServiceConnection {
      * position, and current song between players to ensure consistent playback. If you have an option in your settings activity for setting a custom player, it is recommended
      * that you use hotswap and notify the user that the change has actually been made, as it might not be obvious to the user that the transaction has actually happened.
      */
-    @JvmOverloads fun setCustomPlaybackEngineForService(engine: Playback, hotSwap: Boolean = true) = getService(object : ServiceLoadListener {
-        override fun respond(service: MusicService?) = service!!.replacePlaybackEngine(engine, hotSwap, false)
-    })
+    @JvmOverloads fun setCustomPlaybackEngineForService(engine: Playback, hotSwap: Boolean = true) = getService { it!!.replacePlaybackEngine(engine, hotSwap, false) }
 
     fun getMediaSession() = service!!.getMediaSession()
 
@@ -356,6 +336,6 @@ object PlaybackRemote : ServiceConnection {
 
     fun isPlaying() = service?.engine?.isPlaying()
 
-    fun isRepeating() = service?.engine?.isRepeating
+    fun getRepeatMode() = service?.engine?.repeatMode
 
 }

@@ -21,9 +21,7 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.net.wifi.WifiManager
-import android.support.v4.media.session.PlaybackStateCompat
 import mobile.substance.sdk.music.playback.service.MusicService
-import mobile.substance.sdk.music.playback.service.PlaybackState
 import java.math.BigInteger
 import java.net.InetAddress
 import java.net.UnknownHostException
@@ -88,14 +86,6 @@ object MusicPlaybackUtil {
     fun getPendingIntent(context: Context, action: Action, serviceClass: Class<*>): PendingIntent {
         return PendingIntent.getService(context, MusicService.UNIQUE_ID, Intent(context, serviceClass).setAction(getAction(context, action)),
                 PendingIntent.FLAG_CANCEL_CURRENT)
-    }
-
-    fun simplify(state: Int): PlaybackState {
-        when (state) {
-            PlaybackStateCompat.STATE_PLAYING -> return PlaybackState.STATE_PLAYING
-            PlaybackStateCompat.STATE_PAUSED, PlaybackStateCompat.STATE_BUFFERING, PlaybackStateCompat.STATE_CONNECTING -> return PlaybackState.STATE_PAUSED
-            else -> return PlaybackState.STATE_IDLE
-        }
     }
 
 }

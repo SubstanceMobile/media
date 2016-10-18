@@ -87,8 +87,7 @@ abstract class MediaObject {
         if (isContextRequired) {
             this.context = context
             onContextSet(context)
-        } else
-            Log.d(MediaObject::class.java.simpleName, "Context was not requested. Ignoring")
+        }
         return this
     }
 

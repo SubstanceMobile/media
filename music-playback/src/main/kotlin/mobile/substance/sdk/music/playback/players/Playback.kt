@@ -22,18 +22,17 @@ import android.os.Bundle
 import android.provider.MediaStore
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
-import android.support.v4.media.session.PlaybackStateCompat.*
+import android.support.v4.media.session.PlaybackStateCompat.STATE_NONE
 import android.util.Log
 import mobile.substance.sdk.music.core.dataLinkers.MusicData
 import mobile.substance.sdk.music.core.objects.Album
 import mobile.substance.sdk.music.core.objects.Artist
 import mobile.substance.sdk.music.core.objects.Song
 import mobile.substance.sdk.music.core.utils.MusicCoreUtil
-import mobile.substance.sdk.music.playback.MusicPlaybackOptions
 import mobile.substance.sdk.music.playback.PlaybackRemote
+import mobile.substance.sdk.music.playback.RepeatModes
 import mobile.substance.sdk.music.playback.service.MusicQueue
 import mobile.substance.sdk.music.playback.service.MusicService
-import mobile.substance.sdk.music.playback.service.PlaybackState
 import java.util.*
 
 abstract class Playback : MediaSessionCompat.Callback() {
@@ -67,13 +66,15 @@ abstract class Playback : MediaSessionCompat.Callback() {
      * Do not call this method. This method is called where it is usually most necessary (on all of the actions that can induce playback)
      * If you do want to call it make sure you know what you are doing.
      */
-    open fun createPlayer() {}
+    open fun createPlayer() {
+    }
 
     /**
      * Override it if you need it, BUT do not call this method. This method is called where it is usually most necessary (on all of the actions that can induce playback)
      * If you do want to call it make sure you know what you are doing.
      */
-    open fun configPlayer() {}
+    open fun configPlayer() {
+    }
 
     ///////////////////////////////////////////////////////////////////////////
     // Play
@@ -87,8 +88,8 @@ abstract class Playback : MediaSessionCompat.Callback() {
 
     fun play(song: Song) {
         doPlay(song)
+        if (!(SERVICE!!.getMediaSession()?.isActive ?: false)) SERVICE!!.getMediaSession()?.isActive = true
         SERVICE!!.callback {
-            if (!(SERVICE!!.getMediaSession()?.isActive ?: false)) SERVICE!!.getMediaSession()?.isActive = true
             onSongChanged(song)
             onDurationChanged(song.songDuration?.toInt() ?: 0, song.songDurationString)
         }
@@ -98,6 +99,7 @@ abstract class Playback : MediaSessionCompat.Callback() {
         var mediaId: Long? = null
         if (uri.scheme == "content") mediaId = MusicCoreUtil.findByMediaId(ContentUris.parseId(uri), MusicData.getAlbums(), MusicData.getSongs())?.id
         val song = MusicData.findSongById(mediaId ?: 0)
+        if (song != null) return play(song)
         doPlay(uri, if (song?.hasExplicitArtwork ?: false) song?.explicitArtworkUri else Uri.parse("file://" + MusicData.findAlbumById(song?.songAlbumId ?: 0)?.albumArtworkPath))
     }
 
@@ -185,11 +187,21 @@ abstract class Playback : MediaSessionCompat.Callback() {
     ///////////////////////////////////////////////////////////////////////////
 
     /**
-     * This also handles the next button with repeat. This way, calling next() will repeat if setRepeating() is set to true. This can be turned off by overriding
-     * callRepeatOnNext to be false.
+     * This also handles the next button with repeat. This way, calling next() will repeat if repeatMode equals [RepeatModes.REPEAT_ENABLED]. This can be turned off by overriding
+     * repeatOnNext to be false.
      */
     fun next() {
-        if (isRepeating && callRepeatOnNext) doRepeat() else doNext()
+        when (repeatMode) {
+            RepeatModes.REPEAT_DISABLED -> doNext()
+            RepeatModes.REPEAT_ENABLED -> if (repeatOnNext) play() else {
+                repeatMode = RepeatModes.REPEAT_DISABLED
+                doNext()
+            }
+            RepeatModes.REPEAT_ONCE -> {
+                play()
+                repeatMode = RepeatModes.REPEAT_DISABLED
+            }
+        }
     }
 
     open fun doNext() = PlaybackRemote.playNext()
@@ -272,19 +284,16 @@ abstract class Playback : MediaSessionCompat.Callback() {
     // Repeat
     ///////////////////////////////////////////////////////////////////////////
 
-    open var isRepeating = false
+    var repeatMode = RepeatModes.REPEAT_DISABLED
         set(value) {
             field = value
-            notifyRepeatingChanged()
+            onRepeatModeChanged(value)
+            notifyRepeatModeChanged()
         }
 
-    internal fun notifyRepeatingChanged() {
-        SERVICE!!.callback { onRepeatingChanged(isRepeating) }
-    }
+    protected open fun onRepeatModeChanged(mode: Int) = Unit
 
-    open fun doRepeat() = play()
-
-    open val callRepeatOnNext = true
+    open val repeatOnNext = false
 
     ///////////////////////////////////////////////////////////////////////////
     // Others
@@ -311,9 +320,13 @@ abstract class Playback : MediaSessionCompat.Callback() {
     // State handling
     ///////////////////////////////////////////////////////////////////////////
 
-    private fun passThroughPlaybackState() = SERVICE!!.updatePlaybackState()
+    private fun passThroughPlaybackState(callback: Boolean = false) = SERVICE!!.updatePlaybackState(callback)
 
     protected fun passThroughPlaybackProgress(progress: Long? = null) = SERVICE!!.updatePlaybackProgress(progress)
+
+    protected fun notifyRepeatModeChanged() {
+        SERVICE!!.callback { onRepeatingChanged(repeatMode) }
+    }
 
     /**
      * Update the MediaSession's state to buffering
@@ -321,7 +334,7 @@ abstract class Playback : MediaSessionCompat.Callback() {
     protected fun notifyBuffering() {
         Log.d(TAG, "notifyBuffering()")
         playbackState = PlaybackStateCompat.STATE_BUFFERING
-        passThroughPlaybackState()
+        passThroughPlaybackState(true)
     }
 
     /**
@@ -330,7 +343,7 @@ abstract class Playback : MediaSessionCompat.Callback() {
     protected fun notifyError() {
         Log.d(TAG, "notifyError()")
         playbackState = PlaybackStateCompat.STATE_ERROR
-        passThroughPlaybackState()
+        passThroughPlaybackState(true)
         SERVICE!!.stopForeground(false)
         SERVICE!!.notify(PlaybackRemote.makeNotification())
     }
@@ -340,6 +353,7 @@ abstract class Playback : MediaSessionCompat.Callback() {
      */
     protected fun notifyPlaying() {
         Log.d(TAG, "notifyPlaying()")
+        if (playbackState == PlaybackStateCompat.STATE_BUFFERING) SERVICE!!.callback { onBufferFinished() }
         playbackState = PlaybackStateCompat.STATE_PLAYING
         if (isInHotSwapTransaction) {
             isInHotSwapTransaction = false
@@ -347,7 +361,7 @@ abstract class Playback : MediaSessionCompat.Callback() {
                 call.invoke()
             pendingCalls.clear()
         }
-        passThroughPlaybackState()
+        passThroughPlaybackState(true)
         SERVICE!!.updateMetadata()
         SERVICE!!.startForeground()
     }
@@ -359,7 +373,7 @@ abstract class Playback : MediaSessionCompat.Callback() {
         Log.d(TAG, "notifyPaused()")
         playbackState = PlaybackStateCompat.STATE_PAUSED
         SERVICE!!.stopForeground(false)
-        passThroughPlaybackState()
+        passThroughPlaybackState(true)
         SERVICE!!.notify(PlaybackRemote.makeNotification())
     }
 

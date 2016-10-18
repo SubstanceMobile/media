@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
-package mobile.substance.sdk.music.playback.service
+package mobile.substance.sdk.music.playback
 
-// TODO: Julian you understand more then me what this does please describe it.
-enum class PlaybackState {
-    STATE_PLAYING, STATE_PAUSED, STATE_IDLE
+object RepeatModes {
+
+    const val REPEAT_DISABLED = 0
+    const val REPEAT_ENABLED = 1
+    const val REPEAT_ONCE = 2
+
 }

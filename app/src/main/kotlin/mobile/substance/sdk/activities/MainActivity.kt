@@ -39,9 +39,12 @@ import mobile.substance.sdk.music.loading.Library
 import mobile.substance.sdk.music.loading.LibraryConfig
 import mobile.substance.sdk.music.loading.MusicType
 import mobile.substance.sdk.music.playback.PlaybackRemote
-import mobile.substance.sdk.music.playback.service.PlaybackState
 
 class MainActivity : NavigationDrawerActivity(), PlaybackRemote.RemoteCallback {
+
+    override fun onError() {
+
+    }
 
     private val drawerLayout: DrawerLayout by bindView<DrawerLayout>(R.id.activity_main_drawerlayout)
     private val navigationView: NavigationView by bindView<NavigationView>(R.id.activity_main_navigationview)
@@ -98,11 +101,11 @@ class MainActivity : NavigationDrawerActivity(), PlaybackRemote.RemoteCallback {
         Library.findAlbumById(song.songAlbumId ?: 0)?.requestArt(currentSongImage)
     }
 
-    override fun onStateChanged(state: PlaybackState) {
-        Log.d("MainActivity.kt", "onStateChanged(), ${state.name}")
+    override fun onStateChanged(state: Int) {
+        Log.d("MainActivity.kt", "onStateChanged(), $state")
     }
 
-    override fun onRepeatingChanged(isRepeating: Boolean) {
+    override fun onRepeatingChanged(mode: Int) {
     }
 
     override fun onQueueChanged(queue: List<Song>) {
