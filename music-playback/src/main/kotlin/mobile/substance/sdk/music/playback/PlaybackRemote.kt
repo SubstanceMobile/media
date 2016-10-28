@@ -229,13 +229,13 @@ object PlaybackRemote : ServiceConnection {
     fun setRepeatMode(mode: Int) = getService { it!!.engine.repeatMode = mode }
 
     /**
-     * Switch the repeat mode in the recurring order [RepeatModes.REPEAT_DISABLED] -> [RepeatModes.REPEAT_ONCE] -> [RepeatModes.REPEAT_ENABLED]
+     * Switch the repeat mode in the recurring order [RepeatModes.REPEAT_DISABLED] -> [RepeatModes.REPEAT_ENABLED] -> [RepeatModes.REPEAT_ONCE]
      */
     fun switchRepeatMode() = getService {
         when (it?.engine?.repeatMode) {
-            RepeatModes.REPEAT_DISABLED -> it?.engine?.repeatMode = RepeatModes.REPEAT_ONCE
-            RepeatModes.REPEAT_ONCE -> it?.engine?.repeatMode = RepeatModes.REPEAT_ENABLED
-            RepeatModes.REPEAT_ENABLED -> it?.engine?.repeatMode = RepeatModes.REPEAT_DISABLED
+            RepeatModes.REPEAT_DISABLED -> it?.engine?.repeatMode = RepeatModes.REPEAT_ENABLED
+            RepeatModes.REPEAT_ENABLED -> it?.engine?.repeatMode = RepeatModes.REPEAT_ONCE
+            RepeatModes.REPEAT_ONCE -> it?.engine?.repeatMode = RepeatModes.REPEAT_DISABLED
         }
     }
 
