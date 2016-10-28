@@ -25,14 +25,14 @@ import java.util.*
  */
 internal object MusicQueue {
     var POSITION: Int = 0
-    private set
+        private set
 
     @Volatile private var QUEUE: MutableList<Song>? = ArrayList()
 
     internal fun getQueue(startAtPosition: Boolean): List<Song> {
         if (QUEUE != null) {
             if (startAtPosition) {
-                return QUEUE!!.subList(POSITION + 1, QUEUE!!.lastIndex)
+                return if (POSITION + 1 > QUEUE!!.lastIndex) emptyList() else QUEUE!!.subList(POSITION + 1, QUEUE!!.lastIndex)
             } else return QUEUE!!
         } else return emptyList()
     }

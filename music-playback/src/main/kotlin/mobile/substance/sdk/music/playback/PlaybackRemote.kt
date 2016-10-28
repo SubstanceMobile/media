@@ -247,6 +247,8 @@ object PlaybackRemote : ServiceConnection {
 
     fun getQueue(startAtCurrentPosition: Boolean = false): List<Song>? = MusicQueue.getQueue(startAtCurrentPosition)
 
+    fun getCurrentPosition() = MusicQueue.POSITION
+
     fun setQueue(queue: MutableList<Song>, position: Int) {
         MusicQueue.set(queue, position)
         getService { it?.callback { onQueueChanged(MusicQueue.getQueue(false)) } }
