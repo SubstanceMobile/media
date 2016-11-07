@@ -41,18 +41,7 @@ class MusicAdapter<T : MediaObject>(private val type: MusicType) : RecyclerView.
     init {
         Library.registerListener(this)
 
-        if (type == MusicType.SONGS) {
-            val extra = Song.Builder()
-                    .setTitle("Substance - Single")
-                    .setArtistName("Just kidding :D")
-                    .build()
-            extra.explicitUri = Uri.parse("http://stream.dar.fm/8824")
-            extra.explicitArtworkUri = Uri.parse("http://avatars0.githubusercontent.com/u/9950281?v=3&s=200")
-            val songs = arrayListOf(extra)
-            songs.addAll(MusicData.getSongs())
-            items = songs as List<T>
-
-        }
+        if (type == MusicType.SONGS) items = MusicData.getSongs() as List<T>
         if (type == MusicType.ALBUMS) items = MusicData.getAlbums() as List<T>
         if (type == MusicType.ARTISTS) items = MusicData.getArtists() as List<T>
         if (type == MusicType.PLAYLISTS) items = MusicData.getPlaylists() as List<T>

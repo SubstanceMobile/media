@@ -46,7 +46,7 @@ abstract class NavigationDrawerActivity : BaseActivity() {
 
     override fun onSaveInstanceState(outState: Bundle?) {
         super.onSaveInstanceState(outState)
-        supportFragmentManager.putFragment(outState, "FRAGMENT", fragment)
+        if (fragment != null) supportFragmentManager.putFragment(outState, "FRAGMENT", fragment)
     }
 
     private fun commitFragment() {
