@@ -254,13 +254,15 @@ object PlaybackRemote : ServiceConnection {
         getService { it?.callback { onQueueChanged(MusicQueue.getQueue(false)) } }
     }
 
-    fun switchSongQueuePosition(fromPosition: Int, toPosition: Int, startAtCurrentPosition: Boolean = false) {
-        val queue = MusicQueue.getMutableQueue()!!
-        queue.add(toPosition, queue[if (startAtCurrentPosition) MusicQueue.POSITION + 1 + fromPosition else fromPosition])
-        queue.removeAt(if (fromPosition > toPosition) if (startAtCurrentPosition) MusicQueue.POSITION + 1 + fromPosition else fromPosition + 1 else if (startAtCurrentPosition) MusicQueue.POSITION + 1 + fromPosition else fromPosition)
-    }
+    fun switchSongQueuePosition(fromPosition: Int, toPosition: Int, startAtCurrentPosition: Boolean = false) = Collections.swap(MusicQueue.getMutableQueue()!!, if (startAtCurrentPosition) fromPosition + MusicQueue.POSITION + 1 else fromPosition, if (startAtCurrentPosition) toPosition + MusicQueue.POSITION + 1 else toPosition)
 
-    fun removeSongFromQueue(pos: Int, startsAtCurrentPosition: Boolean = false) = MusicQueue.getMutableQueue()!!.removeAt(if (startsAtCurrentPosition) MusicQueue.POSITION + 1 + pos else pos)
+    fun removeFromQueue(pos: Int, startsAtCurrentPosition: Boolean = false) = MusicQueue.getMutableQueue()!!.removeAt(if (startsAtCurrentPosition) MusicQueue.POSITION + 1 + pos else pos)
+
+    fun addToQueueAsNext(song: Song) = MusicQueue.getMutableQueue()!!.add(MusicQueue.POSITION + 1, song)
+
+    fun addToQueue(song: Song) = addToQueue(listOf(song))
+
+    fun addToQueue(songs: List<Song>) = MusicQueue.getMutableQueue()!!.addAll(songs)
 
     ///////////////////////////////////////////////////////////////////////////
     // Notification

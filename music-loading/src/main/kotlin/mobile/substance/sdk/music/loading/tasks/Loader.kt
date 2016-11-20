@@ -109,7 +109,11 @@ abstract class Loader<Return : MediaObject>(context: Context, vararg params: Any
 
     @UiThread
     fun run() {
-        if (task == null || task!!.status == AsyncTask.Status.FINISHED) task = LoadTask()
+        try {
+            task?.cancel(true)
+        } catch (ignored: IllegalStateException) {
+        }
+        task = LoadTask()
         task!!.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, *runParams)
     }
 

@@ -145,6 +145,9 @@ object MusicCoreUtil {
                 if ("audio" == type) {
                     contentUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
                 }
+                if ("image" == type) {
+                    contentUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+                }
                 val selection = "_id=?"
                 val selectionArgs = arrayOf<String>(split[1])
                 return getDataColumn(context, contentUri!!, selection, selectionArgs)
