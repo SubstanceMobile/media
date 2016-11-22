@@ -40,6 +40,10 @@ object CastPlayback : Playback(), SessionManagerListener<Session>, RemoteMediaCl
         passThroughPlaybackProgress(p0)
     }
 
+    override fun onAdBreakStatusUpdated() {
+
+    }
+
     override fun onStatusUpdated() {
         try {
             when (remoteMediaClient?.mediaStatus?.playerState) {
