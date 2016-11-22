@@ -20,6 +20,7 @@ import android.content.ContentValues
 import android.content.Context
 import android.net.Uri
 import android.provider.MediaStore
+import android.util.Log
 import mobile.substance.sdk.music.core.objects.Song
 
 /**
@@ -58,14 +59,15 @@ object TagUtils {
     fun addToPlaylist(context: Context, songs: List<Long>, id: Long): Boolean {
         val cursor = context.contentResolver.query(MediaStore.Audio.Playlists.Members.getContentUri("external", id), null, null, null, null) ?: return false
 
-        var count = 0
-        if (cursor.moveToFirst()) count = cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Playlists.Members._COUNT))
+        var size = 0
+        if (cursor.moveToFirst()) size = cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Playlists.Members.SIZE))
+        Log.d(TagUtils::class.java.simpleName, size.toString())
         cursor.close()
 
         val valuesArray = Array(songs.size, {
             val cv = ContentValues()
             cv.put(MediaStore.Audio.Playlists.Members.AUDIO_ID, songs[it])
-            cv.put(MediaStore.Audio.Playlists.Members.PLAY_ORDER, it + count + 1)
+            cv.put(MediaStore.Audio.Playlists.Members.PLAY_ORDER, it + size + 1)
             cv
         })
 
@@ -74,8 +76,7 @@ object TagUtils {
     }
 
     fun removeFromPlaylist(context: Context, songs: List<Long>, id: Long) {
-        for (song in songs)
-            context.contentResolver.delete(MediaStore.Audio.Playlists.Members.getContentUri("external", id), "${MediaStore.Audio.Playlists.Members.AUDIO_ID} = ?", arrayOf(song.toString()))
+        for (song in songs) context.contentResolver.delete(MediaStore.Audio.Playlists.Members.getContentUri("external", id), "${MediaStore.Audio.Playlists.Members.AUDIO_ID} = ?", arrayOf(song.toString()))
     }
 
     fun moveInPlaylist(context: Context, playlist: Long, fromPos: Int, toPos: Int): Boolean = MediaStore.Audio.Playlists.Members.moveItem(context.contentResolver, playlist, fromPos, toPos)
