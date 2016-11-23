@@ -22,6 +22,7 @@ package mobile.substance.sdk.music.core
 object MusicCoreOptions {
 
     var defaultArt: Int = 0
+    var defaultArtUrl: String = "https://substanceproject.net/img/Substance_512.png"
 
     var songsString = "Please specify songsString in MusicCoreOptions"
     var albumsString = "Please specify albumsString in MusicCoreOptions"

@@ -28,6 +28,7 @@ import com.google.android.gms.cast.framework.*
 import com.google.android.gms.cast.framework.media.RemoteMediaClient
 import com.google.android.gms.common.api.Status
 import com.google.android.gms.common.images.WebImage
+import mobile.substance.sdk.music.core.MusicCoreOptions
 import mobile.substance.sdk.music.core.dataLinkers.MusicData
 import mobile.substance.sdk.music.core.objects.Song
 import mobile.substance.sdk.music.core.utils.MusicCoreUtil
@@ -145,7 +146,7 @@ object CastPlayback : Playback(), SessionManagerListener<Session>, RemoteMediaCl
 
                 val mediaInfo = MediaInfo.Builder(audioUrl)
                         .setContentType("audio/$fileType")
-                        .setMetadata(buildMetadata(artworkUrl, metadata ?: MediaMetadataCompat.Builder().build()))
+                        .setMetadata(buildMetadata(if (artworkUri != null) artworkUrl else MusicCoreOptions.defaultArtUrl, metadata ?: MediaMetadataCompat.Builder().build()))
                         .setStreamType(MediaInfo.STREAM_TYPE_NONE)
                         .build()
                 doLoad(mediaInfo, true)
@@ -162,7 +163,7 @@ object CastPlayback : Playback(), SessionManagerListener<Session>, RemoteMediaCl
 
                 val mediaInfo = MediaInfo.Builder(url)
                         .setContentType("audio/*")
-                        .setMetadata(buildMetadata(artworkUrl ?: artworkUri.toString(), metadata ?: MediaMetadataCompat.Builder().build()))
+                        .setMetadata(buildMetadata(artworkUrl ?: artworkUri?.toString() ?: MusicCoreOptions.defaultArtUrl, metadata ?: MediaMetadataCompat.Builder().build()))
                         .setStreamType(MediaInfo.STREAM_TYPE_LIVE)
                         .build()
                 doLoad(mediaInfo, true)

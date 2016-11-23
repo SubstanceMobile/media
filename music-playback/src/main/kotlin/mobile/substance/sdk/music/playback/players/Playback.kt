@@ -99,8 +99,7 @@ abstract class Playback : MediaSessionCompat.Callback() {
         var mediaId: Long? = null
         if (uri.scheme == "content") mediaId = MusicCoreUtil.findByMediaId(ContentUris.parseId(uri), MusicData.getAlbums(), MusicData.getSongs())?.id
         val song = MusicData.findSongById(mediaId ?: 0)
-        if (song != null) return play(song)
-        doPlay(uri, if (song?.hasExplicitArtwork ?: false) song?.explicitArtworkUri else Uri.parse("file://" + MusicData.findAlbumById(song?.songAlbumId ?: 0)?.albumArtworkPath))
+        return if (song != null) play(song) else doPlay(uri, null)
     }
 
     override fun onPlayFromUri(uri: Uri?, extras: Bundle?) {

@@ -49,12 +49,12 @@ class LocalServer : NanoHTTPD(MusicPlaybackUtil.SERVER_PORT) {
         }
 
         path = path!!.trim { it <= ' ' }.replace(File.separatorChar, '/')
-        if (path!!.indexOf('?') >= 0) {
-            path = path!!.substring(0, path!!.indexOf('?'))
+        if (path.indexOf('?') >= 0) {
+            path = path.substring(0, path!!.indexOf('?'))
         }
 
         val f = File(path)
-        return serveFile(path!!, headers, f)
+        return serveFile(path, headers, f)
     }
 
     private fun serveFile(path: String, header: Map<String, String>, file: File): Response {
