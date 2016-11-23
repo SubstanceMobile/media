@@ -30,7 +30,7 @@ import java.util.*
 /**
  * A class that needs to be extended in order to load a list of a certain type of object.
 
- * @param  The type to return when done loading. This type should **NOT** be a [List]
+ * @param Return The type to return when done loading. This type should **NOT** be a [List]
  */
 abstract class Loader<Return : MediaObject>(context: Context, vararg params: Any) {
     protected var contentObserver: ContentObserver? = null

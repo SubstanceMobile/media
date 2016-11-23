@@ -29,6 +29,7 @@ import android.os.NetworkOnMainThreadException
 import android.provider.DocumentsContract
 import android.provider.MediaStore
 import android.support.annotation.WorkerThread
+import android.support.v4.content.ContextCompat
 import android.util.TypedValue
 import android.webkit.URLUtil
 import mobile.substance.sdk.music.core.MusicCoreOptions
@@ -37,6 +38,8 @@ import mobile.substance.sdk.music.core.objects.MediaObject
 import mobile.substance.sdk.music.core.objects.Song
 import java.io.File
 import java.net.URL
+import android.graphics.drawable.BitmapDrawable
+import android.graphics.Canvas
 
 object MusicCoreUtil {
 
@@ -116,7 +119,14 @@ object MusicCoreUtil {
             if (e is NetworkOnMainThreadException) return null
         }
 
-        return BitmapFactory.decodeResource(context.resources, MusicCoreOptions.defaultArt)
+        val drawable = ContextCompat.getDrawable(context, MusicCoreOptions.defaultArt)
+        if (drawable is BitmapDrawable) return drawable.bitmap
+
+        val bitmap = Bitmap.createBitmap(drawable.intrinsicWidth, drawable.intrinsicHeight, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bitmap)
+        drawable.setBounds(0, 0, canvas.width, canvas.height)
+        drawable.draw(canvas)
+        return bitmap
     }
 
     /**
@@ -191,7 +201,6 @@ object MusicCoreUtil {
     private fun isMediaDocument(uri: Uri): Boolean {
         return "com.android.providers.media.documents" == uri.authority
     }
-
     ///////////////////////////////////////////////////////////////////////////
     // Url
     ///////////////////////////////////////////////////////////////////////////
