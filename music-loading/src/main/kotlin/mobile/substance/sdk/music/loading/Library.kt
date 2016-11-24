@@ -19,7 +19,7 @@ package mobile.substance.sdk.music.loading
 import android.content.Context
 import android.util.Log
 import mobile.substance.sdk.music.core.MusicApiError
-import mobile.substance.sdk.music.core.MusicCoreOptions
+import mobile.substance.sdk.options.MusicCoreOptions
 import mobile.substance.sdk.music.core.dataLinkers.MusicData
 import mobile.substance.sdk.music.core.dataLinkers.MusicLibraryData
 import mobile.substance.sdk.music.core.objects.*

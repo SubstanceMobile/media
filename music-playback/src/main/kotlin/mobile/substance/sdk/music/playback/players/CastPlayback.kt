@@ -28,11 +28,11 @@ import com.google.android.gms.cast.framework.*
 import com.google.android.gms.cast.framework.media.RemoteMediaClient
 import com.google.android.gms.common.api.Status
 import com.google.android.gms.common.images.WebImage
-import mobile.substance.sdk.music.core.MusicCoreOptions
+import mobile.substance.sdk.options.MusicCoreOptions
 import mobile.substance.sdk.music.core.dataLinkers.MusicData
 import mobile.substance.sdk.music.core.objects.Song
-import mobile.substance.sdk.music.core.utils.MusicCoreUtil
-import mobile.substance.sdk.music.playback.MusicPlaybackUtil
+import mobile.substance.sdk.utils.MusicCoreUtil
+import mobile.substance.sdk.utils.MusicPlaybackUtil
 import mobile.substance.sdk.music.playback.cast.LocalServer
 
 object CastPlayback : Playback(), SessionManagerListener<Session>, RemoteMediaClient.Listener, RemoteMediaClient.ProgressListener {

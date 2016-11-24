@@ -14,23 +14,21 @@
  * limitations under the License.
  */
 
-package mobile.substance.sdk.fragments
+package mobile.substance.sdk.app.sample.helpers
 
-import android.os.Bundle
+import android.support.v4.view.GravityCompat
+import android.support.v4.widget.DrawerLayout
 import android.support.v7.widget.Toolbar
-import butterknife.bindView
 import mobile.substance.sdk.R
-import mobile.substance.sdk.helpers.NavigationHelper
 
 /**
- * Created by Julian Os on 03.05.2016.
+ * Created by Julian on 06/05/16.
  */
-class HomeFragment : NavigationDrawerFragment() {
-    private val toolbar: Toolbar by bindView<Toolbar>(R.id.fragment_home_toolbar)
+object NavigationHelper {
 
-    override fun init(savedInstanceState: Bundle?) {
-        NavigationHelper.setupNavigation(drawerLayout!!, toolbar)
+    fun setupNavigation(drawerLayout: DrawerLayout, toolbar: Toolbar) {
+        toolbar.setNavigationIcon(R.drawable.ic_menu_white_24dp)
+        toolbar.setNavigationOnClickListener { drawerLayout.openDrawer(GravityCompat.START) }
     }
 
-    override val layoutResId: Int = R.layout.fragment_home
 }

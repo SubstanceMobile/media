@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package mobile.substance.sdk.music.playback
+package mobile.substance.sdk.utils
 
 import android.app.ActivityManager
 import android.app.PendingIntent

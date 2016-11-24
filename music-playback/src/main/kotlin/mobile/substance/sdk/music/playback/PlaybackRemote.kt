@@ -32,12 +32,14 @@ import com.google.android.gms.cast.framework.CastContext
 import mobile.substance.sdk.music.core.MusicApiInternalError
 import mobile.substance.sdk.music.core.dataLinkers.MusicData
 import mobile.substance.sdk.music.core.objects.Song
-import mobile.substance.sdk.music.core.utils.MusicCoreUtil
+import mobile.substance.sdk.utils.MusicCoreUtil
 import mobile.substance.sdk.music.playback.players.Playback
 import mobile.substance.sdk.music.playback.service.DefaultMediaNotification
 import mobile.substance.sdk.music.playback.service.MediaNotification
 import mobile.substance.sdk.music.playback.service.MusicQueue
 import mobile.substance.sdk.music.playback.service.MusicService
+import mobile.substance.sdk.options.MusicPlaybackOptions
+import mobile.substance.sdk.utils.MusicPlaybackUtil
 import java.util.*
 
 /**
@@ -357,5 +359,7 @@ object PlaybackRemote : ServiceConnection {
     fun isActive() = getCurrentSong() != null
 
     fun getRepeatMode() = service?.engine?.repeatMode
+
+    fun getActivePlaybackEngine() = service?.engine?.javaClass
 
 }

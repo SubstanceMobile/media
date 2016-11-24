@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package mobile.substance.sdk.music.playback
+package mobile.substance.sdk.options
 
 import android.support.v4.media.session.PlaybackStateCompat
+import mobile.substance.sdk.music.playback.PlaybackRemote
 
 /**
  * For configuring the Playback Library

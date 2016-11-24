@@ -18,7 +18,7 @@ package mobile.substance.sdk.music.tags
 
 import android.content.Context
 import android.net.Uri
-import mobile.substance.sdk.music.core.utils.MusicCoreUtil
+import mobile.substance.sdk.utils.MusicCoreUtil
 
 import org.jaudiotagger.audio.AudioFile
 import org.jaudiotagger.audio.AudioFileIO

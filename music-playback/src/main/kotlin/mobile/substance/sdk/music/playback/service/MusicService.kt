@@ -32,8 +32,8 @@ import android.util.Log
 import com.google.android.gms.cast.framework.CastContext
 import com.google.android.gms.cast.framework.CastState
 import com.google.android.gms.cast.framework.CastStateListener
-import mobile.substance.sdk.music.core.utils.MusicCoreUtil
-import mobile.substance.sdk.music.playback.MusicPlaybackOptions
+import mobile.substance.sdk.utils.MusicCoreUtil
+import mobile.substance.sdk.options.MusicPlaybackOptions
 import mobile.substance.sdk.music.playback.PlaybackRemote
 import mobile.substance.sdk.music.playback.RepeatModes
 import mobile.substance.sdk.music.playback.players.CastPlayback

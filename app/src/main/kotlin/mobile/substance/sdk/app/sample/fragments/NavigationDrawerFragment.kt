@@ -14,15 +14,19 @@
  * limitations under the License.
  */
 
-package mobile.substance.sdk.colors
+package mobile.substance.sdk.app.sample.fragments
 
-import android.graphics.Color
+import android.support.v4.widget.DrawerLayout
+import mobile.substance.sdk.app.sample.activities.NavigationDrawerActivity
 
 /**
- * This class will act as a way to configure this library
+ * Created by Julian on 06/05/16.
  */
-object DynamicColorsOptions {
-    var defaultColors = ColorPackage(Color.WHITE, Color.WHITE)
+abstract class NavigationDrawerFragment : BaseFragment() {
 
-    var defaultCallback: DynamicColorsCallback = object : DynamicColorsCallback { override fun onColorsReady(colors: ColorPackage){} }
+    override abstract val layoutResId: Int
+
+    var drawerLayout: DrawerLayout? = null
+        get() = (activity as NavigationDrawerActivity).drawer
+
 }

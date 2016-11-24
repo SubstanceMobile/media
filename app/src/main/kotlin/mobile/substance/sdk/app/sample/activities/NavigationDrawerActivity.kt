@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-package mobile.substance.sdk.activities
+package mobile.substance.sdk.app.sample.activities
 
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v4.widget.DrawerLayout
 import android.view.MenuItem
 import mobile.substance.sdk.R
-import mobile.substance.sdk.fragments.DynamicColorsFragment
-import mobile.substance.sdk.fragments.HomeFragment
-import mobile.substance.sdk.fragments.MusicFragment
+import mobile.substance.sdk.app.sample.fragments.DynamicColorsFragment
+import mobile.substance.sdk.app.sample.fragments.HomeFragment
+import mobile.substance.sdk.app.sample.fragments.MusicFragment
 
 abstract class NavigationDrawerActivity : BaseActivity() {
 

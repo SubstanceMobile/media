@@ -14,26 +14,29 @@
  * limitations under the License.
  */
 
-package mobile.substance.sdk.viewholders
+package mobile.substance.sdk.app.sample.fragments
 
-import android.support.v7.widget.RecyclerView
+import android.os.Bundle
+import android.support.v4.app.Fragment
+import android.view.LayoutInflater
 import android.view.View
-import android.widget.ImageView
-import android.widget.TextView
-import mobile.substance.sdk.R
+import android.view.ViewGroup
 
 /**
  * Created by Julian Os on 03.05.2016.
  */
-class MusicViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-    var title: TextView? = null
-    var subtitle: TextView? = null
-    var image: ImageView? = null
+abstract class BaseFragment : Fragment() {
 
-    init {
-        title = itemView.findViewById(R.id.list_item_title) as TextView
-        subtitle = itemView.findViewById(R.id.list_item_subtitle) as TextView
-        image = itemView.findViewById(R.id.list_item_icon) as ImageView
+    override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        return inflater?.inflate(layoutResId, container, false)
     }
 
+    override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        init(savedInstanceState)
+    }
+
+    abstract fun init(savedInstanceState: Bundle?)
+
+    abstract val layoutResId: Int
 }

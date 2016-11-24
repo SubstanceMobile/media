@@ -26,6 +26,7 @@ import mobile.substance.sdk.colors.ColorConstants.TEXT_COLOR_DISABLED_LIGHT_BG
 import mobile.substance.sdk.colors.ColorConstants.TEXT_COLOR_LIGHT_BG
 import mobile.substance.sdk.colors.ColorConstants.TEXT_COLOR_SECONDARY_DARK_BG
 import mobile.substance.sdk.colors.ColorConstants.TEXT_COLOR_SECONDARY_LIGHT_BG
+import mobile.substance.sdk.utils.DynamicColorsUtil
 
 /**
  * Created by Julian Os on 04.05.2016.

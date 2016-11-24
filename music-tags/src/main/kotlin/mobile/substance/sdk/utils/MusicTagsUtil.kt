@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package mobile.substance.sdk.music.tags
+package mobile.substance.sdk.utils
 
 import android.content.ContentValues
 import android.content.Context
@@ -26,7 +26,7 @@ import mobile.substance.sdk.music.core.objects.Song
 /**
  * Created by julian on 09/10/2016.
  */
-object TagUtils {
+object MusicTagsUtil {
 
     fun notifyChange(context: Context, uri: Uri) = context.contentResolver.notifyChange(uri, null)
 
@@ -61,7 +61,7 @@ object TagUtils {
 
         var size = 0
         if (cursor.moveToFirst()) size = cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Playlists.Members.SIZE))
-        Log.d(TagUtils::class.java.simpleName, size.toString())
+        Log.d(MusicTagsUtil::class.java.simpleName, size.toString())
         cursor.close()
 
         val valuesArray = Array(songs.size, {

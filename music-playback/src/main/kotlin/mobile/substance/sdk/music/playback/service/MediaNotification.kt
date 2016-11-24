@@ -25,7 +25,7 @@ import android.support.v4.media.session.PlaybackStateCompat
 import android.support.v7.app.NotificationCompat
 import android.util.Log
 import mobile.substance.sdk.music.core.objects.Song
-import mobile.substance.sdk.music.playback.MusicPlaybackOptions
+import mobile.substance.sdk.options.MusicPlaybackOptions
 import mobile.substance.sdk.music.playback.PlaybackRemote
 import mobile.substance.sdk.music.playback.R
 

@@ -23,7 +23,7 @@ import mobile.substance.sdk.music.core.dataLinkers.MusicData
 import mobile.substance.sdk.music.core.objects.Album
 import mobile.substance.sdk.music.core.objects.MediaObject
 import mobile.substance.sdk.music.core.objects.Song
-import mobile.substance.sdk.music.core.utils.MusicCoreUtil
+import mobile.substance.sdk.utils.MusicCoreUtil
 import org.jaudiotagger.audio.AudioFileIO
 import org.jaudiotagger.tag.FieldKey
 import org.jaudiotagger.tag.Tag

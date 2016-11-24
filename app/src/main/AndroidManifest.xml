@@ -18,7 +18,7 @@
     package="mobile.substance.sdk">
 
     <application
-        android:name=".SDKApp"
+        android:name=".app.sample.SampleApp"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -26,7 +26,7 @@
         android:theme="@style/AppTheme">
 
         <activity
-            android:name=".activities.MainActivity"
+            android:name="mobile.substance.sdk.app.sample.activities.MainActivity"
             android:theme="@style/AppTheme.Main">
 
             <intent-filter>
@@ -37,7 +37,7 @@
         </activity>
 
         <service
-            android:name=".MyMusicServiceSubclass"
+            android:name=".app.sample.MyMusicServiceSubclass"
             android:exported="false">
             <intent-filter>
                 <action android:name="android.media.browse.MediaBrowserService" />

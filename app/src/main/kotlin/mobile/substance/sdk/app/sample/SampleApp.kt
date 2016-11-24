@@ -14,20 +14,22 @@
  * limitations under the License.
  */
 
-package mobile.substance.sdk
+package mobile.substance.sdk.app.sample
 
 import android.app.Application
 import android.util.Log
 import com.google.android.gms.cast.CastMediaControlIntent
-import mobile.substance.sdk.music.core.MusicCoreOptions
-import mobile.substance.sdk.music.playback.MusicPlaybackOptions
+import mobile.substance.sdk.BuildConfig
+import mobile.substance.sdk.R
+import mobile.substance.sdk.options.MusicCoreOptions
+import mobile.substance.sdk.options.MusicPlaybackOptions
 import java.lang.reflect.Field
 
 /**
  * Created by Julian Os on 09.05.2016.
  */
 
-class SDKApp : Application() {
+class SampleApp : Application() {
 
 
     override fun onCreate() {
@@ -43,7 +45,7 @@ class SDKApp : Application() {
                 try {
                     field = BuildConfig::class.java.getField("CAST_APPLICATION_ID")
                 } catch (e: Exception) {
-                    Log.i("SDKApp", "There is no BuildConfig field 'CAST_APPLICATION_ID', the default receiver id will be used")
+                    Log.i("SampleApp", "There is no BuildConfig field 'CAST_APPLICATION_ID', the default receiver id will be used")
                 }
                 MusicPlaybackOptions.castApplicationId = if (field == null) CastMediaControlIntent.DEFAULT_MEDIA_RECEIVER_APPLICATION_ID else field.get(null) as String
             }

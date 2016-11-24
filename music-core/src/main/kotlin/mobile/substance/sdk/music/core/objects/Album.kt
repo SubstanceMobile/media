@@ -25,7 +25,7 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.request.animation.GlideAnimation
 import com.bumptech.glide.request.target.SimpleTarget
-import mobile.substance.sdk.music.core.MusicCoreOptions
+import mobile.substance.sdk.options.MusicCoreOptions
 
 class Album : MediaObject() {
 

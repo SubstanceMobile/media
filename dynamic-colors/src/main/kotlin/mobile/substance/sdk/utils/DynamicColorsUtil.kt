@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package mobile.substance.sdk.colors
+package mobile.substance.sdk.utils
 
 import android.graphics.Color
 

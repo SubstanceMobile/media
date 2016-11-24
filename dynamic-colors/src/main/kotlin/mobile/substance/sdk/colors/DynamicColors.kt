@@ -25,6 +25,8 @@ import android.os.AsyncTask
 import android.support.v4.util.Pair
 import android.support.v7.graphics.Palette
 import android.util.Log
+import mobile.substance.sdk.options.DynamicColorsOptions
+import mobile.substance.sdk.utils.DynamicColorsUtil
 import java.io.File
 import java.util.*
 import java.util.concurrent.Executor
@@ -51,9 +53,7 @@ class DynamicColors private constructor(private val from: Any) {
     // The actual task
     ///////////////////////////////////////////////////////////////////////////
 
-    private class DynamicColorsGenerator internal constructor(private val callback: DynamicColorsCallback, smartPicking: Boolean, smartText: Boolean) : AsyncTask<Any, Void, ColorPackage>() {
-        private val smartPicking = smartPicking
-        private val smartText = smartText
+    private class DynamicColorsGenerator internal constructor(private val callback: DynamicColorsCallback, private val smartPicking: Boolean, private val smartText: Boolean) : AsyncTask<Any, Void, ColorPackage>() {
 
         override fun doInBackground(vararg params: Any): ColorPackage? {
             var bitmap: Bitmap? = null
@@ -84,7 +84,6 @@ class DynamicColors private constructor(private val from: Any) {
             val palette = Palette.from(bitmap).generate()
 
             if (smartPicking) {
-                Log.d(DynamicColors.javaClass.simpleName, "DynamicColors is using smart picking")
                 val sortedSwatches = ArrayList(palette.swatches)
                 Collections.sort(sortedSwatches) { a, b -> a.population.toInt().compareTo(b.population) }
 

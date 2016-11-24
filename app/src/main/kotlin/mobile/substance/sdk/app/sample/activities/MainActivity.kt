@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package mobile.substance.sdk.activities
+package mobile.substance.sdk.app.sample.activities
 
 import android.graphics.BitmapFactory
 import android.graphics.drawable.BitmapDrawable
@@ -31,10 +31,10 @@ import butterknife.bindView
 import com.afollestad.materialdialogs.MaterialDialog
 import com.github.javiersantos.materialstyleddialogs.MaterialStyledDialog
 import com.google.android.gms.cast.framework.CastButtonFactory
-import mobile.substance.sdk.MyMusicServiceSubclass
+import mobile.substance.sdk.app.sample.MyMusicServiceSubclass
 import mobile.substance.sdk.R
 import mobile.substance.sdk.music.core.objects.Song
-import mobile.substance.sdk.music.core.utils.MusicCoreUtil
+import mobile.substance.sdk.utils.MusicCoreUtil
 import mobile.substance.sdk.music.loading.Library
 import mobile.substance.sdk.music.loading.LibraryConfig
 import mobile.substance.sdk.music.loading.MusicType

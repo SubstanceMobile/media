@@ -21,7 +21,7 @@ import com.google.android.gms.cast.framework.CastOptions
 import com.google.android.gms.cast.framework.OptionsProvider
 import com.google.android.gms.cast.framework.SessionProvider
 import com.google.android.gms.cast.framework.media.CastMediaOptions
-import mobile.substance.sdk.music.playback.MusicPlaybackOptions
+import mobile.substance.sdk.options.MusicPlaybackOptions
 
 class CastOptionsProvider : OptionsProvider {
 

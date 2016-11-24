@@ -19,7 +19,7 @@ package mobile.substance.sdk.music.core.objects
 import android.net.Uri
 import android.provider.MediaStore
 import android.support.v4.media.MediaMetadataCompat
-import mobile.substance.sdk.music.core.utils.MusicCoreUtil
+import mobile.substance.sdk.utils.MusicCoreUtil
 
 /**
  * Wrapper around a MediaMetadataCompat optimised for Song metadata

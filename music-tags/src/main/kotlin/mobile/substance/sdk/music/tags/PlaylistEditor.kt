@@ -23,6 +23,7 @@ import java.util.ArrayList
 
 import mobile.substance.sdk.music.core.objects.Playlist
 import mobile.substance.sdk.music.core.objects.Song
+import mobile.substance.sdk.utils.MusicTagsUtil
 
 /**
  * Created by Julian Os on 04.05.2016.
@@ -79,11 +80,11 @@ class PlaylistEditor(private val context: Context, playlist: Playlist) {
     fun commit(): List<Boolean> {
         val results = ArrayList<Boolean>()
 
-        if (songsToAdd.isNotEmpty()) results.add(TagUtils.addToPlaylist(context, Array(songsToAdd.size, { songsToAdd[it].id }).asList(), playlist!!.id))
-        if (songsToRemove.size > 0) TagUtils.removeFromPlaylist(context, Array(songsToRemove.size, { songsToRemove[it].id }).asList(), playlist!!.id)
-        if (name != null) results.add(TagUtils.renamePlaylist(context, playlist!!.id, name!!))
-        if (positions != null) results.add(TagUtils.moveInPlaylist(context, playlist!!.id, positions!!.first, positions!!.second))
-        if (delete) TagUtils.deletePlaylist(context, playlist!!.id)
+        if (songsToAdd.isNotEmpty()) results.add(MusicTagsUtil.addToPlaylist(context, Array(songsToAdd.size, { songsToAdd[it].id }).asList(), playlist!!.id))
+        if (songsToRemove.size > 0) MusicTagsUtil.removeFromPlaylist(context, Array(songsToRemove.size, { songsToRemove[it].id }).asList(), playlist!!.id)
+        if (name != null) results.add(MusicTagsUtil.renamePlaylist(context, playlist!!.id, name!!))
+        if (positions != null) results.add(MusicTagsUtil.moveInPlaylist(context, playlist!!.id, positions!!.first, positions!!.second))
+        if (delete) MusicTagsUtil.deletePlaylist(context, playlist!!.id)
 
         Log.d(PlaylistEditor::class.java.simpleName, results.toString())
 

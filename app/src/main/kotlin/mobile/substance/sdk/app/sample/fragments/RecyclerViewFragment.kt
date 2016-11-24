@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package mobile.substance.sdk.fragments
+package mobile.substance.sdk.app.sample.fragments
 
 import android.os.Bundle
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import butterknife.bindView
 import mobile.substance.sdk.R
-import mobile.substance.sdk.adapters.MusicAdapter
+import mobile.substance.sdk.app.sample.adapters.MusicAdapter
 import mobile.substance.sdk.music.core.objects.*
 import mobile.substance.sdk.music.loading.Library
 import mobile.substance.sdk.music.loading.LibraryListener

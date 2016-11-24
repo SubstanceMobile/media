@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package mobile.substance.sdk.music.core.utils
+package mobile.substance.sdk.utils
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -32,7 +32,7 @@ import android.support.annotation.WorkerThread
 import android.support.v4.content.ContextCompat
 import android.util.TypedValue
 import android.webkit.URLUtil
-import mobile.substance.sdk.music.core.MusicCoreOptions
+import mobile.substance.sdk.options.MusicCoreOptions
 import mobile.substance.sdk.music.core.dataLinkers.MusicData
 import mobile.substance.sdk.music.core.objects.MediaObject
 import mobile.substance.sdk.music.core.objects.Song

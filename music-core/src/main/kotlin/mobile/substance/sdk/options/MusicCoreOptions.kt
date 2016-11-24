@@ -14,8 +14,19 @@
  * limitations under the License.
  */
 
-package mobile.substance.sdk
+package mobile.substance.sdk.options
 
-import mobile.substance.sdk.music.playback.service.MusicService
+/**
+ * Created by Adrian on 07/05/2016.
+ */
+object MusicCoreOptions {
 
-class MyMusicServiceSubclass : MusicService()
+    var defaultArt: Int = 0
+    var defaultArtUrl: String = "https://substanceproject.net/img/Substance_512.png"
+
+    var songsString = "Please specify songsString in MusicCoreOptions"
+    var albumsString = "Please specify albumsString in MusicCoreOptions"
+    var playlistsString = "Please specify playlistsString in MusicCoreOptions"
+    var artistsString = "Please specify artistsString in MusicCoreOptions"
+    var genresString = "Please specify genresString in MusicCoreOptions"
+}

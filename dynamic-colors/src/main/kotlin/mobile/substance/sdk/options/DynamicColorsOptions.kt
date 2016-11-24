@@ -14,19 +14,17 @@
  * limitations under the License.
  */
 
-package mobile.substance.sdk.music.core
+package mobile.substance.sdk.options
+
+import android.graphics.Color
+import mobile.substance.sdk.colors.ColorPackage
+import mobile.substance.sdk.colors.DynamicColorsCallback
 
 /**
- * Created by Adrian on 07/05/2016.
+ * This class will act as a way to configure this library
  */
-object MusicCoreOptions {
+object DynamicColorsOptions {
+    var defaultColors = ColorPackage(Color.WHITE, Color.WHITE)
 
-    var defaultArt: Int = 0
-    var defaultArtUrl: String = "https://substanceproject.net/img/Substance_512.png"
-
-    var songsString = "Please specify songsString in MusicCoreOptions"
-    var albumsString = "Please specify albumsString in MusicCoreOptions"
-    var playlistsString = "Please specify playlistsString in MusicCoreOptions"
-    var artistsString = "Please specify artistsString in MusicCoreOptions"
-    var genresString = "Please specify genresString in MusicCoreOptions"
+    var defaultCallback: DynamicColorsCallback = object : DynamicColorsCallback { override fun onColorsReady(colors: ColorPackage){} }
 }

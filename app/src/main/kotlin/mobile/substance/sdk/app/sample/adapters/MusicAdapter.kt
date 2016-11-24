@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package mobile.substance.sdk.adapters
+package mobile.substance.sdk.app.sample.adapters
 
 import android.content.Context
 import android.net.Uri
@@ -31,7 +31,7 @@ import mobile.substance.sdk.music.loading.Library
 import mobile.substance.sdk.music.loading.LibraryListener
 import mobile.substance.sdk.music.loading.MusicType
 import mobile.substance.sdk.music.playback.PlaybackRemote
-import mobile.substance.sdk.viewholders.MusicViewHolder
+import mobile.substance.sdk.app.sample.viewholders.MusicViewHolder
 
 class MusicAdapter<T : MediaObject>(private val type: MusicType) : RecyclerView.Adapter<MusicViewHolder>(), LibraryListener {
 

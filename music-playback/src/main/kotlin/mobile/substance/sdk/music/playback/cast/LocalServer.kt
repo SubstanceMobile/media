@@ -18,7 +18,7 @@ package mobile.substance.sdk.music.playback.cast
 
 
 import fi.iki.elonen.NanoHTTPD
-import mobile.substance.sdk.music.playback.MusicPlaybackUtil
+import mobile.substance.sdk.utils.MusicPlaybackUtil
 import java.io.File
 import java.io.FileInputStream
 import java.io.IOException

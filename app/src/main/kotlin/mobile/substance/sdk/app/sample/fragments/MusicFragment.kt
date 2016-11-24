@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package mobile.substance.sdk.fragments
+package mobile.substance.sdk.app.sample.fragments
 
 import android.content.Context
 import android.os.Bundle
@@ -27,7 +27,7 @@ import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
 import butterknife.bindView
 import mobile.substance.sdk.R
-import mobile.substance.sdk.helpers.NavigationHelper
+import mobile.substance.sdk.app.sample.helpers.NavigationHelper
 import mobile.substance.sdk.music.loading.MusicType
 
 /**

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package mobile.substance.sdk.fragments
+package mobile.substance.sdk.app.sample.fragments
 
 import android.app.Activity
 import android.content.Context
@@ -34,8 +34,8 @@ import mobile.substance.sdk.R
 import mobile.substance.sdk.colors.ColorPackage
 import mobile.substance.sdk.colors.DynamicColors
 import mobile.substance.sdk.colors.DynamicColorsCallback
-import mobile.substance.sdk.colors.DynamicColorsUtil
-import mobile.substance.sdk.helpers.NavigationHelper
+import mobile.substance.sdk.utils.DynamicColorsUtil
+import mobile.substance.sdk.app.sample.helpers.NavigationHelper
 import mobile.substance.sdk.theming.util.TintHelper
 
 /**
