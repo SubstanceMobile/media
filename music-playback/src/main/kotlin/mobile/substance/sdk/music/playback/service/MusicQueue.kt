@@ -18,6 +18,7 @@ package mobile.substance.sdk.music.playback.service
 
 import android.util.Log
 import mobile.substance.sdk.music.core.objects.Song
+import mobile.substance.sdk.music.playback.PlaybackRemote
 import java.util.*
 
 /**
@@ -27,42 +28,44 @@ internal object MusicQueue {
     var POSITION: Int = 0
         private set
 
-    @Volatile private var QUEUE: MutableList<Song>? = ArrayList()
+    @Volatile private var QUEUE: MutableList<Song> = ArrayList()
 
-    internal fun getQueue(startAtPosition: Boolean): List<Song> {
-        if (QUEUE != null) {
-            if (startAtPosition) {
-                return if (POSITION + 1 > QUEUE!!.lastIndex) emptyList() else QUEUE!!.subList(POSITION + 1, QUEUE!!.lastIndex)
-            } else return QUEUE!!
-        } else return emptyList()
+    fun getQueue(startAtPosition: Boolean = false): MutableList<Song> {
+        if (startAtPosition) {
+            return if (POSITION + 1 > QUEUE.lastIndex) ArrayList() else QUEUE.subList(POSITION + 1, QUEUE.size)
+        } else return QUEUE
     }
 
-    internal fun getMutableQueue(): MutableList<Song>? {
-        if (QUEUE != null) return QUEUE!! else return Collections.emptyList()
-    }
+    fun getCurrentSong(): Song? = get(POSITION)
 
-
-    fun getCurrentSong(): Song? {
-        if (QUEUE != null && QUEUE!!.size > 0) return QUEUE!![POSITION]
+    fun get(position: Int): Song? {
+        if (QUEUE.isNotEmpty()) {
+            return if (position < 0) QUEUE[QUEUE.lastIndex] else if (position > QUEUE.lastIndex) QUEUE[0] else QUEUE[position]
+        }
         return null
     }
 
-    internal fun moveForward(by: Int) {
-        Log.d(MusicQueue::class.java.simpleName, "moveForward($by)")
+    fun moveForward(by: Int) {
         POSITION += by
-        if (POSITION >= QUEUE!!.size) POSITION = 0
+        if (POSITION >= QUEUE.size) POSITION = 0
+
+        notifyChanged()
     }
 
-    internal fun moveBackward(by: Int) {
+    fun moveBackward(by: Int) {
         POSITION -= by
-        if (POSITION < 0) POSITION = QUEUE!!.lastIndex
+        if (POSITION < 0) POSITION = QUEUE.lastIndex
+
+        notifyChanged()
     }
 
-    internal fun set(songs: MutableList<Song>, position: Int) {
-        Log.d(MusicQueue::class.java.simpleName, "set(${songs.size}), $position")
+    fun set(songs: MutableList<Song>, position: Int) {
         QUEUE = songs
         POSITION = position
+
+        notifyChanged()
     }
 
+    fun notifyChanged() = PlaybackRemote.delegate { callback { onQueueChanged(getQueue()) } }
 
 }
