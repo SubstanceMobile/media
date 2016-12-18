@@ -41,17 +41,16 @@ import mobile.substance.sdk.music.loading.MusicType
 import mobile.substance.sdk.music.playback.PlaybackRemote
 
 class MainActivity : NavigationDrawerActivity(), PlaybackRemote.RemoteCallback {
-
-    override fun onError() {
-
-    }
-
     private val drawerLayout: DrawerLayout by bindView<DrawerLayout>(R.id.activity_main_drawerlayout)
     private val navigationView: NavigationView by bindView<NavigationView>(R.id.activity_main_navigationview)
     private val currentSongImage: ImageView by bindView<ImageView>(R.id.activity_main_current_song_image)
     private val currentSongTitle: TextView by bindView<TextView>(R.id.activity_main_current_song_title)
     private val currentSongCard: CardView by bindView<CardView>(R.id.activity_main_current_song_card)
     private val currentSongProgress: TextView by bindView<TextView>(R.id.activity_main_current_song_progress)
+
+    override fun onError() {
+
+    }
 
     override fun init(savedInstanceState: Bundle?) {
         super.init(savedInstanceState)
@@ -60,12 +59,10 @@ class MainActivity : NavigationDrawerActivity(), PlaybackRemote.RemoteCallback {
                 .hookIntoActivityLifecycle(this)
                 .load(MusicType.SONGS, MusicType.ALBUMS, MusicType.ARTISTS, MusicType.GENRES, MusicType.PLAYLISTS))
                 .build()
-
         navigationView.setNavigationItemSelectedListener { it ->
             drawerLayout.closeDrawer(GravityCompat.START)
             handleNavigationClick(it)
         }
-
         currentSongCard.setOnClickListener {
             val dialog = MaterialStyledDialog(this)
                     .setTitle(PlaybackRemote.getCurrentSong()!!.songTitle!!)

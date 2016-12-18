@@ -142,13 +142,11 @@ abstract class Playback : MediaSessionCompat.Callback() {
     // Other //
     ///////////
 
-    override fun onPlayFromSearch(query: String?, extras: Bundle?) {
-        query ?: return
+    override fun onPlayFromSearch(query: String, extras: Bundle?) {
         var songs: MutableList<Song>? = null
         when (extras?.get(MediaStore.EXTRA_MEDIA_FOCUS)) {
             MediaStore.Audio.Media.ENTRY_CONTENT_TYPE -> {
                 songs = MusicData.search<Song>(query) ?: return
-
             }
             MediaStore.Audio.Albums.ENTRY_CONTENT_TYPE -> {
                 val results = MusicData.search<Album>(query) ?: return

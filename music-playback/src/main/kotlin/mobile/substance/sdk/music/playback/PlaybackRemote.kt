@@ -23,9 +23,12 @@ import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.graphics.Bitmap
+import android.net.Uri
+import android.os.Bundle
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
+import android.support.v4.media.session.MediaSessionCompat
 import android.support.v7.app.NotificationCompat
 import android.util.Log
 import com.google.android.gms.cast.framework.CastContext
@@ -171,6 +174,12 @@ object PlaybackRemote : ServiceConnection {
         }
     }
 
+    fun playFromUri(uri: Uri, extras: Bundle) = getService { control()!!.transportControls.playFromUri(uri, extras) }
+
+    fun playFromMediaId(mediaId: String, extras: Bundle) = getService { control()!!.transportControls.playFromMediaId(mediaId, extras) }
+
+    fun playFromSearch(query: String, extras: Bundle) = getService { control()!!.transportControls.playFromSearch(query, extras) }
+
     /**
      * Play the next song in the queue
      */
@@ -296,7 +305,6 @@ object PlaybackRemote : ServiceConnection {
     }
 
     fun makeNotification(updateInterface: NotificationUpdateInterface): Notification {
-
         val artwork = MusicCoreUtil.getArtwork(MusicQueue.getCurrentSong()!!, service!!)
         val notification = makeNotification(artwork)
         updateInterface.updateNotification(notification)
@@ -305,9 +313,9 @@ object PlaybackRemote : ServiceConnection {
             Thread {
                 run {
                     try {
-                        val inetArtwork = MusicCoreUtil.getArtwork(MusicQueue.getCurrentSong()!!, service!!)
-                        Log.d(PlaybackRemote::class.java.simpleName, "New try, seperate Thread! Is it still null? ${inetArtwork == null}, ${inetArtwork?.byteCount}")
-                        Handler(Looper.getMainLooper()).post { updateInterface.updateNotification(makeNotification(inetArtwork)) }
+                        val externalArtwork = MusicCoreUtil.getArtwork(MusicQueue.getCurrentSong()!!, service!!)
+                        Log.d(PlaybackRemote::class.java.simpleName, "New try, seperate Thread! Is it still null? ${externalArtwork == null}, ${externalArtwork?.byteCount}")
+                        Handler(Looper.getMainLooper()).post { updateInterface.updateNotification(makeNotification(externalArtwork)) }
                     } catch (ignored: Exception) {
                     }
                 }
@@ -339,8 +347,6 @@ object PlaybackRemote : ServiceConnection {
     /**
      * <b>WARNING: Do not call this unless really necessary or you know what you are doing</b>
      *
-     * <b>This is what the service controls so make sure you know what you are doing.</b>
-     *
      * Feel free to override Playback and set it here. This will tell the service to control this instead of the default LocalPlayback and CastPlayback classes. As a warning, if you start cast playback this will be replaced.
      * Be warned that if you stop cast playback there will first be a call to MusicPlaybackOptions to create a custom player instance. Make sure you call that too.
      *
@@ -350,7 +356,7 @@ object PlaybackRemote : ServiceConnection {
      */
     @JvmOverloads fun setCustomPlaybackEngineForService(engine: Playback, hotSwap: Boolean = true) = getService { replacePlaybackEngine(engine, hotSwap, false) }
 
-    fun getMediaSession() = service!!.getMediaSession()
+    fun getMediaSession() = service?.getMediaSession()
 
     fun isReady() = isBound
 
@@ -360,6 +366,9 @@ object PlaybackRemote : ServiceConnection {
 
     fun getRepeatMode() = service?.engine?.repeatMode
 
-    fun getActivePlaybackEngine() = service?.engine?.javaClass
+    /**
+     * Calling this method allows interference with internal stuff. Only call it if you know what you're doing and log heavily!
+     */
+    fun getActivePlaybackEngine() = service?.engine
 
 }
