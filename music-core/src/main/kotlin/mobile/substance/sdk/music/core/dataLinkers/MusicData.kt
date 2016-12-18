@@ -71,7 +71,16 @@ object MusicData : MusicLibraryData {
                 if (it.artistName?.contains(query, true) ?: false)
                     results.add(it as T)
             }
-
+        if (T::class.java == Playlist::class.java)
+            getPlaylists().forEach {
+                if (it.playlistName?.contains(query, true) ?: false)
+                    results.add(it as T)
+            }
+        if (T::class.java == Genre::class.java)
+            getGenres().forEach {
+                if (it.genreName?.contains(query, true) ?: false)
+                    results.add(it as T)
+            }
         return results
     }
 
