@@ -34,9 +34,13 @@ interface MusicLibraryData {
     ///////////////////////////////////////////////////////////////////////////
 
     fun getSongs() : MutableList<Song>
+
     fun getAlbums() : MutableList<Album>
+
     fun getArtists() : MutableList<Artist>
+
     fun getPlaylists() : MutableList<Playlist>
+
     fun getGenres() : MutableList<Genre>
 
     fun getContext() : Context
@@ -46,46 +50,24 @@ interface MusicLibraryData {
     // NOTE: These have default implementations. For convenience
     /////////////////////////////////////////////////////////////////////////
 
-    fun findSongById(id: Long) : Song? {
-        for (song in getSongs()) if (song.id == id) return song
-        return null
-    }
+    fun findSongById(id: Long): Song? = getSongs().firstOrNull { it.id == id }
 
-    fun findSongByUri(uri: Uri): Song? {
-        for (song in getSongs()) if (song.uri === uri) return song
-        return null
-    }
+    fun findSongByUri(uri: Uri): Song? = getSongs().firstOrNull { it.uri === uri }
 
-    fun findAlbumById(id: Long) : Album? {
-        for (album in getAlbums()) if (album.id == id) return album
-        return null
-    }
+    fun findAlbumById(id: Long): Album? = getAlbums().firstOrNull { it.id == id }
 
-    fun findArtistById(id: Long) : Artist? {
-        for (artist in getArtists()) if (artist.id == id) return artist
-        return null
-    }
+    fun findArtistById(id: Long): Artist? = getArtists().firstOrNull { it.id == id }
 
-    fun findPlaylistById(id: Long) : Playlist? {
-        for (playlist in getPlaylists()) if (playlist.id == id) return playlist
-        return null
-    }
+    fun findPlaylistById(id: Long): Playlist? = getPlaylists().firstOrNull { it.id == id }
 
-    fun findGenreById(id: Long) : Genre? {
-        for (genre in getGenres()) if (genre.id == id) return genre
-        return null
-    }
+    fun findGenreById(id: Long): Genre? = getGenres().firstOrNull { it.id == id }
 
     ///////////////////////////////////////////////////////////////////////////
     // findXforY()
     // NOTE: These have default implementations. For convenience
     ///////////////////////////////////////////////////////////////////////////
 
-    interface QueryResult<T> {
-        fun onQueryResult(result: T)
-    }
-
-    class QueryTask<Result>(private val callback: QueryResult<Result>) : AsyncTask<() -> Result, Void, Result>() {
+    class QueryTask<Result>(private val callback: (Result) -> Any) : AsyncTask<() -> Result, Void, Result>() {
 
         @SafeVarargs
         override fun doInBackground(vararg params: () -> Result): Result? {
@@ -99,67 +81,42 @@ interface MusicLibraryData {
         }
 
         override fun onPostExecute(result: Result) {
-            callback.onQueryResult(result)
+            callback.invoke(result)
         }
     }
 
-    fun findSongsForArtist(artist: Artist): List<Song> {
-        val songs = ArrayList<Song>()
-        for (song in getSongs()) {
-            if (song.songArtistId == artist.id)
-                songs.add(song)
-        }
-        return songs
-    }
+    fun findSongsForArtist(artist: Artist): List<Song> = getSongs().filter { it.songArtistId == artist.id }
 
-    fun findSongsForArtistAsync(artist: Artist, callback: QueryResult<List<Song>>) {
+    fun findSongsForArtistAsync(artist: Artist, callback: (List<Song>) -> Any) {
         QueryTask(callback).execute({ findSongsForArtist(artist) })
     }
 
-    fun findAlbumsForArtist(artist: Artist): List<Album> {
-        val albums = ArrayList<Album>()
-        for (album in getAlbums()) {
-            if (album.albumArtistName == artist.artistName)
-                albums.add(album)
-        }
-        return albums
-    }
+    fun findAlbumsForArtist(artist: Artist): List<Album> = getAlbums().filter { it.albumArtistName == artist.artistName }
 
-    fun findAlbumsForArtistAsync(artist: Artist, callback: QueryResult<List<Album>>) {
+    fun findAlbumsForArtistAsync(artist: Artist, callback: (List<Album>) -> Any) {
         QueryTask(callback).execute({ findAlbumsForArtist(artist) })
     }
 
     fun findSongsForAlbum(album: Album): List<Song> {
-        val songs = ArrayList<Song>()
-        for (song in getSongs()) {
-            if (song.songAlbumId == album.id)
-                songs.add(song)
-        }
-        return songs
+        val songs = getSongs().filter { it.songAlbumId == album.id }
+        return songs.sortedBy(Song::songTrackNumber)
     }
 
-    fun findSongsForAlbumAsync(album: Album, callback: QueryResult<List<Song>>) {
+    fun findSongsForAlbumAsync(album: Album, callback: (List<Song>) -> Any) {
         QueryTask(callback).execute({ findSongsForAlbum(album) })
     }
 
-    fun findArtistForAlbum(album: Album): Artist? {
-        for (artist in getArtists()) {
-            if (artist.artistName == album.albumArtistName)
-                return artist
-        }
-        return null
-    }
+    fun findArtistForAlbum(album: Album): Artist? = getArtists().firstOrNull { it.artistName == album.albumArtistName }
 
-    fun findArtistForAlbumAsync(album: Album, callback: QueryResult<Artist?>) {
+    fun findArtistForAlbumAsync(album: Album, callback: (Artist?) -> Any) {
         QueryTask(callback).execute({ findArtistForAlbum(album) })
     }
 
-    @Throws(NullPointerException::class) fun findSongsForPlaylist(playlist: Playlist): List<Song> {
+    fun findSongsForPlaylist(playlist: Playlist): List<Song> {
         val songs = ArrayList<Song>()
         try {
             val playlistSongsCursor = getContext().contentResolver.query(MediaStore.Audio.Playlists.Members.getContentUri("external", playlist.id),
-                    null, null, null,
-                    MediaStore.Audio.Playlists.Members.PLAY_ORDER)
+                    null, null, null, MediaStore.Audio.Playlists.Members.PLAY_ORDER)
             val idColumn = playlistSongsCursor!!.getColumnIndex(MediaStore.Audio.Playlists.Members.AUDIO_ID)
             playlistSongsCursor.moveToFirst()
             do {
@@ -171,26 +128,22 @@ interface MusicLibraryData {
         } catch (e: IndexOutOfBoundsException) {
             return emptyList()
         }
-
     }
 
-    fun findSongsForPlaylistAsync(playlist: Playlist, callback: QueryResult<List<Song>>) {
+    fun findSongsForPlaylistAsync(playlist: Playlist, callback: (List<Song>) -> Any) {
         QueryTask(callback).execute({ findSongsForPlaylist(playlist) })
     }
 
-    @Throws(NullPointerException::class) fun findSongsForGenre(genre: Genre): List<Song> {
+    fun findSongsForGenre(genre: Genre): List<Song> {
         val songs = ArrayList<Song>()
         try {
             val genreSongsCursor = getContext().contentResolver.query(MediaStore.Audio.Genres.Members.getContentUri("external", genre.id),
-                    null, null, null, null)
+                    null, null, null, MediaStore.Audio.Genres.Members.DEFAULT_SORT_ORDER)
             val idColumn = genreSongsCursor!!.getColumnIndex(MediaStore.Audio.Genres.Members.AUDIO_ID)
             genreSongsCursor.moveToFirst()
             do {
                 val s = findSongById(genreSongsCursor.getLong(idColumn))
-                if (s != null) {
-                    songs.add(s)
-                    Log.d("GENRE: " + genre.genreName, "Found Song: " + s.songTitle)
-                }
+                if (s != null) songs.add(s)
             } while (genreSongsCursor.moveToNext())
             genreSongsCursor.close()
             return songs
@@ -200,7 +153,7 @@ interface MusicLibraryData {
 
     }
 
-    fun findSongsForGenreAsync(genre: Genre, callback: QueryResult<List<Song>>) {
+    fun findSongsForGenreAsync(genre: Genre, callback: (List<Song>) -> Any) {
         QueryTask(callback).execute({ findSongsForGenre(genre) })
     }
 
