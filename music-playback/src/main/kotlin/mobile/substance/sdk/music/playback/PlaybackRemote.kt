@@ -275,15 +275,27 @@ object PlaybackRemote : ServiceConnection {
     /**
      * Swaps the two songs at the given positions. You may want to use this in your UI, e.g. when using a drag-drop style queue reordering
      */
-    fun swapQueueItems(fromPosition: Int, toPosition: Int, startAtCurrentPosition: Boolean = false) = Collections.swap(MusicQueue.getQueue(), if (startAtCurrentPosition) fromPosition + MusicQueue.POSITION + 1 else fromPosition, if (startAtCurrentPosition) toPosition + MusicQueue.POSITION + 1 else toPosition)
+    fun swapQueueItems(fromPosition: Int, toPosition: Int, startAtCurrentPosition: Boolean = false, triggerCallbacks: Boolean = false) {
+        Collections.swap(MusicQueue.getQueue(), if (startAtCurrentPosition) fromPosition + MusicQueue.POSITION + 1 else fromPosition, if (startAtCurrentPosition) toPosition + MusicQueue.POSITION + 1 else toPosition)
+        if (triggerCallbacks) MusicQueue.notifyChanged()
+    }
 
-    fun removeFromQueue(pos: Int, startsAtCurrentPosition: Boolean = false) = MusicQueue.getQueue().removeAt(if (startsAtCurrentPosition) MusicQueue.POSITION + 1 + pos else pos)
+    fun removeFromQueue(pos: Int, startsAtCurrentPosition: Boolean = false, triggerCallbacks: Boolean = false) {
+        MusicQueue.getQueue().removeAt(if (startsAtCurrentPosition) MusicQueue.POSITION + 1 + pos else pos)
+        if (triggerCallbacks) MusicQueue.notifyChanged()
+    }
 
-    fun addToQueueAsNext(song: Song) = MusicQueue.getQueue().add(MusicQueue.POSITION + 1, song)
+    fun addToQueueAsNext(song: Song, triggerCallbacks: Boolean = false) {
+        MusicQueue.getQueue().add(MusicQueue.POSITION + 1, song)
+        if (triggerCallbacks) MusicQueue.notifyChanged()
+    }
 
-    fun addToQueue(song: Song) = addToQueue(listOf(song))
+    fun addToQueue(song: Song, triggerCallbacks: Boolean = false) = addToQueue(listOf(song), triggerCallbacks)
 
-    fun addToQueue(songs: List<Song>) = MusicQueue.getQueue().addAll(songs)
+    fun addToQueue(songs: List<Song>, triggerCallbacks: Boolean = false) {
+        MusicQueue.getQueue().addAll(songs)
+        if (triggerCallbacks) MusicQueue.notifyChanged()
+    }
 
     ///////////////////////////////////////////////////////////////////////////
     // Notification
