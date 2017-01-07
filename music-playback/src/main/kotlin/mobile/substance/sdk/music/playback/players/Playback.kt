@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Substance Mobile
+ * Copyright 2017 Substance Mobile
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -204,7 +204,7 @@ abstract class Playback : MediaSessionCompat.Callback() {
         }
     }
 
-    open fun doNext() = PlaybackRemote.playNext()
+    open fun doNext() = PlaybackRemote.playNextInternal()
 
     override fun onSkipToNext() = next()
 
@@ -213,7 +213,7 @@ abstract class Playback : MediaSessionCompat.Callback() {
     // TODO STATE STUFF
     ///////////////////////////////////////////////////////////////////////////
 
-    open fun doPrev() = PlaybackRemote.playPrevious()
+    open fun doPrev() = PlaybackRemote.playPreviousInternal()
 
     open fun restart() = seek(0L)
 

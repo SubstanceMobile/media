@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Substance Mobile
+ * Copyright 2017 Substance Mobile
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -183,7 +183,9 @@ object PlaybackRemote : ServiceConnection {
     /**
      * Play the next song in the queue
      */
-    fun playNext() {
+    fun playNext() = getService { control()?.transportControls?.skipToNext() }
+
+    internal fun playNextInternal() {
         MusicQueue.moveForward(1)
         play()
     }
@@ -191,7 +193,9 @@ object PlaybackRemote : ServiceConnection {
     /**
      * Play the previous song in the queue
      */
-    fun playPrevious() {
+    fun playPrevious() = getService { control()?.transportControls?.skipToPrevious() }
+
+    internal fun playPreviousInternal() {
         MusicQueue.moveBackward(1)
         play()
     }
