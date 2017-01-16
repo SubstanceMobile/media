@@ -255,6 +255,7 @@ open class MusicService : MediaBrowserServiceCompat(), CastStateListener {
         if (intent.action != null) {
             val action = intent.action
             when {
+                action.endsWith("SHUFFLE") -> PlaybackRemote.shuffle()
                 action.endsWith("NOTIFICATION") -> startActivity(packageManager.getLaunchIntentForPackage(applicationContext.packageName))
                 action.endsWith("PLAY") -> PlaybackRemote.resume()
                 action.endsWith("PAUSE") -> PlaybackRemote.pause()
