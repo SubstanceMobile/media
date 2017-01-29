@@ -66,12 +66,7 @@ object Library : MusicLibraryData {
     private var LOADER_GENRES: MediaLoader<Genre>? = null
 
     private val buildFinishedListeners = ArrayList<() -> Any>()
-    private val buildState: Array<Boolean>
-        get() = arrayOf(LOADER_SONGS?.finishedOnce ?: true,
-                LOADER_ALBUMS?.finishedOnce ?: true,
-                LOADER_PLAYLISTS?.finishedOnce ?: true,
-                LOADER_ARTISTS?.finishedOnce ?: true,
-                LOADER_GENRES?.finishedOnce ?: true)
+    private val buildState = kotlin.arrayOfNulls<Boolean>(5)
 
     private fun checkIsFinished() {
         if (isBuilt()) {
@@ -80,7 +75,12 @@ object Library : MusicLibraryData {
         }
     }
 
-    fun isBuilt(): Boolean = buildState.all { it } && context != null // Makes sure we've been initialized
+    fun isBuilt(): Boolean {
+        buildState.forEach {
+            if (it == false) return false
+        }
+        return true
+    }
 
     fun enable() = MusicData.hook(this)
 
@@ -91,6 +91,7 @@ object Library : MusicLibraryData {
         if (libraryConfig.contains(MusicType.SONGS)) {
             val songsLoader = SongsLoader(activity)
             songsLoader.init()
+            if (buildState[0] == null) buildState[0] = false
             songsLoader.addListener(object : MediaLoader.TaskListener<Song> {
                 override fun onOneLoaded(item: Song, pos: Int) {
                     for (listener in listeners) listener.onSongLoaded(item, pos)
@@ -108,6 +109,7 @@ object Library : MusicLibraryData {
         if (libraryConfig.contains(MusicType.ALBUMS)) {
             val albumsLoader = AlbumsLoader(activity)
             albumsLoader.init()
+            if (buildState[1] == null) buildState[1] = false
             albumsLoader.addListener(object : MediaLoader.TaskListener<Album> {
                 override fun onOneLoaded(item: Album, pos: Int) {
                     for (listener in listeners) listener.onAlbumLoaded(item, pos)
@@ -122,26 +124,10 @@ object Library : MusicLibraryData {
             })
             LOADER_ALBUMS = albumsLoader
         }
-        if (libraryConfig.contains(MusicType.PLAYLISTS)) {
-            val playlistsLoader = PlaylistsLoader(activity)
-            playlistsLoader.init()
-            playlistsLoader.addListener(object : MediaLoader.TaskListener<Playlist> {
-                override fun onOneLoaded(item: Playlist, pos: Int) {
-                    for (listener in listeners) listener.onPlaylistLoaded(item, pos)
-                }
-
-                override fun onCompleted(result: List<Playlist>) {
-                    Log.d(Library.javaClass.simpleName, "Completed building playlists")
-                    playlists = result.toMutableList()
-                    for (listener in listeners) listener.onPlaylistsCompleted(result)
-                    checkIsFinished()
-                }
-            })
-            LOADER_PLAYLISTS = playlistsLoader
-        }
         if (libraryConfig.contains(MusicType.ARTISTS)) {
             val artistsLoader = ArtistsLoader(activity)
             artistsLoader.init()
+            if (buildState[2] == null) buildState[2] = false
             artistsLoader.addListener(object : MediaLoader.TaskListener<Artist> {
                 override fun onOneLoaded(item: Artist, pos: Int) {
                     for (listener in listeners) listener.onArtistLoaded(item, pos)
@@ -156,9 +142,28 @@ object Library : MusicLibraryData {
             })
             LOADER_ARTISTS = artistsLoader
         }
+        if (libraryConfig.contains(MusicType.PLAYLISTS)) {
+            val playlistsLoader = PlaylistsLoader(activity)
+            playlistsLoader.init()
+            if (buildState[3] == null) buildState[3] = false
+            playlistsLoader.addListener(object : MediaLoader.TaskListener<Playlist> {
+                override fun onOneLoaded(item: Playlist, pos: Int) {
+                    for (listener in listeners) listener.onPlaylistLoaded(item, pos)
+                }
+
+                override fun onCompleted(result: List<Playlist>) {
+                    Log.d(Library.javaClass.simpleName, "Completed building playlists")
+                    playlists = result.toMutableList()
+                    for (listener in listeners) listener.onPlaylistsCompleted(result)
+                    checkIsFinished()
+                }
+            })
+            LOADER_PLAYLISTS = playlistsLoader
+        }
         if (libraryConfig.contains(MusicType.GENRES)) {
             val genresLoader = GenresLoader(activity)
             genresLoader.init()
+            if (buildState[4] == null) buildState[4] = false
             genresLoader.addListener(object : MediaLoader.TaskListener<Genre> {
                 override fun onOneLoaded(item: Genre, pos: Int) {
                     for (listener in listeners) listener.onGenreLoaded(item, pos)

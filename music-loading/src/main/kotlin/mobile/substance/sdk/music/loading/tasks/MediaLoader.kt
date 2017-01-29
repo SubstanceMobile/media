@@ -64,12 +64,6 @@ abstract class MediaLoader<Return : MediaObject>(private val activity: AppCompat
         }
     }
     /**
-     * Tells whether the loading did finish at least once in its lifetime
-     */
-    var finishedOnce: Boolean = false
-    private var updatedQueue = false
-
-    /**
      * The listener for [Loader] events
 
      * @param Return type of variable should be passed to the listener. When extending [Loader], you will specify what this should be
@@ -273,7 +267,6 @@ abstract class MediaLoader<Return : MediaObject>(private val activity: AppCompat
     }
 
     override fun onLoadFinished(loader: Loader<List<Return>>?, data: List<Return>?) {
-        if (!finishedOnce) finishedOnce = true
         if (data != null) sort(data)
         val result = data ?: emptyList()
         verifyListener.onCompleted(result)
