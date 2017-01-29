@@ -22,6 +22,7 @@ import android.database.Cursor
 import android.net.Uri
 import android.os.Handler
 import android.provider.MediaStore
+import android.support.v7.app.AppCompatActivity
 import android.util.Log
 
 import mobile.substance.sdk.music.core.objects.Genre
@@ -30,7 +31,7 @@ import mobile.substance.sdk.music.loading.Library
 /**
  * Created by Julian Os on 05.05.2016.
  */
-class GenresTask(context: Context, vararg params: Any) : Loader<Genre>(context, params) {
+class GenresTask(activity: AppCompatActivity) : MediaLoader<Genre>(activity) {
 
     override fun buildObject(cursor: Cursor): Genre? {
         val name = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Genres.NAME))
@@ -45,10 +46,6 @@ class GenresTask(context: Context, vararg params: Any) : Loader<Genre>(context, 
 
     override val uri: Uri = MediaStore.Audio.Genres.EXTERNAL_CONTENT_URI
 
-    override val observer: ContentObserver? = object : ContentObserver(Handler()) {
-            override fun onChange(selfChange: Boolean) {
-                super.onChange(selfChange)
-                update(Library.getGenres())
-            }
-        }
+    override val loaderId: Int = 12
+
 }

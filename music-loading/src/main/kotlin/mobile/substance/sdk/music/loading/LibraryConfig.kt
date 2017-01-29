@@ -53,13 +53,17 @@ class LibraryConfig {
             override fun onActivityStarted(p0: Activity?) {
                 try {
                     Library.registerMediaStoreListeners()
-                } catch (ignored: Exception) {}
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
             }
 
             override fun onActivityStopped(p0: Activity?) {
                 try {
                     Library.unregisterMediaStoreListeners()
-                } catch (ignored: Exception) {}
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
             }
 
             override fun onActivityDestroyed(p0: Activity?) {

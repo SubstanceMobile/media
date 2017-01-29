@@ -46,7 +46,7 @@ abstract class MediaLoader<Return : MediaObject>(private val activity: AppCompat
     open val projection: Array<String>? = null
     open val selection: String? = null
     open val selectionArgs: Array<String>? = null
-    abstract val sortOrder: String
+    open val sortOrder: String? = null
 
     var cursor: Cursor? = null
     var cancellationSignal: CancellationSignal? = null
@@ -265,8 +265,7 @@ abstract class MediaLoader<Return : MediaObject>(private val activity: AppCompat
     }
 
     override fun onLoadFinished(loader: Loader<List<Return>>?, data: List<Return>?) {
-        if (!finishedOnce)
-            finishedOnce = true
+        if (!finishedOnce) finishedOnce = true
         if (data != null) sort(data)
         val result = data ?: emptyList()
         verifyListener.onCompleted(result)

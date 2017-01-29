@@ -22,6 +22,7 @@ import android.database.Cursor
 import android.net.Uri
 import android.os.Handler
 import android.provider.MediaStore
+import android.support.v7.app.AppCompatActivity
 import android.util.Log
 
 import mobile.substance.sdk.music.core.objects.Song
@@ -30,7 +31,7 @@ import mobile.substance.sdk.music.loading.Library
 /**
  * Created by Adrian on 3/25/2016.
  */
-class SongsTask(context: Context, vararg params: Any) : Loader<Song>(context, params) {
+class SongsTask(activity: AppCompatActivity) : MediaLoader<Song>(activity) {
 
     override fun buildObject(cursor: Cursor): Song? {
         val title = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE))
@@ -44,7 +45,7 @@ class SongsTask(context: Context, vararg params: Any) : Loader<Song>(context, pa
         val year = cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Media.YEAR))
         val dateAdded = cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Media.DATE_ADDED))
 
-        val s = Song.Builder()
+        return Song.Builder()
                 .setId(id)
                 .setTitle(title)
                 .setArtistName(artist)
@@ -56,7 +57,6 @@ class SongsTask(context: Context, vararg params: Any) : Loader<Song>(context, pa
                 .setDuration(duration)
                 .setDateAdded(dateAdded)
                 .build()
-        return s
     }
 
     override val uri: Uri
@@ -65,14 +65,9 @@ class SongsTask(context: Context, vararg params: Any) : Loader<Song>(context, pa
     override val selection: String?
         get() = MediaStore.Audio.Media.IS_MUSIC + "=1"
 
-    override val sortOrder: String?
+    override val sortOrder: String
         get() = MediaStore.Audio.Media.DEFAULT_SORT_ORDER
 
-    override val observer: ContentObserver?
-        get() = object : ContentObserver(Handler()) {
-            override fun onChange(selfChange: Boolean) {
-                super.onChange(selfChange)
-                update(Library.getSongs())
-            }
-        }
+    override val loaderId: Int = 14
+
 }

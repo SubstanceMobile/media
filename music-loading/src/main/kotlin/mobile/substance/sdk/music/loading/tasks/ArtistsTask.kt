@@ -22,6 +22,7 @@ import android.database.Cursor
 import android.net.Uri
 import android.os.Handler
 import android.provider.MediaStore
+import android.support.v7.app.AppCompatActivity
 import android.util.Log
 
 import mobile.substance.sdk.music.core.objects.Artist
@@ -30,7 +31,7 @@ import mobile.substance.sdk.music.loading.Library
 /**
  * Created by Adrian on 3/25/2016.
  */
-class ArtistsTask(context: Context, vararg params: Any) : Loader<Artist>(context, params) {
+class ArtistsTask(activity: AppCompatActivity) : MediaLoader<Artist>(activity) {
 
     override fun buildObject(cursor: Cursor): Artist? {
         val name = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Artists.ARTIST))
@@ -45,10 +46,6 @@ class ArtistsTask(context: Context, vararg params: Any) : Loader<Artist>(context
 
     override val uri: Uri = MediaStore.Audio.Artists.EXTERNAL_CONTENT_URI
 
-    override val observer: ContentObserver? = object : ContentObserver(Handler()) {
-            override fun onChange(selfChange: Boolean) {
-                super.onChange(selfChange)
-                update(Library.getArtists())
-            }
-        }
+    override val loaderId: Int = 11
+
 }
