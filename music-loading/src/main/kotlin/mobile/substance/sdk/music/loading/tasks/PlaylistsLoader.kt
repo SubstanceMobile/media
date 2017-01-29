@@ -31,7 +31,7 @@ import mobile.substance.sdk.music.loading.Library
 /**
  * Created by Adrian on 3/25/2016.
  */
-class PlaylistsTask(activity: AppCompatActivity) : MediaLoader<Playlist>(activity) {
+class PlaylistsLoader(activity: AppCompatActivity) : MediaLoader<Playlist>(activity) {
 
     override fun buildObject(cursor: Cursor): Playlist? {
         val name = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Playlists.NAME))

@@ -16,18 +16,15 @@
 
 package mobile.substance.sdk.music.loading.tasks
 
-import android.content.Context
 import android.database.ContentObserver
 import android.database.Cursor
 import android.net.Uri
-import android.os.AsyncTask
 import android.os.Bundle
 import android.support.annotation.UiThread
 import android.support.annotation.WorkerThread
 import android.support.v4.app.LoaderManager
 import android.support.v4.content.AsyncTaskLoader
 import android.support.v4.content.ContentResolverCompat
-import android.support.v4.content.CursorLoader
 import android.support.v4.content.Loader
 import android.support.v4.os.CancellationSignal
 import android.support.v4.os.OperationCanceledException
@@ -39,7 +36,7 @@ import java.io.PrintWriter
 import java.util.*
 
 abstract class MediaLoader<Return : MediaObject>(private val activity: AppCompatActivity) : AsyncTaskLoader<List<Return>>(activity), LoaderManager.LoaderCallbacks<List<Return>> {
-    open val observer: ContentObserver = ForceLoadContentObserver()
+    val observer: ContentObserver = ForceLoadContentObserver()
 
     abstract val loaderId: Int
     abstract val uri: Uri
@@ -109,11 +106,15 @@ abstract class MediaLoader<Return : MediaObject>(private val activity: AppCompat
 
     @UiThread
     fun init() {
+        destroy()
+        activity.supportLoaderManager.initLoader(loaderId, Bundle.EMPTY, this)
+    }
+
+    @UiThread
+    fun destroy() {
         try {
             activity.supportLoaderManager.destroyLoader(loaderId)
         } catch (ignored: Exception) {}
-
-        activity.supportLoaderManager.initLoader(loaderId, Bundle.EMPTY, this)
     }
 
     @UiThread
@@ -236,19 +237,19 @@ abstract class MediaLoader<Return : MediaObject>(private val activity: AppCompat
     override fun dump(prefix: String, fd: FileDescriptor?, writer: PrintWriter, args: Array<String>?) {
         super.dump(prefix, fd, writer, args)
         writer.print(prefix)
-        writer.print("mUri=")
+        writer.print("uri=")
         writer.println(uri)
         writer.print(prefix)
-        writer.print("mProjection=")
+        writer.print("projection=")
         writer.println(Arrays.toString(projection))
         writer.print(prefix)
-        writer.print("mSelection=")
+        writer.print("selection=")
         writer.println(selection)
         writer.print(prefix)
-        writer.print("mSelectionArgs=")
+        writer.print("selectionArgs=")
         writer.println(Arrays.toString(selectionArgs))
         writer.print(prefix)
-        writer.print("mSortOrder=")
+        writer.print("sortOrder=")
         writer.println(sortOrder)
         writer.print(prefix)
         writer.print("cursor=")
@@ -273,6 +274,11 @@ abstract class MediaLoader<Return : MediaObject>(private val activity: AppCompat
 
     override fun onCreateLoader(id: Int, args: Bundle?): Loader<List<Return>> {
         return this
+    }
+
+    override fun onContentChanged() {
+        Log.i(MediaLoader::class.java.simpleName, "onContentChanged() has been called - the Loader has received an update notification. Loader id $loaderId")
+        super.onContentChanged()
     }
 
 }

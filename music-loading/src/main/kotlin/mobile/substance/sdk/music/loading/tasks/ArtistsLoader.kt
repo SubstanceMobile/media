@@ -25,27 +25,27 @@ import android.provider.MediaStore
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
 
-import mobile.substance.sdk.music.core.objects.Genre
+import mobile.substance.sdk.music.core.objects.Artist
 import mobile.substance.sdk.music.loading.Library
 
 /**
- * Created by Julian Os on 05.05.2016.
+ * Created by Adrian on 3/25/2016.
  */
-class GenresTask(activity: AppCompatActivity) : MediaLoader<Genre>(activity) {
+class ArtistsLoader(activity: AppCompatActivity) : MediaLoader<Artist>(activity) {
 
-    override fun buildObject(cursor: Cursor): Genre? {
-        val name = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Genres.NAME))
-        val id = cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Genres._ID))
+    override fun buildObject(cursor: Cursor): Artist? {
+        val name = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Artists.ARTIST))
+        val id = cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Artists._ID))
 
-        val g = Genre.Builder()
+        val a = Artist.Builder()
                 .setName(name)
                 .setId(id)
                 .build()
-        return g
+        return a
     }
 
-    override val uri: Uri = MediaStore.Audio.Genres.EXTERNAL_CONTENT_URI
+    override val uri: Uri = MediaStore.Audio.Artists.EXTERNAL_CONTENT_URI
 
-    override val loaderId: Int = 12
+    override val loaderId: Int = 11
 
 }

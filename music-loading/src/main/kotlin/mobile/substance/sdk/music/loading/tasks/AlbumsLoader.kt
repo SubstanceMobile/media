@@ -27,7 +27,7 @@ import android.util.Log
 import mobile.substance.sdk.music.core.objects.Album
 import mobile.substance.sdk.music.loading.Library
 
-class AlbumsTask(activity: AppCompatActivity) : MediaLoader<Album>(activity) {
+class AlbumsLoader(activity: AppCompatActivity) : MediaLoader<Album>(activity) {
 
     override fun buildObject(cursor: Cursor): Album? {
         val name = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Albums.ALBUM))

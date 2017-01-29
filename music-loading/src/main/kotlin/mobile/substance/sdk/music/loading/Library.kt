@@ -29,7 +29,6 @@ import java.util.*
 
 @SuppressWarnings("unused")
 object Library : MusicLibraryData {
-
     private var context: Context? = null
 
     override fun getContext(): Context {
@@ -83,15 +82,16 @@ object Library : MusicLibraryData {
 
     fun isBuilt(): Boolean = buildState.all { it } && context != null // Makes sure we've been initialized
 
+    fun enable() = MusicData.hook(this)
+
     @JvmOverloads fun init(activity: AppCompatActivity, libraryConfig: LibraryConfig = LibraryConfig()): Library {
         Library.context = activity.applicationContext
-        if (libraryConfig.hookData) MusicData.hook(this)
 
         //Create tasks
         if (libraryConfig.contains(MusicType.SONGS)) {
-            val songsTask = SongsTask(activity)
-            songsTask.init()
-            songsTask.addListener(object : MediaLoader.TaskListener<Song> {
+            val songsLoader = SongsLoader(activity)
+            songsLoader.init()
+            songsLoader.addListener(object : MediaLoader.TaskListener<Song> {
                 override fun onOneLoaded(item: Song, pos: Int) {
                     for (listener in listeners) listener.onSongLoaded(item, pos)
                 }
@@ -103,12 +103,12 @@ object Library : MusicLibraryData {
                     checkIsFinished()
                 }
             })
-            LOADER_SONGS = songsTask
+            LOADER_SONGS = songsLoader
         }
         if (libraryConfig.contains(MusicType.ALBUMS)) {
-            val albumsTask = AlbumsTask(activity)
-            albumsTask.init()
-            albumsTask.addListener(object : MediaLoader.TaskListener<Album> {
+            val albumsLoader = AlbumsLoader(activity)
+            albumsLoader.init()
+            albumsLoader.addListener(object : MediaLoader.TaskListener<Album> {
                 override fun onOneLoaded(item: Album, pos: Int) {
                     for (listener in listeners) listener.onAlbumLoaded(item, pos)
                 }
@@ -120,12 +120,12 @@ object Library : MusicLibraryData {
                     checkIsFinished()
                 }
             })
-            LOADER_ALBUMS = albumsTask
+            LOADER_ALBUMS = albumsLoader
         }
         if (libraryConfig.contains(MusicType.PLAYLISTS)) {
-            val playlistsTask = PlaylistsTask(activity)
-            playlistsTask.init()
-            playlistsTask.addListener(object : MediaLoader.TaskListener<Playlist> {
+            val playlistsLoader = PlaylistsLoader(activity)
+            playlistsLoader.init()
+            playlistsLoader.addListener(object : MediaLoader.TaskListener<Playlist> {
                 override fun onOneLoaded(item: Playlist, pos: Int) {
                     for (listener in listeners) listener.onPlaylistLoaded(item, pos)
                 }
@@ -137,12 +137,12 @@ object Library : MusicLibraryData {
                     checkIsFinished()
                 }
             })
-            LOADER_PLAYLISTS = playlistsTask
+            LOADER_PLAYLISTS = playlistsLoader
         }
         if (libraryConfig.contains(MusicType.ARTISTS)) {
-            val artistsTask = ArtistsTask(activity)
-            artistsTask.init()
-            artistsTask.addListener(object : MediaLoader.TaskListener<Artist> {
+            val artistsLoader = ArtistsLoader(activity)
+            artistsLoader.init()
+            artistsLoader.addListener(object : MediaLoader.TaskListener<Artist> {
                 override fun onOneLoaded(item: Artist, pos: Int) {
                     for (listener in listeners) listener.onArtistLoaded(item, pos)
                 }
@@ -154,12 +154,12 @@ object Library : MusicLibraryData {
                     checkIsFinished()
                 }
             })
-            LOADER_ARTISTS = artistsTask
+            LOADER_ARTISTS = artistsLoader
         }
         if (libraryConfig.contains(MusicType.GENRES)) {
-            val genresTask = GenresTask(activity)
-            genresTask.init()
-            genresTask.addListener(object : MediaLoader.TaskListener<Genre> {
+            val genresLoader = GenresLoader(activity)
+            genresLoader.init()
+            genresLoader.addListener(object : MediaLoader.TaskListener<Genre> {
                 override fun onOneLoaded(item: Genre, pos: Int) {
                     for (listener in listeners) listener.onGenreLoaded(item, pos)
                 }
@@ -171,7 +171,7 @@ object Library : MusicLibraryData {
                     checkIsFinished()
                 }
             })
-            LOADER_GENRES = genresTask
+            LOADER_GENRES = genresLoader
         }
 
         return this
@@ -184,6 +184,19 @@ object Library : MusicLibraryData {
         LOADER_PLAYLISTS?.run()
         LOADER_GENRES?.run()
         Log.d(Library.javaClass.simpleName, "Library is building...")
+    }
+
+    fun cleanUp() {
+        LOADER_SONGS?.destroy()
+        LOADER_SONGS = null
+        LOADER_ALBUMS?.destroy()
+        LOADER_ALBUMS = null
+        LOADER_ARTISTS?.destroy()
+        LOADER_ARTISTS = null
+        LOADER_PLAYLISTS?.destroy()
+        LOADER_PLAYLISTS = null
+        LOADER_GENRES?.destroy()
+        LOADER_GENRES = null
     }
 
     ///////////////////////////////////////////////////////////////////////////

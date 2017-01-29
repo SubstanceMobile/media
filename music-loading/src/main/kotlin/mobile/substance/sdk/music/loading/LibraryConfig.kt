@@ -16,16 +16,10 @@
 
 package mobile.substance.sdk.music.loading
 
-import android.app.Activity
-import android.app.Application
-import android.content.Context
-import android.os.Bundle
-
+/**
+ * A class that tells [Library] which loaders are needed for the Activity which it is being initialized on
+ */
 class LibraryConfig {
-
-    ///////////////////////////////////////////////////////////////////////////
-    // Main configuration
-    ///////////////////////////////////////////////////////////////////////////
 
     private val config = arrayListOf<MusicType>()
 
@@ -36,21 +30,4 @@ class LibraryConfig {
 
     fun contains(item: MusicType) = config.contains(item)
 
-    ///////////////////////////////////////////////////////////////////////////
-    // Optional configuration objects
-    ///////////////////////////////////////////////////////////////////////////
-
-    internal var hookData = true
-
-    fun doNotHookData(): LibraryConfig {
-        hookData = false
-        return this
-    }
-
-    fun hookIntoActivityLifecycle(application: Application) : LibraryConfig {
-        // TODO: Integrate into lifecycle
-        return this
-    }
-
-    fun hookIntoActivityLifecycle(activity: Activity) = hookIntoActivityLifecycle(activity.application)
 }

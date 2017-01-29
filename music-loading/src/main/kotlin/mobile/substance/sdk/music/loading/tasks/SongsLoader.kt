@@ -31,7 +31,7 @@ import mobile.substance.sdk.music.loading.Library
 /**
  * Created by Adrian on 3/25/2016.
  */
-class SongsTask(activity: AppCompatActivity) : MediaLoader<Song>(activity) {
+class SongsLoader(activity: AppCompatActivity) : MediaLoader<Song>(activity) {
 
     override fun buildObject(cursor: Cursor): Song? {
         val title = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE))
