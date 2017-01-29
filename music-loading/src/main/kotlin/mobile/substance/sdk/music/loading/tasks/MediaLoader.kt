@@ -47,6 +47,7 @@ abstract class MediaLoader<Return : MediaObject>(private val activity: AppCompat
 
     var cursor: Cursor? = null
     var cancellationSignal: CancellationSignal? = null
+    var abortWithCursor: Boolean = false
 
     protected var listeners: MutableList<TaskListener<Return>> = ArrayList()
     private var currentData: List<Return> = ArrayList()
@@ -118,7 +119,10 @@ abstract class MediaLoader<Return : MediaObject>(private val activity: AppCompat
     }
 
     @UiThread
-    fun run() = activity.supportLoaderManager.initLoader(loaderId, Bundle.EMPTY, this).forceLoad()
+    fun run(fullRun: Boolean = true) {
+        if (!fullRun) abortWithCursor = true
+        activity.supportLoaderManager.initLoader(loaderId, Bundle.EMPTY, this).forceLoad()
+    }
 
     @WorkerThread
     override fun loadInBackground(): List<Return> {
@@ -141,6 +145,9 @@ abstract class MediaLoader<Return : MediaObject>(private val activity: AppCompat
                     cursor.close()
                     throw ex
                 }
+
+                if (abortWithCursor) cancelLoadInBackground()
+
                 if (!cursor.moveToFirst()) return emptyList()
             } else return emptyList()
 

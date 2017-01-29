@@ -186,6 +186,19 @@ object Library : MusicLibraryData {
         Log.d(Library.javaClass.simpleName, "Library is building...")
     }
 
+    /**
+     * This method shall only be called when you don't want to explicitly [build] with this Activity
+     * This makes the loaders run in order to retrieve a [android.database.Cursor] to register a [android.database.ContentObserver] on
+     * When necessary, call this method right after [init] in [AppCompatActivity.onStart]
+     */
+    fun assureIsObserving() {
+        LOADER_SONGS?.run(false)
+        LOADER_ALBUMS?.run(false)
+        LOADER_ARTISTS?.run(false)
+        LOADER_PLAYLISTS?.run(false)
+        LOADER_GENRES?.run(false)
+    }
+
     fun cleanUp() {
         LOADER_SONGS?.destroy()
         LOADER_SONGS = null
