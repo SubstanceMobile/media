@@ -50,9 +50,7 @@ object MusicCoreUtil {
      *
      * @param url The url so start
      */
-    fun startUrl(cxt: Context, url: String) {
-        cxt.startActivity(Intent(Intent.ACTION_VIEW).setData(Uri.parse(url)))
-    }
+    fun startUrl(cxt: Context, url: String) = cxt.startActivity(Intent(Intent.ACTION_VIEW).setData(Uri.parse(url)))
 
     /**
      * Formats strings to match time. Is either hh:mm:ss or mm:ss
@@ -87,9 +85,7 @@ object MusicCoreUtil {
     // Unit conversions
     ///////////////////////////////////////////////////////////////////////////
 
-    fun dpToPx(context: Context, dp: Float): Float {
-        return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, context.resources.displayMetrics)
-    }
+    fun dpToPx(context: Context, dp: Float): Float = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, context.resources.displayMetrics)
 
     ///////////////////////////////////////////////////////////////////////////
     // Bitmap retrieval
@@ -109,7 +105,7 @@ object MusicCoreUtil {
     fun getArtwork(song: Song, context: Context): Bitmap? {
         try {
             val albumArtPath = MusicData.findAlbumById(song.songAlbumId ?: 0)?.albumArtworkPath
-            if (albumArtPath != null && albumArtPath.length > 0) return BitmapFactory.decodeFile(albumArtPath)
+            if (albumArtPath != null && albumArtPath.isNotEmpty()) return BitmapFactory.decodeFile(albumArtPath)
             if (song.hasExplicitArtwork && song.explicitArtworkUri!! != Uri.EMPTY) {
                 val url = getUrlFromUri(song.explicitArtworkUri!!)
                 return if (url != null) BitmapFactory.decodeStream(URL(url).openStream()) else BitmapFactory.decodeFile(song.explicitArtworkUri!!.path)
@@ -142,14 +138,14 @@ object MusicCoreUtil {
         if (isKitKat && DocumentsContract.isDocumentUri(context, uri)) {
             if (isExternalStorageDocument(uri)) {
                 val docId : String= DocumentsContract.getDocumentId(uri)
-                val split = (java.lang.String.valueOf(docId) as java.lang.String).split(":")
+                val split = (java.lang.String.valueOf(docId) as String).split(":")
                 val type = split[0]
-                if (("primary" as java.lang.String).equalsIgnoreCase(uri.scheme)) {
+                if (("primary" as String).equals(uri.scheme, true)) {
                     return Environment.getExternalStorageDirectory().path + File.separator + split[1]
                 }
             } else if (isMediaDocument(uri)) {
                 val docId = DocumentsContract.getDocumentId(uri)
-                val split = (java.lang.String.valueOf(docId) as java.lang.String).split(":")
+                val split = (java.lang.String.valueOf(docId) as String).split(":")
                 val type = split[0]
                 var contentUri: Uri? = null
                 if ("audio" == type) {
@@ -162,9 +158,9 @@ object MusicCoreUtil {
                 val selectionArgs = arrayOf<String>(split[1])
                 return getDataColumn(context, contentUri!!, selection, selectionArgs)
             }
-        } else if (("content" as java.lang.String).equalsIgnoreCase(uri.scheme)) {
+        } else if (("content" as String).equals(uri.scheme, true)) {
             return getDataColumn(context, uri, null, null)
-        } else if (("file" as java.lang.String).equalsIgnoreCase(uri.scheme)) {
+        } else if (("file" as String).equals(uri.scheme, true)) {
             return uri.path
         }
         return null
@@ -188,25 +184,19 @@ object MusicCoreUtil {
     }
 
     fun findByMediaId(id: Long, vararg data: List<MediaObject>): MediaObject? {
-        for (list in data)
-            for (item in list)
-                if (item.id == id) return item
-        return null
+        return data
+                .flatMap { it }
+                .firstOrNull { it.id == id }
     }
 
-    private fun isExternalStorageDocument(uri: Uri): Boolean {
-        return "com.android.externalstorage.documents" == uri.authority
-    }
+    private fun isExternalStorageDocument(uri: Uri): Boolean = "com.android.externalstorage.documents" == uri.authority
 
-    private fun isMediaDocument(uri: Uri): Boolean {
-        return "com.android.providers.media.documents" == uri.authority
-    }
+    private fun isMediaDocument(uri: Uri): Boolean = "com.android.providers.media.documents" == uri.authority
+
     ///////////////////////////////////////////////////////////////////////////
     // Url
     ///////////////////////////////////////////////////////////////////////////
 
-    fun getUrlFromUri(uri: Uri): String? {
-        if (URLUtil.isValidUrl(uri.toString()) && uri.toString().startsWith("http")) return uri.toString() else return null
-    }
+    fun getUrlFromUri(uri: Uri): String? = if (URLUtil.isValidUrl(uri.toString()) && uri.toString().startsWith("http")) uri.toString() else null
 
 }

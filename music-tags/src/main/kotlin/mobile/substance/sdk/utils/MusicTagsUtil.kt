@@ -39,11 +39,15 @@ object MusicTagsUtil {
             val cv = ContentValues()
             cv.put(MediaStore.Audio.Playlists.NAME, name)
             context.contentResolver.insert(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, cv)
+            context.contentResolver.notifyChange(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, null)
             return true
         }
     }
 
-    fun deletePlaylist(context: Context, id: Long) = context.contentResolver.delete(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, "${MediaStore.Audio.Playlists._ID} = ?", arrayOf(id.toString()))
+    fun deletePlaylist(context: Context, id: Long) {
+        context.contentResolver.delete(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, "${MediaStore.Audio.Playlists._ID} = ?", arrayOf(id.toString()))
+        context.contentResolver.notifyChange(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, null)
+    }
 
     fun renamePlaylist(context: Context, id: Long, newName: String): Boolean {
         val cursor = context.contentResolver.query(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, null, "${MediaStore.Audio.Playlists._ID} = ?", arrayOf(id.toString()), null)
@@ -52,6 +56,7 @@ object MusicTagsUtil {
             val cv = ContentValues()
             cv.put(MediaStore.Audio.Playlists.NAME, newName)
             context.contentResolver.update(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, cv, "${MediaStore.Audio.Playlists._ID} = ?", arrayOf(id.toString()))
+            context.contentResolver.notifyChange(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, null)
             return true
         } else return false
     }
@@ -72,13 +77,21 @@ object MusicTagsUtil {
         })
 
         context.contentResolver.bulkInsert(MediaStore.Audio.Playlists.Members.getContentUri("external", id), valuesArray)
+        context.contentResolver.notifyChange(MediaStore.Audio.Playlists.Members.getContentUri("external", id), null)
         return true
     }
 
     fun removeFromPlaylist(context: Context, songs: List<Long>, id: Long) {
-        for (song in songs) context.contentResolver.delete(MediaStore.Audio.Playlists.Members.getContentUri("external", id), "${MediaStore.Audio.Playlists.Members.AUDIO_ID} = ?", arrayOf(song.toString()))
+        for (song in songs) {
+            context.contentResolver.delete(MediaStore.Audio.Playlists.Members.getContentUri("external", id), "${MediaStore.Audio.Playlists.Members.AUDIO_ID} = ?", arrayOf(song.toString()))
+        }
+        context.contentResolver.notifyChange(MediaStore.Audio.Playlists.Members.getContentUri("external", id), null)
     }
 
-    fun moveInPlaylist(context: Context, playlist: Long, fromPos: Int, toPos: Int): Boolean = MediaStore.Audio.Playlists.Members.moveItem(context.contentResolver, playlist, fromPos, toPos)
+    fun moveInPlaylist(context: Context, playlist: Long, fromPos: Int, toPos: Int): Boolean {
+        val success = MediaStore.Audio.Playlists.Members.moveItem(context.contentResolver, playlist, fromPos, toPos)
+        context.contentResolver.notifyChange(MediaStore.Audio.Playlists.Members.getContentUri("external", playlist), null)
+        return success
+    }
 
 }
