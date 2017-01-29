@@ -30,7 +30,7 @@ class LibraryConfig {
     private val config = arrayListOf<MusicType>()
 
     fun load(vararg items: MusicType) : LibraryConfig {
-        for (item in items) config.add(item)
+        config += items
         return this
     }
 
@@ -48,49 +48,9 @@ class LibraryConfig {
     }
 
     fun hookIntoActivityLifecycle(application: Application) : LibraryConfig {
-        application.registerActivityLifecycleCallbacks(object : Application.ActivityLifecycleCallbacks{
-
-            override fun onActivityStarted(p0: Activity?) {
-                try {
-                    Library.registerMediaStoreListeners()
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                }
-            }
-
-            override fun onActivityStopped(p0: Activity?) {
-                try {
-                    Library.unregisterMediaStoreListeners()
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                }
-            }
-
-            override fun onActivityDestroyed(p0: Activity?) {
-                //Do nothing
-            }
-
-            override fun onActivitySaveInstanceState(p0: Activity?, p1: Bundle?) {
-                //Do nothing
-            }
-
-            override fun onActivityCreated(p0: Activity?, p1: Bundle?) {
-                //Do nothing
-            }
-
-            override fun onActivityResumed(p0: Activity?) {
-                //Do nothing
-            }
-
-            override fun onActivityPaused(p0: Activity?) {
-                //Do nothing
-            }
-
-        })
+        // TODO: Integrate into lifecycle
         return this
     }
 
     fun hookIntoActivityLifecycle(activity: Activity) = hookIntoActivityLifecycle(activity.application)
-
-    fun apply(context: Context) = Library.init(context, this)
 }

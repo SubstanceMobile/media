@@ -66,7 +66,6 @@ object MusicTagsUtil {
 
         var size = 0
         if (cursor.moveToFirst()) size = cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Playlists.Members.SIZE))
-        Log.d(MusicTagsUtil::class.java.simpleName, size.toString())
         cursor.close()
 
         val valuesArray = Array(songs.size, {
