@@ -22,9 +22,6 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.media.AudioManager
 
-/**
- * Created by Julian on 17/09/16.
- */
 object AudioBecomingNoisyReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {

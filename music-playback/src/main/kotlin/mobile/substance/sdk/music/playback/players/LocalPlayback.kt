@@ -158,11 +158,10 @@ object LocalPlayback : Playback(),
     ////////////
 
     override fun onRepeatModeChanged(mode: Int) {
-        when (mode) {
-            RepeatModes.REPEAT_DISABLED -> localPlayer?.isLooping = false
-            RepeatModes.REPEAT_ENABLED -> localPlayer?.isLooping = true
-        }
+        localPlayer?.isLooping = mode == RepeatModes.REPEAT_ENABLED
     }
+
+    override val repeatOnNext: Boolean = true
 
     ///////////////////////////////////////////////////////////////////////////
     // Progress Thread

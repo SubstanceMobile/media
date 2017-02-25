@@ -198,8 +198,8 @@ abstract class Playback : MediaSessionCompat.Callback() {
                 doNext()
             }
             RepeatModes.REPEAT_ONCE -> {
-                play()
                 repeatMode = RepeatModes.REPEAT_DISABLED
+                play()
             }
         }
     }

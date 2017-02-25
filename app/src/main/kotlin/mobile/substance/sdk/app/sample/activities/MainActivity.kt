@@ -56,9 +56,9 @@ class MainActivity : NavigationDrawerActivity(), PlaybackRemote.RemoteCallback {
         super.init(savedInstanceState)
 
         Library.init(this, LibraryConfig()
-                .hookIntoActivityLifecycle(this)
                 .load(MusicType.SONGS, MusicType.ALBUMS, MusicType.ARTISTS, MusicType.GENRES, MusicType.PLAYLISTS))
-                .build()
+        if (!Library.isBuilt()) Library.build()
+
         navigationView.setNavigationItemSelectedListener { it ->
             drawerLayout.closeDrawer(GravityCompat.START)
             handleNavigationClick(it)

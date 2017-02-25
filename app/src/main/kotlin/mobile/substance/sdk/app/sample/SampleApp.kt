@@ -21,6 +21,7 @@ import android.util.Log
 import com.google.android.gms.cast.CastMediaControlIntent
 import mobile.substance.sdk.BuildConfig
 import mobile.substance.sdk.R
+import mobile.substance.sdk.music.loading.Library
 import mobile.substance.sdk.options.MusicCoreOptions
 import mobile.substance.sdk.options.MusicPlaybackOptions
 import java.lang.reflect.Field
@@ -34,6 +35,8 @@ class SampleApp : Application() {
 
     override fun onCreate() {
         super.onCreate()
+
+        Library.enable()
 
         Thread() {
             run {

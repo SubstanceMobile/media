@@ -17,6 +17,9 @@
 package mobile.substance.sdk.music.loading
 
 import android.content.Context
+import android.os.Bundle
+import android.support.v4.app.LoaderManager
+import android.support.v4.content.Loader
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import mobile.substance.sdk.music.core.MusicApiError
@@ -29,10 +32,10 @@ import java.util.*
 
 @SuppressWarnings("unused")
 object Library : MusicLibraryData {
-    private var context: Context? = null
+    private var activity: AppCompatActivity? = null
 
     override fun getContext(): Context {
-        if (context != null) return context as Context
+        if (activity != null) return activity as Context
         throw MusicApiError("Please call init() on Library")
     }
 
@@ -75,17 +78,12 @@ object Library : MusicLibraryData {
         }
     }
 
-    fun isBuilt(): Boolean {
-        buildState.forEach {
-            if (it == false) return false
-        }
-        return true
-    }
+    fun isBuilt(): Boolean = buildState.all { it ?: true }
 
     fun enable() = MusicData.hook(this)
 
     @JvmOverloads fun init(activity: AppCompatActivity, libraryConfig: LibraryConfig = LibraryConfig()): Library {
-        Library.context = activity.applicationContext
+        Library.activity = activity
 
         //Create tasks
         if (libraryConfig.contains(MusicType.SONGS)) {
@@ -98,6 +96,7 @@ object Library : MusicLibraryData {
                 }
 
                 override fun onCompleted(result: List<Song>) {
+                    if (buildState[0] == false) buildState[0] = true
                     Log.d(Library.javaClass.simpleName, "Completed building songs")
                     songs = result.toMutableList()
                     for (listener in listeners) listener.onSongsCompleted(result)
@@ -116,6 +115,7 @@ object Library : MusicLibraryData {
                 }
 
                 override fun onCompleted(result: List<Album>) {
+                    if (buildState[1] == false) buildState[1] = true
                     Log.d(Library.javaClass.simpleName, "Completed building albums")
                     albums = result.toMutableList()
                     for (listener in listeners) listener.onAlbumsCompleted(result)
@@ -134,6 +134,7 @@ object Library : MusicLibraryData {
                 }
 
                 override fun onCompleted(result: List<Artist>) {
+                    if (buildState[2] == false) buildState[2] = true
                     Log.d(Library.javaClass.simpleName, "Completed building artists")
                     artists = result.toMutableList()
                     for (listener in listeners) listener.onArtistsCompleted(result)
@@ -152,6 +153,7 @@ object Library : MusicLibraryData {
                 }
 
                 override fun onCompleted(result: List<Playlist>) {
+                    if (buildState[3] == false) buildState[3] = true
                     Log.d(Library.javaClass.simpleName, "Completed building playlists")
                     playlists = result.toMutableList()
                     for (listener in listeners) listener.onPlaylistsCompleted(result)
@@ -170,6 +172,7 @@ object Library : MusicLibraryData {
                 }
 
                 override fun onCompleted(result: List<Genre>) {
+                    if (buildState[4] == false) buildState[4] = true
                     Log.d(Library.javaClass.simpleName, "Completed building genres")
                     genres = result.toMutableList()
                     for (listener in listeners) listener.onGenresCompleted(result)
@@ -189,32 +192,6 @@ object Library : MusicLibraryData {
         LOADER_PLAYLISTS?.run()
         LOADER_GENRES?.run()
         Log.d(Library.javaClass.simpleName, "Library is building...")
-    }
-
-    /**
-     * This method shall only be called when you don't want to explicitly [build] with this Activity
-     * This makes the loaders run in order to retrieve a [android.database.Cursor] to register a [android.database.ContentObserver] on
-     * When necessary, call this method right after [init] in [AppCompatActivity.onStart]
-     */
-    fun assureIsObserving() {
-        LOADER_SONGS?.run(false)
-        LOADER_ALBUMS?.run(false)
-        LOADER_ARTISTS?.run(false)
-        LOADER_PLAYLISTS?.run(false)
-        LOADER_GENRES?.run(false)
-    }
-
-    fun cleanUp() {
-        LOADER_SONGS?.destroy()
-        LOADER_SONGS = null
-        LOADER_ALBUMS?.destroy()
-        LOADER_ALBUMS = null
-        LOADER_ARTISTS?.destroy()
-        LOADER_ARTISTS = null
-        LOADER_PLAYLISTS?.destroy()
-        LOADER_PLAYLISTS = null
-        LOADER_GENRES?.destroy()
-        LOADER_GENRES = null
     }
 
     ///////////////////////////////////////////////////////////////////////////

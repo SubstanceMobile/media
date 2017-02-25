@@ -67,50 +67,16 @@ interface MusicLibraryData {
     // NOTE: These have default implementations. For convenience
     ///////////////////////////////////////////////////////////////////////////
 
-    class QueryTask<Result>(private val callback: (Result) -> Any) : AsyncTask<() -> Result, Void, Result>() {
-
-        @SafeVarargs
-        override fun doInBackground(vararg params: () -> Result): Result? {
-            try {
-                return params[0].invoke()
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-
-            return null
-        }
-
-        override fun onPostExecute(result: Result) {
-            callback.invoke(result)
-        }
-    }
-
     fun findSongsForArtist(artist: Artist): List<Song> = getSongs().filter { it.songArtistId == artist.id }
 
-    fun findSongsForArtistAsync(artist: Artist, callback: (List<Song>) -> Any) {
-        QueryTask(callback).execute({ findSongsForArtist(artist) })
-    }
-
     fun findAlbumsForArtist(artist: Artist): List<Album> = getAlbums().filter { it.albumArtistName == artist.artistName }
-
-    fun findAlbumsForArtistAsync(artist: Artist, callback: (List<Album>) -> Any) {
-        QueryTask(callback).execute({ findAlbumsForArtist(artist) })
-    }
 
     fun findSongsForAlbum(album: Album): List<Song> {
         val songs = getSongs().filter { it.songAlbumId == album.id }
         return songs.sortedBy(Song::songTrackNumber)
     }
 
-    fun findSongsForAlbumAsync(album: Album, callback: (List<Song>) -> Any) {
-        QueryTask(callback).execute({ findSongsForAlbum(album) })
-    }
-
     fun findArtistForAlbum(album: Album): Artist? = getArtists().firstOrNull { it.artistName == album.albumArtistName }
-
-    fun findArtistForAlbumAsync(album: Album, callback: (Artist?) -> Any) {
-        QueryTask(callback).execute({ findArtistForAlbum(album) })
-    }
 
     fun findSongsForPlaylist(playlist: Playlist): List<Song> {
         val songs = ArrayList<Song>()
@@ -130,10 +96,6 @@ interface MusicLibraryData {
         }
     }
 
-    fun findSongsForPlaylistAsync(playlist: Playlist, callback: (List<Song>) -> Any) {
-        QueryTask(callback).execute({ findSongsForPlaylist(playlist) })
-    }
-
     fun findSongsForGenre(genre: Genre): List<Song> {
         val songs = ArrayList<Song>()
         try {
@@ -151,10 +113,6 @@ interface MusicLibraryData {
             return emptyList()
         }
 
-    }
-
-    fun findSongsForGenreAsync(genre: Genre, callback: (List<Song>) -> Any) {
-        QueryTask(callback).execute({ findSongsForGenre(genre) })
     }
 
     ///////////////////////////////////////////////////////////////////////////

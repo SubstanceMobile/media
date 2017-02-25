@@ -227,7 +227,6 @@ object PlaybackRemote : ServiceConnection {
      * Shuffle the hooked songs
      */
     fun shuffle() {
-        // TODO: Finalize
         val songs = ArrayList<Song>()
         songs.addAll(MusicData.getSongs())
         Collections.shuffle(songs)

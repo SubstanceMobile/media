@@ -119,11 +119,6 @@ object CastPlayback : Playback(), SessionManagerListener<Session>, RemoteMediaCl
     }
 
     private fun doPlay(fileUri: Uri, artworkUri: Uri?, metadata: MediaMetadataCompat?) {
-
-        /*if (metadata == null) {
-            metadata = retrieveMetadata(fileUri)
-        }*/ // TODO
-
         remoteMediaClient?.stop()
         fileServer.stop()
 

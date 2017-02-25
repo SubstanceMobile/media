@@ -35,7 +35,7 @@ import java.io.FileDescriptor
 import java.io.PrintWriter
 import java.util.*
 
-abstract class MediaLoader<Return : MediaObject>(private val activity: AppCompatActivity) : AsyncTaskLoader<List<Return>>(activity), LoaderManager.LoaderCallbacks<List<Return>> {
+abstract class MediaLoader<Return : MediaObject>(protected val activity: AppCompatActivity) : AsyncTaskLoader<List<Return>>(activity), LoaderManager.LoaderCallbacks<List<Return>> {
     val observer: ContentObserver = ForceLoadContentObserver()
 
     abstract val loaderId: Int
@@ -47,7 +47,6 @@ abstract class MediaLoader<Return : MediaObject>(private val activity: AppCompat
 
     var cursor: Cursor? = null
     var cancellationSignal: CancellationSignal? = null
-    var abortWithCursor: Boolean = false
 
     protected var listeners: MutableList<TaskListener<Return>> = ArrayList()
     private var currentData: List<Return> = ArrayList()
@@ -101,25 +100,16 @@ abstract class MediaLoader<Return : MediaObject>(private val activity: AppCompat
 
     @UiThread
     fun init() {
-        destroy()
         activity.supportLoaderManager.initLoader(loaderId, Bundle.EMPTY, this)
+        registerObserver()
     }
 
     @UiThread
-    fun destroy() {
-        try {
-            activity.supportLoaderManager.destroyLoader(loaderId)
-        } catch (ignored: Exception) {}
-    }
-
-    @UiThread
-    fun run(fullRun: Boolean = true) {
-        if (!fullRun) abortWithCursor = true
-        activity.supportLoaderManager.initLoader(loaderId, Bundle.EMPTY, this).forceLoad()
-    }
+    fun run() = activity.supportLoaderManager.initLoader(loaderId, Bundle.EMPTY, this).forceLoad()
 
     @WorkerThread
     override fun loadInBackground(): List<Return> {
+        unregisterObserver()
         synchronized(this) {
             if (isLoadInBackgroundCanceled) {
                 throw OperationCanceledException()
@@ -130,20 +120,8 @@ abstract class MediaLoader<Return : MediaObject>(private val activity: AppCompat
             val cursor = ContentResolverCompat.query(context.contentResolver,
                     uri, projection, selection, selectionArgs, sortOrder,
                     cancellationSignal)
-            if (cursor != null) {
-                try {
-                    // Ensure the cursor window is filled.
-                    cursor.count
-                    cursor.registerContentObserver(observer)
-                } catch (ex: RuntimeException) {
-                    cursor.close()
-                    throw ex
-                }
 
-                if (abortWithCursor) cancelLoadInBackground()
-
-                if (!cursor.moveToFirst()) return emptyList()
-            } else return emptyList()
+            if (cursor == null || !cursor.moveToFirst()) return emptyList()
 
             //If there is data then continue
             val generated = ArrayList<Return>()
@@ -270,6 +248,7 @@ abstract class MediaLoader<Return : MediaObject>(private val activity: AppCompat
         if (data != null) sort(data)
         val result = data ?: emptyList()
         verifyListener.onCompleted(result)
+        registerObserver()
     }
 
     override fun onCreateLoader(id: Int, args: Bundle?): Loader<List<Return>> {
@@ -280,5 +259,9 @@ abstract class MediaLoader<Return : MediaObject>(private val activity: AppCompat
         Log.i(MediaLoader::class.java.simpleName, "onContentChanged() has been called - the Loader has received an update notification. Loader id $loaderId")
         super.onContentChanged()
     }
+
+    private fun registerObserver() = activity.contentResolver.registerContentObserver(uri, true, observer)
+
+    private fun unregisterObserver() = activity.contentResolver.unregisterContentObserver(observer)
 
 }

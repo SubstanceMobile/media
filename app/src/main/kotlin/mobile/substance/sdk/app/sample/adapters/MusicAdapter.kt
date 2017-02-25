@@ -33,64 +33,16 @@ import mobile.substance.sdk.music.loading.MusicType
 import mobile.substance.sdk.music.playback.PlaybackRemote
 import mobile.substance.sdk.app.sample.viewholders.MusicViewHolder
 
-class MusicAdapter<T : MediaObject>(private val type: MusicType) : RecyclerView.Adapter<MusicViewHolder>(), LibraryListener {
-
+class MusicAdapter<T : MediaObject>(private val type: MusicType) : RecyclerView.Adapter<MusicViewHolder>() {
     var items: List<T>? = null
     var context: Context? = null
 
     init {
-        Library.registerListener(this)
-
         if (type == MusicType.SONGS) items = MusicData.getSongs() as List<T>
         if (type == MusicType.ALBUMS) items = MusicData.getAlbums() as List<T>
         if (type == MusicType.ARTISTS) items = MusicData.getArtists() as List<T>
         if (type == MusicType.PLAYLISTS) items = MusicData.getPlaylists() as List<T>
         if (type == MusicType.GENRES) items = MusicData.getGenres() as List<T>
-    }
-
-    override fun onSongLoaded(item: Song, pos: Int) {}
-
-    override fun onSongsCompleted(result: List<Song>) {
-        if (type == MusicType.SONGS) {
-            items = result as List<T>
-            notifyDataSetChanged()
-        }
-    }
-
-    override fun onAlbumLoaded(item: Album, pos: Int) {}
-
-    override fun onAlbumsCompleted(result: List<Album>) {
-        if (type == MusicType.ALBUMS) {
-            items = result as List<T>
-            notifyDataSetChanged()
-        }
-    }
-
-    override fun onArtistLoaded(item: Artist, pos: Int) {}
-
-    override fun onArtistsCompleted(result: List<Artist>) {
-        if (type == MusicType.ARTISTS) {
-            items = result as List<T>
-            notifyDataSetChanged()
-        }
-    }
-
-    override fun onPlaylistLoaded(item: Playlist, pos: Int) {}
-
-    override fun onPlaylistsCompleted(result: List<Playlist>) {
-        if (type == MusicType.PLAYLISTS) {
-            items = result as List<T>
-            notifyDataSetChanged()
-        }
-    }
-
-    override fun onGenreLoaded(item: Genre, pos: Int) {}
-
-    override fun onGenresCompleted(result: List<Genre>) {
-        if (type == MusicType.GENRES) {
-            items = result as List<T>
-            notifyDataSetChanged()
-        }
     }
 
     override fun onBindViewHolder(holder: MusicViewHolder?, position: Int) {
@@ -123,7 +75,6 @@ class MusicAdapter<T : MediaObject>(private val type: MusicType) : RecyclerView.
         holder.title?.text = song.songTitle
         holder.subtitle?.text = song.songArtistName
         val album = MusicData.findAlbumById(song.songAlbumId ?: 0)
-        Log.d("Binding Song", "Album ${album?.albumName}, id ${album?.id}, artworkPath ${album?.albumArtworkPath}")
         album?.requestArt(holder.image!!)
 
 
@@ -143,21 +94,14 @@ class MusicAdapter<T : MediaObject>(private val type: MusicType) : RecyclerView.
 
     private fun bindGenre(genre: Genre, holder: MusicViewHolder) {
         holder.title!!.text = genre.genreName
-        MusicData.findSongsForGenreAsync(genre, object : MusicLibraryData.QueryResult<List<Song>> {
-            override fun onQueryResult(result: List<Song>) {
-                if (result.size > 0) MusicData.findAlbumById(result.first().songAlbumId!!)!!.requestArt(holder.image!!)
-            }
-        })
-
+        val songs = MusicData.findSongsForGenre(genre)
+        if (songs.isNotEmpty()) MusicData.findAlbumById(songs.first().songAlbumId!!)!!.requestArt(holder.image!!)
     }
 
     private fun bindPlaylist(playlist: Playlist, holder: MusicViewHolder) {
         holder.title!!.text = playlist.playlistName
-        MusicData.findSongsForPlaylistAsync(playlist, object : MusicLibraryData.QueryResult<List<Song>> {
-            override fun onQueryResult(result: List<Song>) {
-                if (result.size > 0) Library.findAlbumById(result.first().songAlbumId!!)!!.requestArt(holder.image!!)
-            }
-        })
+        val songs = MusicData.findSongsForPlaylist(playlist)
+        if (songs.isNotEmpty()) Library.findAlbumById(songs.first().songAlbumId!!)!!.requestArt(holder.image!!)
     }
 
 }
