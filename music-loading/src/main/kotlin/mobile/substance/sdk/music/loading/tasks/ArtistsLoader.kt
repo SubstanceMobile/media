@@ -17,21 +17,12 @@
 package mobile.substance.sdk.music.loading.tasks
 
 import android.content.Context
-import android.database.ContentObserver
 import android.database.Cursor
 import android.net.Uri
-import android.os.Handler
 import android.provider.MediaStore
-import android.support.v7.app.AppCompatActivity
-import android.util.Log
-
 import mobile.substance.sdk.music.core.objects.Artist
-import mobile.substance.sdk.music.loading.Library
 
-/**
- * Created by Adrian on 3/25/2016.
- */
-class ArtistsLoader(activity: AppCompatActivity) : MediaLoader<Artist>(activity) {
+class ArtistsLoader(context: Context) : MediaLoader<Artist>(context) {
 
     override fun buildObject(cursor: Cursor): Artist? {
         val name = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Artists.ARTIST))
@@ -46,6 +37,6 @@ class ArtistsLoader(activity: AppCompatActivity) : MediaLoader<Artist>(activity)
 
     override val uri: Uri = MediaStore.Audio.Artists.EXTERNAL_CONTENT_URI
 
-    override val loaderId: Int = 11
+    override val loaderId: Int = 12
 
 }

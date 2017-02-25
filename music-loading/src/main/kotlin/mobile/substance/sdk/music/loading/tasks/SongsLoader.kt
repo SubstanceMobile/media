@@ -17,21 +17,12 @@
 package mobile.substance.sdk.music.loading.tasks
 
 import android.content.Context
-import android.database.ContentObserver
 import android.database.Cursor
 import android.net.Uri
-import android.os.Handler
 import android.provider.MediaStore
-import android.support.v7.app.AppCompatActivity
-import android.util.Log
-
 import mobile.substance.sdk.music.core.objects.Song
-import mobile.substance.sdk.music.loading.Library
 
-/**
- * Created by Adrian on 3/25/2016.
- */
-class SongsLoader(activity: AppCompatActivity) : MediaLoader<Song>(activity) {
+class SongsLoader(context: Context) : MediaLoader<Song>(context) {
 
     override fun buildObject(cursor: Cursor): Song? {
         val title = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE))
@@ -63,11 +54,14 @@ class SongsLoader(activity: AppCompatActivity) : MediaLoader<Song>(activity) {
         get() = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
 
     override val selection: String?
-        get() = MediaStore.Audio.Media.IS_MUSIC + "=1"
+        get() = "${MediaStore.Audio.Media.IS_MUSIC} = ?"
+
+    override val selectionArgs: Array<String>?
+        get() = arrayOf(1.toString())
 
     override val sortOrder: String
         get() = MediaStore.Audio.Media.DEFAULT_SORT_ORDER
 
-    override val loaderId: Int = 14
+    override val loaderId: Int = 10
 
 }

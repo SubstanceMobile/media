@@ -28,10 +28,11 @@ import mobile.substance.sdk.music.core.dataLinkers.MusicData
 import mobile.substance.sdk.music.core.dataLinkers.MusicLibraryData
 import mobile.substance.sdk.music.core.objects.*
 import mobile.substance.sdk.music.loading.tasks.*
+import java.security.acl.LastOwnerException
 import java.util.*
 
 @SuppressWarnings("unused")
-object Library : MusicLibraryData {
+object Library : MusicLibraryData, LoaderManager.LoaderCallbacks<List<*>> {
     private var activity: AppCompatActivity? = null
 
     override fun getContext(): Context {
@@ -87,8 +88,7 @@ object Library : MusicLibraryData {
 
         //Create tasks
         if (libraryConfig.contains(MusicType.SONGS)) {
-            val songsLoader = SongsLoader(activity)
-            songsLoader.init()
+            val songsLoader = activity.supportLoaderManager.initLoader(10, Bundle.EMPTY, this) as SongsLoader
             if (buildState[0] == null) buildState[0] = false
             songsLoader.addListener(object : MediaLoader.TaskListener<Song> {
                 override fun onOneLoaded(item: Song, pos: Int) {
@@ -106,8 +106,7 @@ object Library : MusicLibraryData {
             LOADER_SONGS = songsLoader
         }
         if (libraryConfig.contains(MusicType.ALBUMS)) {
-            val albumsLoader = AlbumsLoader(activity)
-            albumsLoader.init()
+            val albumsLoader = activity.supportLoaderManager.initLoader(11, Bundle.EMPTY, this) as AlbumsLoader
             if (buildState[1] == null) buildState[1] = false
             albumsLoader.addListener(object : MediaLoader.TaskListener<Album> {
                 override fun onOneLoaded(item: Album, pos: Int) {
@@ -125,8 +124,7 @@ object Library : MusicLibraryData {
             LOADER_ALBUMS = albumsLoader
         }
         if (libraryConfig.contains(MusicType.ARTISTS)) {
-            val artistsLoader = ArtistsLoader(activity)
-            artistsLoader.init()
+            val artistsLoader = activity.supportLoaderManager.initLoader(12, Bundle.EMPTY, this) as ArtistsLoader
             if (buildState[2] == null) buildState[2] = false
             artistsLoader.addListener(object : MediaLoader.TaskListener<Artist> {
                 override fun onOneLoaded(item: Artist, pos: Int) {
@@ -144,8 +142,7 @@ object Library : MusicLibraryData {
             LOADER_ARTISTS = artistsLoader
         }
         if (libraryConfig.contains(MusicType.PLAYLISTS)) {
-            val playlistsLoader = PlaylistsLoader(activity)
-            playlistsLoader.init()
+            val playlistsLoader = activity.supportLoaderManager.initLoader(13, Bundle.EMPTY, this) as PlaylistsLoader
             if (buildState[3] == null) buildState[3] = false
             playlistsLoader.addListener(object : MediaLoader.TaskListener<Playlist> {
                 override fun onOneLoaded(item: Playlist, pos: Int) {
@@ -163,8 +160,7 @@ object Library : MusicLibraryData {
             LOADER_PLAYLISTS = playlistsLoader
         }
         if (libraryConfig.contains(MusicType.GENRES)) {
-            val genresLoader = GenresLoader(activity)
-            genresLoader.init()
+            val genresLoader = activity.supportLoaderManager.initLoader(14, Bundle.EMPTY, this) as GenresLoader
             if (buildState[4] == null) buildState[4] = false
             genresLoader.addListener(object : MediaLoader.TaskListener<Genre> {
                 override fun onOneLoaded(item: Genre, pos: Int) {
@@ -186,11 +182,11 @@ object Library : MusicLibraryData {
     }
 
     fun build() {
-        LOADER_SONGS?.run()
-        LOADER_ALBUMS?.run()
-        LOADER_ARTISTS?.run()
-        LOADER_PLAYLISTS?.run()
-        LOADER_GENRES?.run()
+        LOADER_SONGS?.forceLoad()
+        LOADER_ALBUMS?.forceLoad()
+        LOADER_ARTISTS?.forceLoad()
+        LOADER_PLAYLISTS?.forceLoad()
+        LOADER_GENRES?.forceLoad()
         Log.d(Library.javaClass.simpleName, "Library is building...")
     }
 
@@ -332,4 +328,30 @@ object Library : MusicLibraryData {
 
     fun unregisterGenresListener(genreListener: MediaLoader.TaskListener<Genre>) = LOADER_GENRES?.removeListener(genreListener)
 
+
+    ///////////////////////////////////////////////////////////////////////////
+    // LoaderManager.LoaderCallbacks
+    ///////////////////////////////////////////////////////////////////////////
+
+    override fun onLoaderReset(loader: Loader<List<*>>?) {
+
+    }
+
+    override fun onLoadFinished(loader: Loader<List<*>>?, data: List<*>?) {
+        println("onLoadFinished() ${loader!!.id}")
+        val result = data ?: emptyList<MediaObject>()
+        (loader as MediaLoader).verifyListener.onCompleted(result as List<Nothing>)
+        (loader as MediaLoader).registerObserver()
+    }
+
+    override fun onCreateLoader(id: Int, args: Bundle?): Loader<List<*>>? {
+        when (id) {
+            10 -> return SongsLoader(activity!!) as Loader<List<*>>
+            11 -> return AlbumsLoader(activity!!) as Loader<List<*>>
+            12 -> return ArtistsLoader(activity!!) as Loader<List<*>>
+            13 -> return PlaylistsLoader(activity!!) as Loader<List<*>>
+            14 -> return GenresLoader(activity!!) as Loader<List<*>>
+            else -> return null
+        }
+    }
 }

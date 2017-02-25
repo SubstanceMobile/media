@@ -17,17 +17,12 @@
 package mobile.substance.sdk.music.loading.tasks
 
 import android.content.Context
-import android.database.ContentObserver
 import android.database.Cursor
 import android.net.Uri
-import android.os.Handler
 import android.provider.MediaStore
-import android.support.v7.app.AppCompatActivity
-import android.util.Log
 import mobile.substance.sdk.music.core.objects.Album
-import mobile.substance.sdk.music.loading.Library
 
-class AlbumsLoader(activity: AppCompatActivity) : MediaLoader<Album>(activity) {
+class AlbumsLoader(context: Context) : MediaLoader<Album>(context) {
 
     override fun buildObject(cursor: Cursor): Album? {
         val name = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Albums.ALBUM))
@@ -53,6 +48,6 @@ class AlbumsLoader(activity: AppCompatActivity) : MediaLoader<Album>(activity) {
 
     override val sortOrder: String? = MediaStore.Audio.Albums.DEFAULT_SORT_ORDER
 
-    override val loaderId: Int = 10
+    override val loaderId: Int = 11
 
 }

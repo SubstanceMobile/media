@@ -55,6 +55,7 @@ class MainActivity : NavigationDrawerActivity(), PlaybackRemote.RemoteCallback {
     override fun init(savedInstanceState: Bundle?) {
         super.init(savedInstanceState)
 
+        println("init()")
         Library.init(this, LibraryConfig()
                 .load(MusicType.SONGS, MusicType.ALBUMS, MusicType.ARTISTS, MusicType.GENRES, MusicType.PLAYLISTS))
         if (!Library.isBuilt()) Library.build()

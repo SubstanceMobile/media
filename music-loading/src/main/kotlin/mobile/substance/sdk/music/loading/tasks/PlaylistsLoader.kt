@@ -17,21 +17,12 @@
 package mobile.substance.sdk.music.loading.tasks
 
 import android.content.Context
-import android.database.ContentObserver
 import android.database.Cursor
 import android.net.Uri
-import android.os.Handler
 import android.provider.MediaStore
-import android.support.v7.app.AppCompatActivity
-import android.util.Log
-
 import mobile.substance.sdk.music.core.objects.Playlist
-import mobile.substance.sdk.music.loading.Library
 
-/**
- * Created by Adrian on 3/25/2016.
- */
-class PlaylistsLoader(activity: AppCompatActivity) : MediaLoader<Playlist>(activity) {
+class PlaylistsLoader(context: Context) : MediaLoader<Playlist>(context) {
 
     override fun buildObject(cursor: Cursor): Playlist? {
         val name = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Playlists.NAME))
