@@ -152,7 +152,10 @@ abstract class MediaLoader<Return : MediaObject>(context: Context) : AsyncTaskLo
 
     override fun onContentChanged() {
         println("onContentChanged() $id")
-        if (isStarted) unregisterObserver()
+        if (isStarted) {
+            println("onContentChanged() -> isStarted!")
+            unregisterObserver()
+        }
         super.onContentChanged()
     }
 

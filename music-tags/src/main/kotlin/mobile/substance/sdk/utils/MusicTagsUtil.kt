@@ -16,31 +16,34 @@
 
 package mobile.substance.sdk.utils
 
+import android.content.ContentUris
 import android.content.ContentValues
 import android.content.Context
 import android.net.Uri
 import android.provider.MediaStore
+import android.support.v4.content.ContentResolverCompat
 import android.util.Log
 import mobile.substance.sdk.music.core.objects.Song
 
-/**
- * Created by julian on 09/10/2016.
- */
 object MusicTagsUtil {
 
     fun notifyChange(context: Context, uri: Uri) = context.contentResolver.notifyChange(uri, null)
 
-    fun createPlaylist(context: Context, name: String): Boolean {
+    /**
+     * A method that inserts a new playlist into [com.android.providers.media.MediaProvider]
+     *
+     * @param context  A Context used to access the ContentResolver
+     * @param name  The name of the new playlist
+     * @return  The new playlist's row id, also the [mobile.substance.sdk.music.core.objects.Playlist.id]
+     */
+    fun createPlaylist(context: Context, name: String): Long {
         val cursor = context.contentResolver.query(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, null, "${MediaStore.Audio.Playlists.NAME} = ?", arrayOf(name), null)
         if (cursor != null && cursor.moveToFirst()) {
             cursor.close()
-            return false
-        } else {
-            val cv = ContentValues()
-            cv.put(MediaStore.Audio.Playlists.NAME, name)
-            context.contentResolver.insert(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, cv)
-            return true
-        }
+            return 0
+        } else return ContentUris.parseId(context.contentResolver.insert(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, ContentValues().apply {
+                put(MediaStore.Audio.Playlists.NAME, name)
+            }))
     }
 
     fun deletePlaylist(context: Context, id: Long) = context.contentResolver.delete(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, "${MediaStore.Audio.Playlists._ID} = ?", arrayOf(id.toString()))
@@ -64,10 +67,10 @@ object MusicTagsUtil {
         cursor.close()
 
         val valuesArray = Array(songs.size, {
-            val cv = ContentValues()
-            cv.put(MediaStore.Audio.Playlists.Members.AUDIO_ID, songs[it])
-            cv.put(MediaStore.Audio.Playlists.Members.PLAY_ORDER, it + size + 1)
-            cv
+            ContentValues().apply {
+                put(MediaStore.Audio.Playlists.Members.AUDIO_ID, songs[it])
+                put(MediaStore.Audio.Playlists.Members.PLAY_ORDER, it + size + 1)
+            }
         })
 
         context.contentResolver.bulkInsert(MediaStore.Audio.Playlists.Members.getContentUri("external", id), valuesArray)
