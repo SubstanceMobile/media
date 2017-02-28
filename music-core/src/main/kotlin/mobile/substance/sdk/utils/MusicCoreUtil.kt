@@ -40,6 +40,10 @@ import java.io.File
 import java.net.URL
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.Canvas
+import android.provider.BaseColumns
+import android.provider.MediaStore.MediaColumns
+import android.util.Log
+
 
 object MusicCoreUtil {
 
@@ -181,6 +185,24 @@ object MusicCoreUtil {
                 cursor.close()
         }
         return null
+    }
+
+    /**
+     * Given a media filename, returns it's id in the media content provider
+
+     * @param providerUri
+     * @param context
+     * @param path
+     * @return the file's id in the media content provider
+     */
+    fun retrieveMediaId(providerUri: Uri, context: Context, path: String): Long {
+        val projection = arrayOf(MediaColumns._ID, MediaColumns.DATA)
+        val cursor = context.contentResolver.query(
+                providerUri, projection,
+                MediaColumns.DATA + "= ?", arrayOf(path), null)
+        return cursor?.use {
+            if (cursor.moveToFirst()) cursor.getLong(cursor.getColumnIndexOrThrow(BaseColumns._ID)) else 0L
+        } ?: 0
     }
 
     fun findByMediaId(id: Long, vararg data: List<MediaObject>): MediaObject? {

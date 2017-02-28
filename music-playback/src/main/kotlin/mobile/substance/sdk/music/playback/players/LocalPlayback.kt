@@ -257,8 +257,8 @@ object LocalPlayback : Playback(),
     override fun getCurrentPosInSong(): Int {
         try {
             return localPlayer?.currentPosition ?: 0
-        } catch (e: Exception) {
-            Log.e(TAG, "failed retrieving the current position, returning 0", e)
+        } catch (e: IllegalStateException) {
+            e.printStackTrace()
             return 0
         }
     }

@@ -97,7 +97,11 @@ abstract class Playback : MediaSessionCompat.Callback() {
 
     private fun play(uri: Uri) {
         var mediaId: Long? = null
-        if (uri.scheme == "content") mediaId = MusicCoreUtil.findByMediaId(ContentUris.parseId(uri), MusicData.getAlbums(), MusicData.getSongs())?.id
+        if (uri.scheme == "content") {
+            mediaId = MusicCoreUtil.findByMediaId(ContentUris.parseId(uri), MusicData.getAlbums(), MusicData.getSongs())?.id
+        } else {
+            mediaId = MusicCoreUtil.retrieveMediaId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, SERVICE!!, uri.path)
+        }
         val song = MusicData.findSongById(mediaId ?: 0)
         return if (song != null) play(song) else doPlay(uri, null)
     }

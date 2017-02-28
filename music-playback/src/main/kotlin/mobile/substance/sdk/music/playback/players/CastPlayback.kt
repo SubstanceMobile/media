@@ -31,9 +31,10 @@ import com.google.android.gms.common.images.WebImage
 import mobile.substance.sdk.options.MusicCoreOptions
 import mobile.substance.sdk.music.core.dataLinkers.MusicData
 import mobile.substance.sdk.music.core.objects.Song
+import mobile.substance.sdk.music.playback.cast.HttpServer
 import mobile.substance.sdk.utils.MusicCoreUtil
 import mobile.substance.sdk.utils.MusicPlaybackUtil
-import mobile.substance.sdk.music.playback.cast.LocalServer
+import java.io.File
 
 object CastPlayback : Playback(), SessionManagerListener<Session>, RemoteMediaClient.Listener, RemoteMediaClient.ProgressListener {
 
@@ -49,12 +50,10 @@ object CastPlayback : Playback(), SessionManagerListener<Session>, RemoteMediaCl
         try {
             when (remoteMediaClient?.mediaStatus?.playerState) {
                 MediaStatus.PLAYER_STATE_IDLE -> {
+                    notifyIdle()
                     when (remoteMediaClient!!.mediaStatus.idleReason) {
                         MediaStatus.IDLE_REASON_ERROR -> notifyError()
-                        MediaStatus.IDLE_REASON_FINISHED -> {
-                            notifyIdle()
-                            next()
-                        }
+                        MediaStatus.IDLE_REASON_FINISHED -> next()
                     }
                 }
                 MediaStatus.PLAYER_STATE_BUFFERING -> {
@@ -98,7 +97,7 @@ object CastPlayback : Playback(), SessionManagerListener<Session>, RemoteMediaCl
     private var overrideIsPlaying = false
     private var overridePosition: Int? = null
 
-    private var fileServer = LocalServer()
+    private var fileServer = HttpServer(MusicPlaybackUtil.SERVER_PORT)
     // private var artworkServer = AsyncHttpServer()
 
     override fun init() {
@@ -120,7 +119,6 @@ object CastPlayback : Playback(), SessionManagerListener<Session>, RemoteMediaCl
 
     private fun doPlay(fileUri: Uri, artworkUri: Uri?, metadata: MediaMetadataCompat?) {
         remoteMediaClient?.stop()
-        fileServer.stop()
 
         try {
             val url = MusicCoreUtil.getUrlFromUri(fileUri)
@@ -130,12 +128,11 @@ object CastPlayback : Playback(), SessionManagerListener<Session>, RemoteMediaCl
                 val filePath = MusicCoreUtil.getFilePath(SERVICE!!, fileUri)
                 val fileType = filePath?.substring(filePath.lastIndexOf(".") + 1)
 
-                fileServer.paths = Pair(filePath, MusicCoreUtil.getFilePath(SERVICE!!, artworkUri ?: Uri.EMPTY))
                 fileServer.start()
 
-                val baseUrl = "http://${MusicPlaybackUtil.getIpAddressString(SERVICE!!)}:${MusicPlaybackUtil.SERVER_PORT}/"
-                val audioUrl = baseUrl + MusicPlaybackUtil.URL_PATH_PART_AUDIO + "/" + fileUri.toString().hashCode()
-                val artworkUrl = baseUrl + MusicPlaybackUtil.URL_PATH_PART_ARTWORK + "/" + artworkUri.toString().hashCode()
+                val baseUrl = "http://${MusicPlaybackUtil.getIpAddressString(SERVICE!!)}:${MusicPlaybackUtil.SERVER_PORT}"
+                val audioUrl = baseUrl + filePath
+                val artworkUrl = baseUrl + artworkUri?.path
 
                 Log.d(TAG, "Serving files. URLS: audio: $audioUrl artwork: $artworkUrl")
 
@@ -146,13 +143,11 @@ object CastPlayback : Playback(), SessionManagerListener<Session>, RemoteMediaCl
                         .build()
                 doLoad(mediaInfo, true)
             } else {
-
                 var artworkUrl: String? = null
 
                 if (artworkUri != null && MusicCoreUtil.getUrlFromUri(artworkUri) == null) {
-                    fileServer.paths = Pair(null, MusicCoreUtil.getFilePath(SERVICE!!, artworkUri))
                     fileServer.start()
-                    artworkUrl = "http://${MusicPlaybackUtil.getIpAddressString(SERVICE!!)}:${MusicPlaybackUtil.SERVER_PORT}/${MusicPlaybackUtil.URL_PATH_PART_ARTWORK}/${artworkUri.toString().hashCode()}"
+                    artworkUrl = "http://${MusicPlaybackUtil.getIpAddressString(SERVICE!!)}:${MusicPlaybackUtil.SERVER_PORT}${artworkUri.path}"
                     Log.d(TAG, "Serving file. URL: artwork: $artworkUrl")
                 }
 
