@@ -20,6 +20,8 @@ import android.content.ContentUris
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.provider.MediaStore
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
@@ -33,7 +35,9 @@ import mobile.substance.sdk.music.playback.PlaybackRemote
 import mobile.substance.sdk.music.playback.RepeatModes
 import mobile.substance.sdk.music.playback.service.MusicQueue
 import mobile.substance.sdk.music.playback.service.MusicService
+import mobile.substance.sdk.utils.MusicCoreUtil.createSongFromFile
 import java.util.*
+import kotlin.concurrent.thread
 
 abstract class Playback : MediaSessionCompat.Callback() {
     companion object {
@@ -95,15 +99,17 @@ abstract class Playback : MediaSessionCompat.Callback() {
         }
     }
 
-    private fun play(uri: Uri) {
+    private fun play(uri: Uri) = thread {
         var mediaId: Long? = null
         if (uri.scheme == "content") {
             mediaId = MusicCoreUtil.findByMediaId(ContentUris.parseId(uri), MusicData.getAlbums(), MusicData.getSongs())?.id
         } else {
             mediaId = MusicCoreUtil.retrieveMediaId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, SERVICE!!, uri.path)
         }
-        val song = MusicData.findSongById(mediaId ?: 0)
-        return if (song != null) play(song) else doPlay(uri, null)
+        val song = MusicData.findSongById(mediaId ?: 0) ?: createSongFromFile(uri.path)
+        Handler(Looper.getMainLooper()).post {
+            PlaybackRemote.play(song)
+        }
     }
 
     override fun onPlayFromUri(uri: Uri?, extras: Bundle?) {

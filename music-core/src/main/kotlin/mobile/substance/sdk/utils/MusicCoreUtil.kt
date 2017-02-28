@@ -40,6 +40,7 @@ import java.io.File
 import java.net.URL
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.Canvas
+import android.media.MediaMetadataRetriever
 import android.provider.BaseColumns
 import android.provider.MediaStore.MediaColumns
 import android.util.Log
@@ -195,6 +196,7 @@ object MusicCoreUtil {
      * @param path
      * @return the file's id in the media content provider
      */
+    @WorkerThread
     fun retrieveMediaId(providerUri: Uri, context: Context, path: String): Long {
         val projection = arrayOf(MediaColumns._ID, MediaColumns.DATA)
         val cursor = context.contentResolver.query(
@@ -220,5 +222,17 @@ object MusicCoreUtil {
     ///////////////////////////////////////////////////////////////////////////
 
     fun getUrlFromUri(uri: Uri): String? = if (URLUtil.isValidUrl(uri.toString()) && uri.toString().startsWith("http")) uri.toString() else null
+
+    @WorkerThread
+    fun createSongFromFile(path: String): Song {
+        val retriever = MediaMetadataRetriever()
+        retriever.setDataSource(path)
+        return Song.Builder()
+                .setTitle(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE) ?: path.substring(path.lastIndexOf("/") + 1))
+                .setArtistName(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST) ?: "<unknown>")
+                .setAlbumName(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM) ?: "<unknown>")
+                .setDuration(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION).toLong())
+                .build()
+    }
 
 }
