@@ -97,40 +97,6 @@ object MusicCoreUtil {
     ///////////////////////////////////////////////////////////////////////////
 
     /**
-     * Convenience method that simplifies getting the artwork for a specific song. Needs to be called from a worker thread
-     * in order not to cause a @code NetworkOnMainThreadException
-     *
-     * @param song song to get artwork of
-     *
-     * @param context required for the default artwork drawable fallback
-     *
-     * @return The retrieved Bitmap; null if a NetworkOnMainThreadException has been caught
-     */
-    @WorkerThread
-    fun getArtwork(song: Song, context: Context): Bitmap? {
-        try {
-            val albumArtPath = MusicData.findAlbumById(song.songAlbumId ?: 0)?.albumArtworkPath
-            if (albumArtPath != null && albumArtPath.isNotEmpty()) return BitmapFactory.decodeFile(albumArtPath)
-            if (song.hasExplicitArtwork && song.explicitArtworkUri!! != Uri.EMPTY) {
-                val url = getUrlFromUri(song.explicitArtworkUri!!)
-                return if (url != null) BitmapFactory.decodeStream(URL(url).openStream()) else BitmapFactory.decodeFile(song.explicitArtworkUri!!.path)
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-            if (e is NetworkOnMainThreadException) return null
-        }
-
-        val drawable = ContextCompat.getDrawable(context, MusicCoreOptions.defaultArt)
-        if (drawable is BitmapDrawable) return drawable.bitmap
-
-        val bitmap = Bitmap.createBitmap(drawable.intrinsicWidth, drawable.intrinsicHeight, Bitmap.Config.ARGB_8888)
-        val canvas = Canvas(bitmap)
-        drawable.setBounds(0, 0, canvas.width, canvas.height)
-        drawable.draw(canvas)
-        return bitmap
-    }
-
-    /**
      * Convenience method to get the file path of a content Uri
      *
      * @param context required to access the contentResolver
