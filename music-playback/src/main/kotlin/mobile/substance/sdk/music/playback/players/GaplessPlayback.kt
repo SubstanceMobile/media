@@ -64,12 +64,6 @@ object GaplessPlayback : Playback(),
     ///////////////
 
     override fun doPlay(fileUri: Uri, artworkUri: Uri?) {
-        //Stop the media player if a song is being played right now.
-        if (isPlaying())
-            getActivePlayer()?.stop()
-
-        getActivePlayer()?.reset() // Necessary step to be able to setDataSource() again
-
         // Switch the active player
         switchPlayers()
 
@@ -80,7 +74,14 @@ object GaplessPlayback : Playback(),
             doResume()
         }
 
+        //Stop the old media player if a song is being played right now.
+        if (isPlaying())
+            getInactivePlayer()?.stop()
+
+        getInactivePlayer()?.reset() // Reset the old MediaPlayeer, necessary to be able to setDataSource() again
+
         if (shouldPrepareNext()) {
+            println("GaplessPlayback.kt is preparing the next song...")
             if (repeatMode == PlaybackStateCompat.REPEAT_MODE_ONE) {
                 getInactivePlayer()?.prepareWithDataSource(SERVICE!!, fileUri)
             } else if (!MusicQueue.isLastPosition() || repeatMode == PlaybackStateCompat.REPEAT_MODE_ALL) {
@@ -202,7 +203,7 @@ object GaplessPlayback : Playback(),
 
     //Not checking it it is looping because onCompletion is never actually called if it is looping.
     override fun onCompletion(mp: MediaPlayer?) {
-        notifyIdle()
+        if (!isPrepared) notifyIdle()
         shutdownProgressThread()
         next()
     }

@@ -77,7 +77,7 @@ internal object MusicQueue {
         QUEUE_PRIMARY = songs
         POSITION = position
 
-        if (isSecondaryActive) isSecondaryActive = false else notifyChanged()
+        if (isSecondaryActive) PlaybackRemote.useShuffledQueue(false) else notifyChanged()
     }
 
     fun initSecondaryQueue() {

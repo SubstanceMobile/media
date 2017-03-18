@@ -239,11 +239,9 @@ object PlaybackRemote : ServiceConnection {
     /**
      * Shuffle the current queue
      */
-    fun shuffleQueue() {
-        val songs = ArrayList<Song>()
-        songs.addAll(MusicQueue.getQueue())
-        Collections.shuffle(songs)
-        play(songs, 0)
+    fun useShuffledQueue(useShuffledQueue: Boolean) {
+        if (!MusicQueue.isSecondaryActive && useShuffledQueue) MusicQueue.initSecondaryQueue()
+        MusicQueue.isSecondaryActive
     }
 
     /**

@@ -291,10 +291,7 @@ abstract class Playback : MediaSessionCompat.Callback() {
     // Shuffle mode
     ///////////////////////////////////////////////////////////////////////////
 
-    override fun onSetShuffleModeEnabled(enabled: Boolean) {
-        if (enabled) MusicQueue.initSecondaryQueue()
-        MusicQueue.isSecondaryActive = enabled
-    }
+    override fun onSetShuffleModeEnabled(enabled: Boolean) = PlaybackRemote.useShuffledQueue(enabled)
 
     ///////////////////////////////////////////////////////////////////////////
     // Others
