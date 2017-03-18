@@ -32,19 +32,21 @@ import android.util.Log
 import com.google.android.gms.cast.framework.CastContext
 import com.google.android.gms.cast.framework.CastState
 import com.google.android.gms.cast.framework.CastStateListener
-import mobile.substance.sdk.utils.MusicCoreUtil
-import mobile.substance.sdk.options.MusicPlaybackOptions
 import mobile.substance.sdk.music.playback.PlaybackRemote
-import mobile.substance.sdk.music.playback.RepeatModes
+import mobile.substance.sdk.music.playback.destroy
 import mobile.substance.sdk.music.playback.players.CastPlayback
+import mobile.substance.sdk.music.playback.players.GaplessPlayback
 import mobile.substance.sdk.music.playback.players.LocalPlayback
 import mobile.substance.sdk.music.playback.players.Playback
+import mobile.substance.sdk.options.MusicPlaybackOptions
+import mobile.substance.sdk.utils.MusicCoreUtil
 import java.util.*
+import kotlin.concurrent.thread
 
 open class MusicService : MediaBrowserServiceCompat(), CastStateListener {
 
     override fun onCastStateChanged(p0: Int) {
-        if (p0 == CastState.CONNECTED) replacePlaybackEngine(CastPlayback, engine.isPlaying() || engine.getCurrentPosInSong() > 0, true)
+        if (p0 == CastState.CONNECTED) replacePlaybackEngine(CastPlayback, engine.isPlaying() || engine.getCurrentPosition() > 0, true)
     }
 
     //Companion object for the unique ID and log tag.
@@ -91,7 +93,7 @@ open class MusicService : MediaBrowserServiceCompat(), CastStateListener {
         for (CALLBACK in CALLBACKS) call.invoke(CALLBACK)
     }
 
-    var engine: Playback = LocalPlayback
+    var engine: Playback = if (MusicPlaybackOptions.isGaplessPlaybackEnabled) GaplessPlayback else LocalPlayback
 
     internal fun replacePlaybackEngine(newEngine: Playback, hotSwap: Boolean, trustedSource: Boolean = false) {
         var oldPos = 0
@@ -104,7 +106,7 @@ open class MusicService : MediaBrowserServiceCompat(), CastStateListener {
                 engine.pause()
                 wasPlaying = true
             }
-            oldPos = engine.getCurrentPosInSong()
+            oldPos = engine.getCurrentPosition()
             Log.d(TAG, "Current state is saved. Cleaning up old engine")
         }
         engine.stop()
@@ -129,7 +131,7 @@ open class MusicService : MediaBrowserServiceCompat(), CastStateListener {
         }
 
         // Reset old values that become deprecated with a new engine
-        callback { onRepeatingChanged(RepeatModes.REPEAT_DISABLED) }
+        callback { onRepeatingChanged(PlaybackStateCompat.REPEAT_MODE_NONE) }
 
         Log.d(TAG, "Engine transaction complete")
     }
@@ -161,11 +163,13 @@ open class MusicService : MediaBrowserServiceCompat(), CastStateListener {
         engine.init(this)
     }
 
-    internal fun updatePlaybackState(callback: Boolean = false) {
+    internal fun updatePlaybackState(callback: Boolean = false, progress: Long = engine.getCurrentPosition().toLong()) {
         val playbackState = engine.playbackState
+        val repeatMode = engine.repeatMode
         session?.setPlaybackState(
-                PlaybackStateCompat.Builder().setActions(MusicPlaybackOptions.playbackActions.getActions())
-                        .setState(playbackState, engine.getCurrentPosInSong().toLong(), engine.getPlaybackSpeed())
+                PlaybackStateCompat.Builder()
+                        .setActions(MusicPlaybackOptions.playbackActions.getActions())
+                        .setState(playbackState or repeatMode, progress, engine.getPlaybackSpeed())
                         .build())
         if (callback) {
             callback {
@@ -177,33 +181,23 @@ open class MusicService : MediaBrowserServiceCompat(), CastStateListener {
     }
 
     internal fun updatePlaybackProgress(progress: Long? = null) {
-        session?.setPlaybackState(
-                PlaybackStateCompat.Builder().setActions(MusicPlaybackOptions.playbackActions.getActions())
-                        .setState(engine.playbackState, progress ?: engine.getCurrentPosInSong().toLong(), engine.getPlaybackSpeed())
-                        .build())
-        Handler(Looper.getMainLooper()).post { callback { onProgressChanged(progress?.toInt() ?: engine.getCurrentPosInSong()) } }
+        updatePlaybackState(progress = progress ?: engine.getCurrentPosition().toLong())
+        Handler(Looper.getMainLooper()).post { callback { onProgressChanged(progress?.toInt() ?: engine.getCurrentPosition()) } }
     }
 
-    internal fun updateMetadata() {
-        Thread() {
-            run {
-                val source = MusicQueue.getCurrentSong()?.getMetadata() ?: return@Thread
-                session?.setMetadata(MediaMetadataCompat.Builder(source)
-                        .putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, MusicCoreUtil.getArtwork(MusicQueue.getCurrentSong()!!, this))
-                        .build())
-            }
-        }.start()
+    internal fun updateMetadata() = thread {
+        val source = MusicQueue.getCurrentSong()?.getMetadata()
+        val metadataCompat = MediaMetadataCompat.Builder(source)
+        if (MusicPlaybackOptions.isLockscreenArtworkEnabled) {
+            metadataCompat.putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART,
+                    MusicCoreUtil.getArtwork(MusicQueue.getCurrentSong()!!, this, MusicPlaybackOptions.isLockscreenArtworkBlurEnabled))
+        }
+        session?.setMetadata(metadataCompat.build())
     }
 
     ///////////////////////////////////////////////////////////////////////////
     // MediaSession
     ///////////////////////////////////////////////////////////////////////////
-
-    private fun destroySession() {
-        session?.isActive = false
-        session?.release()
-        session = null
-    }
 
     override fun onGetRoot(clientPackageName: String, clientUid: Int, rootHints: Bundle?): BrowserRoot? = null // We don't use this
 
@@ -221,7 +215,6 @@ open class MusicService : MediaBrowserServiceCompat(), CastStateListener {
 
     override fun onCreate() {
         super.onCreate()
-        Log.d(TAG, "onCreate()")
         init()
     }
 
@@ -229,7 +222,7 @@ open class MusicService : MediaBrowserServiceCompat(), CastStateListener {
         super.onDestroy()
         HeadsetPlugReceiver unregister this
         AudioBecomingNoisyReceiver unregister this
-        destroySession()
+        session?.destroy()
         try {
             if (MusicPlaybackOptions.defaultCallback != null) unregisterCallback(MusicPlaybackOptions.defaultCallback!!)
         } catch (ignored: Exception) {
@@ -244,14 +237,12 @@ open class MusicService : MediaBrowserServiceCompat(), CastStateListener {
     fun notify(notification: Notification) = notificationManager!!.notify(UNIQUE_ID, notification)
 
     fun kill() {
-        destroySession()
+        session?.destroy()
         stopForeground(true)
         stopSelf()
     }
 
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
-        Log.d(TAG, "onStartCommand()")
-
         if (intent.action != null) {
             val action = intent.action
             when {
@@ -286,7 +277,6 @@ open class MusicService : MediaBrowserServiceCompat(), CastStateListener {
     }
 
     override fun onBind(intent: Intent): IBinder? {
-        Log.d(TAG, "onBind()")
         return binder
     }
 

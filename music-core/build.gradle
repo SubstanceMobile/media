@@ -45,5 +45,7 @@ dependencies {
     compile "com.android.support:support-annotations:$project.supportLibVersion"
     compile "com.android.support:support-v4:$project.supportLibVersion"
     compile 'com.github.bumptech.glide:glide:3.7.0'
+    compile 'jp.wasabeef:glide-transformations:2.0.2'
+    compile 'co.metalab.asyncawait:asyncawait:1.0.0'
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 }

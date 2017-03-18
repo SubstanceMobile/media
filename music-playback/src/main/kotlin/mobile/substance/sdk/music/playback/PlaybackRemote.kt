@@ -28,9 +28,12 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
+import android.support.annotation.IntDef
 import android.support.v4.media.session.MediaSessionCompat
+import android.support.v4.media.session.PlaybackStateCompat
 import android.support.v7.app.NotificationCompat
 import android.util.Log
+import co.metalab.asyncawait.async
 import com.google.android.gms.cast.framework.CastContext
 import mobile.substance.sdk.music.core.MusicApiInternalError
 import mobile.substance.sdk.music.core.dataLinkers.MusicData
@@ -185,8 +188,8 @@ object PlaybackRemote : ServiceConnection {
      */
     fun playNext() = getService { control()?.transportControls?.skipToNext() }
 
-    internal fun playNextInternal() {
-        MusicQueue.moveForward(1)
+    internal fun playNextInternal() = getService {
+        if (engine.repeatMode != PlaybackStateCompat.REPEAT_MODE_ALL || MusicQueue.isLastPosition()) MusicQueue.moveForward(1)
         play()
     }
 
@@ -246,16 +249,16 @@ object PlaybackRemote : ServiceConnection {
     /**
      * Set whether the playback engine shall loop or not
      */
-    fun setRepeatMode(mode: Int) = getService { engine.repeatMode = mode }
+    fun setRepeatMode(@PlaybackStateCompat.RepeatMode mode: Int) = getService { control()!!.transportControls.setRepeatMode(mode) }
 
     /**
-     * Switch the repeat mode in the recurring order [RepeatModes.REPEAT_DISABLED] -> [RepeatModes.REPEAT_ENABLED] -> [RepeatModes.REPEAT_ONCE]
+     * Switch the repeat mode in the recurring order [PlaybackStateCompat.REPEAT_MODE_NONE] -> [PlaybackStateCompat.REPEAT_MODE_ALL] -> [PlaybackStateCompat.REPEAT_MODE_ONE]
      */
     fun switchRepeatMode() = getService {
         when (engine.repeatMode) {
-            RepeatModes.REPEAT_DISABLED -> engine.repeatMode = RepeatModes.REPEAT_ENABLED
-            RepeatModes.REPEAT_ENABLED -> engine.repeatMode = RepeatModes.REPEAT_ONCE
-            RepeatModes.REPEAT_ONCE -> engine.repeatMode = RepeatModes.REPEAT_DISABLED
+            PlaybackStateCompat.REPEAT_MODE_NONE -> control()!!.transportControls.setRepeatMode(PlaybackStateCompat.REPEAT_MODE_ALL)
+            PlaybackStateCompat.REPEAT_MODE_ALL -> control()!!.transportControls.setRepeatMode(PlaybackStateCompat.REPEAT_MODE_ONE)
+            PlaybackStateCompat.REPEAT_MODE_ONE -> control()!!.transportControls.setRepeatMode(PlaybackStateCompat.REPEAT_MODE_NONE)
         }
     }
 
@@ -320,24 +323,10 @@ object PlaybackRemote : ServiceConnection {
     }
 
     fun makeNotification(updateInterface: NotificationUpdateInterface): Notification {
-        val artwork = MusicCoreUtil.getArtwork(MusicQueue.getCurrentSong()!!, service!!)
-        val notification = makeNotification(artwork)
-        updateInterface.updateNotification(notification)
-
-        if (artwork == null) {
-            Thread {
-                run {
-                    try {
-                        val externalArtwork = MusicCoreUtil.getArtwork(MusicQueue.getCurrentSong()!!, service!!)
-                        Log.d(PlaybackRemote::class.java.simpleName, "New try, seperate Thread! Is it still null? ${externalArtwork == null}, ${externalArtwork?.byteCount}")
-                        Handler(Looper.getMainLooper()).post { updateInterface.updateNotification(makeNotification(externalArtwork)) }
-                    } catch (ignored: Exception) {
-                    }
-                }
-            }.start()
+        async {
+            updateInterface.updateNotification(makeNotification(await { MusicCoreUtil.getArtwork(MusicQueue.getCurrentSong()!!, service!!) }))
         }
-
-        return notification
+        return makeNotification(null)
     }
 
     internal fun makeNotification(albumArt: Bitmap?): Notification {
@@ -350,7 +339,11 @@ object PlaybackRemote : ServiceConnection {
                     MusicPlaybackUtil.getPendingIntent(context!!, MusicPlaybackUtil.Action.NOTIFICATION, serviceClass),
                     MusicPlaybackUtil.getPendingIntent(context!!, MusicPlaybackUtil.Action.STOP, serviceClass))
         }
-        notificationCreator.populate(getCurrentSong()!!, notificationBuilder!!, getMediaSession(), MusicPlaybackUtil.getPendingIntent(context!!, MusicPlaybackUtil.Action.PLAY, serviceClass), MusicPlaybackUtil.getPendingIntent(context!!, MusicPlaybackUtil.Action.PAUSE, serviceClass))
+        notificationCreator.populate(getCurrentSong()!!,
+                notificationBuilder!!,
+                getMediaSession(),
+                MusicPlaybackUtil.getPendingIntent(context!!, MusicPlaybackUtil.Action.PLAY, serviceClass),
+                MusicPlaybackUtil.getPendingIntent(context!!, MusicPlaybackUtil.Action.PAUSE, serviceClass))
         if (albumArt != null) notificationCreator.loadArt(albumArt, notificationBuilder!!)
         return notificationCreator.buildNotification(notificationBuilder!!)
     }
@@ -362,7 +355,7 @@ object PlaybackRemote : ServiceConnection {
     /**
      * <b>WARNING: Do not call this unless really necessary or you know what you are doing</b>
      *
-     * Feel free to override Playback and set it here. This will tell the service to control this instead of the default LocalPlayback and CastPlayback classes. As a warning, if you start cast playback this will be replaced.
+     * Feel free to override Playback and set it here. This will tell the service to control this instead of the default LocalPlayback, GaplessPlayback and CastPlayback classes. As a warning, if you start cast playback this will be replaced.
      * Be warned that if you stop cast playback there will first be a call to MusicPlaybackOptions to create a custom player instance. Make sure you call that too.
      *
      * If you want all state to be transferred between players, make sure you leave the hotswap (the second parameter) as true. This will automatically transfer playback state

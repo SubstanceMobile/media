@@ -21,6 +21,7 @@ package mobile.substance.sdk.options
  */
 object MusicCoreOptions {
 
+    var glidePreferPlaceholder = false
     var defaultArt: Int = 0
     var defaultArtUrl: String = "https://substanceproject.net/img/Substance_512.png"
 

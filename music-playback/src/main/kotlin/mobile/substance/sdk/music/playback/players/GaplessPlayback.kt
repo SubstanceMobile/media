@@ -1,39 +1,34 @@
-/*
- * Copyright 2016 Substance Mobile
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package mobile.substance.sdk.music.playback.players
 
 import android.content.Context
 import android.media.AudioManager
 import android.media.MediaPlayer
 import android.net.Uri
-import android.os.Build
+import android.os.Bundle
 import android.os.PowerManager
+import android.os.ResultReceiver
+import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
-import mobile.substance.sdk.music.core.objects.Song
-import mobile.substance.sdk.utils.MusicCoreUtil
+import mobile.substance.sdk.music.playback.PlaybackRemote
 import mobile.substance.sdk.music.playback.destroy
+import mobile.substance.sdk.music.playback.prepareWithDataSource
+import mobile.substance.sdk.music.playback.service.MusicQueue
+import mobile.substance.sdk.utils.MusicCoreUtil
 
-
-object LocalPlayback : Playback(),
-        MediaPlayer.OnPreparedListener, MediaPlayer.OnCompletionListener, MediaPlayer.OnErrorListener, AudioManager.OnAudioFocusChangeListener {
-    val TAG = "LocalPlayback"
-    private var localPlayer: MediaPlayer? = null
+object GaplessPlayback : Playback(),
+        MediaPlayer.OnPreparedListener,
+        MediaPlayer.OnCompletionListener,
+        MediaPlayer.OnErrorListener,
+        AudioManager.OnAudioFocusChangeListener {
+    val TAG = GaplessPlayback::class.java.simpleName
+    private var players = arrayOfNulls<MediaPlayer>(2)
+    private var isPrepared = false
+    private var activePlayerIndex = 0
     private var audioManager: AudioManager? = null
     private var wasPlayingBeforeAction = false
+
+    private fun getActivePlayer(): MediaPlayer? = players[activePlayerIndex]
+    private fun getInactivePlayer(): MediaPlayer? = players[if (activePlayerIndex == 0) 1 else 0]
 
     override fun init() {
         audioManager = SERVICE!!.getSystemService(Context.AUDIO_SERVICE) as AudioManager
@@ -44,19 +39,19 @@ object LocalPlayback : Playback(),
     ///////////////////////////////////////////////////////////////////////////
 
     override fun createPlayer() {
-        localPlayer = MediaPlayer()
+        players[0] = MediaPlayer()
+        players[1] = MediaPlayer()
     }
 
     override fun configPlayer() {
-        localPlayer?.setWakeMode(SERVICE, PowerManager.PARTIAL_WAKE_LOCK)
-        localPlayer?.setAudioStreamType(AudioManager.STREAM_MUSIC)
-        localPlayer?.setOnPreparedListener(this)
-        localPlayer?.setOnCompletionListener(this)
-        localPlayer?.setOnErrorListener(this)
-
-        //API 23+ playback speed API
-        if (Build.VERSION.SDK_INT >= 23) {
-            // localPlayer.playbackParams = PlaybackParams().setSpeed(getPlaybackSpeed()).allowDefaults() TODO: throws java.lang.IllegalStateException
+        players.forEach {
+            it?.apply {
+                setWakeMode(SERVICE, PowerManager.PARTIAL_WAKE_LOCK)
+                setAudioStreamType(AudioManager.STREAM_MUSIC)
+                setOnPreparedListener(this@GaplessPlayback)
+                setOnCompletionListener(this@GaplessPlayback)
+                setOnErrorListener(this@GaplessPlayback)
+            }
         }
     }
 
@@ -71,22 +66,34 @@ object LocalPlayback : Playback(),
     override fun doPlay(fileUri: Uri, artworkUri: Uri?) {
         //Stop the media player if a song is being played right now.
         if (isPlaying())
-            localPlayer?.stop()
+            getActivePlayer()?.stop()
 
-        localPlayer?.reset() // Necessary step to be able to setDataSource() again
+        getActivePlayer()?.reset() // Necessary step to be able to setDataSource() again
 
-        //Start the service and do some work!
-        try {
-            val url = fileUri.toString()
-            Log.d("Checking url validity", url)
-            if (!MusicCoreUtil.isHttpUrl(url)) localPlayer?.setDataSource(SERVICE!!.applicationContext, fileUri) else localPlayer?.setDataSource(url)
-        } catch (e: Exception) {
-            Log.e(TAG, "Unable to play " + MusicCoreUtil.getFilePath(SERVICE!!, fileUri), e)
-        } finally {
-            notifyBuffering()
-            localPlayer?.prepareAsync()
+        // Switch the active player
+        switchPlayers()
+
+        if (!isPrepared) {
+            getActivePlayer()?.prepareWithDataSource(SERVICE!!, fileUri)
+        } else {
+            isPrepared = false
+            doResume()
+        }
+
+        if (shouldPrepareNext()) {
+            if (repeatMode == PlaybackStateCompat.REPEAT_MODE_ONE) {
+                getInactivePlayer()?.prepareWithDataSource(SERVICE!!, fileUri)
+            } else if (!MusicQueue.isLastPosition() || repeatMode == PlaybackStateCompat.REPEAT_MODE_ALL) {
+                getInactivePlayer()?.prepareWithDataSource(SERVICE!!, PlaybackRemote.getNextSong()!!.uri)
+            }
         }
     }
+
+    private fun switchPlayers() {
+        activePlayerIndex = if (activePlayerIndex == 0) 1 else 0
+    }
+
+    private fun shouldPrepareNext(): Boolean = (!MusicQueue.isLastPosition() || repeatMode == PlaybackStateCompat.REPEAT_MODE_ALL) || (repeatMode == PlaybackStateCompat.REPEAT_MODE_ONE)
 
     ////////////
     // Resume //
@@ -97,7 +104,7 @@ object LocalPlayback : Playback(),
     fun doResume(updateFocus: Boolean) {
         if (!isPlaying()) {
             if (!updateFocus or requestAudioFocus()) {
-                localPlayer?.start()
+                getActivePlayer()?.start()
                 notifyPlaying()
                 startProgressThread()
             } else Log.e(TAG, "AudioFocus denied")
@@ -112,7 +119,7 @@ object LocalPlayback : Playback(),
 
     fun doPause(updateFocus: Boolean) {
         if (updateFocus) giveUpAudioFocus()
-        localPlayer?.pause()
+        getActivePlayer()?.pause()
         notifyPaused()
         shutdownProgressThread()
     }
@@ -125,7 +132,9 @@ object LocalPlayback : Playback(),
 
     fun doStop(updateFocus: Boolean) {
         if (updateFocus) giveUpAudioFocus()
-        localPlayer?.destroy()
+        players.forEach {
+            it?.destroy()
+        }
         shutdownProgressThread()
         notifyIdle()
     }
@@ -137,10 +146,10 @@ object LocalPlayback : Playback(),
     override fun doSeek(time: Long) {
         val to = time.toInt()
         wasPlayingBeforeAction = isPlaying()
-        localPlayer?.pause()
-        if (to <= localPlayer!!.duration) {
-            localPlayer?.seekTo(to)
-            if (wasPlayingBeforeAction) localPlayer?.start()
+        getActivePlayer()?.pause()
+        if (to <= getActivePlayer()!!.duration) {
+            getActivePlayer()?.seekTo(to)
+            if (wasPlayingBeforeAction) getActivePlayer()?.start()
         } else next()
     }
 
@@ -185,7 +194,11 @@ object LocalPlayback : Playback(),
     // STATUS: TODO
     ///////////////////////////////////////////////////////////////////////////
 
-    override fun onPrepared(mp: MediaPlayer?) = doResume()
+    override fun onPrepared(mp: MediaPlayer?) {
+        if (mp == getInactivePlayer()) {
+            isPrepared = true
+        } else doResume()
+    }
 
     //Not checking it it is looping because onCompletion is never actually called if it is looping.
     override fun onCompletion(mp: MediaPlayer?) {
@@ -226,18 +239,25 @@ object LocalPlayback : Playback(),
         }
     }
 
-    private fun setDucking(duck: Boolean) = localPlayer?.setVolume(if (duck) 0.5f else 1.0f, if (duck) 0.5f else 1.0f)
+    private fun setDucking(duck: Boolean) = getActivePlayer()?.setVolume(if (duck) 0.5f else 1.0f, if (duck) 0.5f else 1.0f)
 
     ///////////////////////////////////////////////////////////////////////////
     // Misc.
     // STATUS: COMPLETE
     ///////////////////////////////////////////////////////////////////////////
 
-    override fun isPlaying() = localPlayer?.isPlaying ?: false
+    override fun isPlaying(): Boolean {
+        try {
+            return getActivePlayer()?.isPlaying ?: false
+        } catch (e: IllegalStateException) {
+            e.printStackTrace()
+            return false
+        }
+    }
 
     override fun getCurrentPosition(): Int {
         try {
-            return localPlayer?.currentPosition ?: 0
+            return getActivePlayer()?.currentPosition ?: 0
         } catch (e: IllegalStateException) {
             e.printStackTrace()
             return 0

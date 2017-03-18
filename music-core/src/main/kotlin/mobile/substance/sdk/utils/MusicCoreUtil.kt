@@ -18,44 +18,32 @@ package mobile.substance.sdk.utils
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.content.Intent
 import android.database.Cursor
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
+import android.graphics.Canvas
+import android.graphics.drawable.BitmapDrawable
+import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
-import android.os.NetworkOnMainThreadException
+import android.provider.BaseColumns
 import android.provider.DocumentsContract
 import android.provider.MediaStore
+import android.provider.MediaStore.MediaColumns
 import android.support.annotation.WorkerThread
 import android.support.v4.content.ContextCompat
-import android.util.TypedValue
 import android.webkit.URLUtil
-import mobile.substance.sdk.options.MusicCoreOptions
+import com.bumptech.glide.Glide
+import com.bumptech.glide.request.target.Target
+import jp.wasabeef.glide.transformations.BlurTransformation
 import mobile.substance.sdk.music.core.dataLinkers.MusicData
 import mobile.substance.sdk.music.core.objects.MediaObject
 import mobile.substance.sdk.music.core.objects.Song
+import mobile.substance.sdk.options.MusicCoreOptions
 import java.io.File
-import java.net.URL
-import android.graphics.drawable.BitmapDrawable
-import android.graphics.Canvas
-import android.media.MediaMetadataRetriever
-import android.provider.BaseColumns
-import android.provider.MediaStore.MediaColumns
-import android.util.Log
 
 
 object MusicCoreUtil {
-
-    /**
-     * Convenience method that simplifies calling intents and such
-
-     * @param cxt The context to start the activity from
-     *
-     * @param url The url so start
-     */
-    fun startUrl(cxt: Context, url: String) = cxt.startActivity(Intent(Intent.ACTION_VIEW).setData(Uri.parse(url)))
 
     /**
      * Formats strings to match time. Is either hh:mm:ss or mm:ss
@@ -74,25 +62,6 @@ object MusicCoreUtil {
     }
 
     ///////////////////////////////////////////////////////////////////////////
-    // Android Version Utils
-    ///////////////////////////////////////////////////////////////////////////
-
-    val isKitKat: Boolean
-        get() = Build.VERSION.SDK_INT >= 19
-
-    val isLollipop: Boolean
-        get() = Build.VERSION.SDK_INT >= 21
-
-    val isMarshmallow: Boolean
-        get() = Build.VERSION.SDK_INT >= 23
-
-    ///////////////////////////////////////////////////////////////////////////
-    // Unit conversions
-    ///////////////////////////////////////////////////////////////////////////
-
-    fun dpToPx(context: Context, dp: Float): Float = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, context.resources.displayMetrics)
-
-    ///////////////////////////////////////////////////////////////////////////
     // Bitmap retrieval
     ///////////////////////////////////////////////////////////////////////////
 
@@ -106,9 +75,9 @@ object MusicCoreUtil {
      * @return the file path
      */
     fun getFilePath(context: Context, uri: Uri): String? {
-        if (isKitKat && DocumentsContract.isDocumentUri(context, uri)) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT && DocumentsContract.isDocumentUri(context, uri)) {
             if (isExternalStorageDocument(uri)) {
-                val docId : String= DocumentsContract.getDocumentId(uri)
+                val docId: String = DocumentsContract.getDocumentId(uri)
                 val split = (java.lang.String.valueOf(docId) as String).split(":")
                 val type = split[0]
                 if (("primary" as String).equals(uri.scheme, true)) {
@@ -127,17 +96,21 @@ object MusicCoreUtil {
                 }
                 val selection = "_id=?"
                 val selectionArgs = arrayOf<String>(split[1])
-                return getDataColumn(context, contentUri!!, selection, selectionArgs)
+                return queryDataColumnForContentUri(context, contentUri!!, selection, selectionArgs)
             }
         } else if (("content" as String).equals(uri.scheme, true)) {
-            return getDataColumn(context, uri, null, null)
+            return queryDataColumnForContentUri(context, uri, null, null)
         } else if (("file" as String).equals(uri.scheme, true)) {
             return uri.path
         }
         return null
     }
 
-    private fun getDataColumn(context: Context, uri: Uri, selection: String?, selectionArgs: Array<String>?): String? {
+    private fun isExternalStorageDocument(uri: Uri): Boolean = "com.android.externalstorage.documents" == uri.authority
+
+    private fun isMediaDocument(uri: Uri): Boolean = "com.android.providers.media.documents" == uri.authority
+
+    private fun queryDataColumnForContentUri(context: Context, uri: Uri, selection: String?, selectionArgs: Array<String>?): String? {
         var cursor: Cursor? = null
         val column = "_data"
         val projection = arrayOf(column)
@@ -179,15 +152,44 @@ object MusicCoreUtil {
                 .firstOrNull { it.id == id }
     }
 
-    private fun isExternalStorageDocument(uri: Uri): Boolean = "com.android.externalstorage.documents" == uri.authority
-
-    private fun isMediaDocument(uri: Uri): Boolean = "com.android.providers.media.documents" == uri.authority
+    /**
+     * Convenience method that simplifies getting the artwork for a specific song
+     *
+     * @param song song to get artwork of
+     *
+     * @param context required for the default artwork drawable fallback
+     *
+     * @return The retrieved Bitmap; null if a NetworkOnMainThreadException has been caught
+     */
+    @WorkerThread
+    fun getArtwork(song: Song, context: Context, blurIfPossible: Boolean = false): Bitmap? {
+        var bitmap: Bitmap?
+        val albumArtPath = MusicData.findAlbumById(song.songAlbumId ?: 0)?.albumArtworkPath
+        val requestBuilder = Glide.with(context)
+                .load(if (song.hasExplicitArtwork && song.explicitArtworkUri!! != Uri.EMPTY) song.explicitArtworkUri.toString() else albumArtPath)
+                .asBitmap()
+                .error(MusicCoreOptions.defaultArt)
+        if (blurIfPossible) requestBuilder.transform(BlurTransformation(context))
+        bitmap = requestBuilder.into(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL).get()
+        if (bitmap == null) {
+            val drawable = ContextCompat.getDrawable(context, MusicCoreOptions.defaultArt)
+            if (drawable is BitmapDrawable) {
+                bitmap = drawable.bitmap
+            } else {
+                bitmap = Bitmap.createBitmap(drawable.intrinsicWidth, drawable.intrinsicHeight, Bitmap.Config.ARGB_8888)
+                val canvas = Canvas(bitmap)
+                drawable.setBounds(0, 0, canvas.width, canvas.height)
+                drawable.draw(canvas)
+            }
+        }
+        return bitmap
+    }
 
     ///////////////////////////////////////////////////////////////////////////
     // Url
     ///////////////////////////////////////////////////////////////////////////
 
-    fun getUrlFromUri(uri: Uri): String? = if (URLUtil.isValidUrl(uri.toString()) && uri.toString().startsWith("http")) uri.toString() else null
+    fun isHttpUrl(url: String): Boolean = URLUtil.isValidUrl(url) && url.startsWith("http")
 
     @WorkerThread
     fun createSongFromFile(path: String): Song {

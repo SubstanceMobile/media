@@ -32,6 +32,7 @@ import mobile.substance.sdk.options.MusicCoreOptions
 import mobile.substance.sdk.music.core.dataLinkers.MusicData
 import mobile.substance.sdk.music.core.objects.Song
 import mobile.substance.sdk.music.playback.cast.HttpServer
+import mobile.substance.sdk.options.MusicPlaybackOptions
 import mobile.substance.sdk.utils.MusicCoreUtil
 import mobile.substance.sdk.utils.MusicPlaybackUtil
 import java.io.File
@@ -56,18 +57,10 @@ object CastPlayback : Playback(), SessionManagerListener<Session>, RemoteMediaCl
                         MediaStatus.IDLE_REASON_FINISHED -> next()
                     }
                 }
-                MediaStatus.PLAYER_STATE_BUFFERING -> {
-                    notifyBuffering()
-                }
-                MediaStatus.PLAYER_STATE_PAUSED -> {
-                    notifyPaused()
-                }
-                MediaStatus.PLAYER_STATE_PLAYING -> {
-                    notifyPlaying()
-                }
-                MediaStatus.PLAYER_STATE_UNKNOWN -> {
-                    notifyIdle()
-                }
+                MediaStatus.PLAYER_STATE_BUFFERING -> notifyBuffering()
+                MediaStatus.PLAYER_STATE_PAUSED -> notifyPaused()
+                MediaStatus.PLAYER_STATE_PLAYING -> notifyPlaying()
+                MediaStatus.PLAYER_STATE_UNKNOWN -> notifyIdle()
             }
         } catch (e: Exception) {
             e.printStackTrace()
@@ -121,9 +114,7 @@ object CastPlayback : Playback(), SessionManagerListener<Session>, RemoteMediaCl
         remoteMediaClient?.stop()
 
         try {
-            val url = MusicCoreUtil.getUrlFromUri(fileUri)
-
-            if (url == null) {
+            if (!MusicCoreUtil.isHttpUrl(fileUri.toString())) {
 
                 val filePath = MusicCoreUtil.getFilePath(SERVICE!!, fileUri)
                 val fileType = filePath?.substring(filePath.lastIndexOf(".") + 1)
@@ -145,13 +136,13 @@ object CastPlayback : Playback(), SessionManagerListener<Session>, RemoteMediaCl
             } else {
                 var artworkUrl: String? = null
 
-                if (artworkUri != null && MusicCoreUtil.getUrlFromUri(artworkUri) == null) {
+                if (artworkUri != null && !MusicCoreUtil.isHttpUrl(artworkUri.toString())) {
                     fileServer.start()
                     artworkUrl = "http://${MusicPlaybackUtil.getIpAddressString(SERVICE!!)}:${MusicPlaybackUtil.SERVER_PORT}${artworkUri.path}"
                     Log.d(TAG, "Serving file. URL: artwork: $artworkUrl")
                 }
 
-                val mediaInfo = MediaInfo.Builder(url)
+                val mediaInfo = MediaInfo.Builder(fileUri.toString())
                         .setContentType("audio/*")
                         .setMetadata(buildMetadata(artworkUrl ?: artworkUri?.toString() ?: MusicCoreOptions.defaultArtUrl, metadata ?: MediaMetadataCompat.Builder().build()))
                         .setStreamType(MediaInfo.STREAM_TYPE_LIVE)
@@ -170,9 +161,9 @@ object CastPlayback : Playback(), SessionManagerListener<Session>, RemoteMediaCl
 
     override fun doPlay(fileUri: Uri, artworkUri: Uri?) = doPlay(fileUri, artworkUri, null)
 
-    private fun doLoad(info: MediaInfo, autoplay: Boolean) {
+    private fun doLoad(info: MediaInfo, autoPlay: Boolean) {
         notifyBuffering()
-        remoteMediaClient?.load(info, autoplay)?.setResultCallback {
+        remoteMediaClient?.load(info, autoPlay)?.setResultCallback {
             if (!(it.status?.isSuccess ?: false)) {
                 logStatus(it.status, "Playback failed")
             } else notifyPlaying()
@@ -247,11 +238,9 @@ object CastPlayback : Playback(), SessionManagerListener<Session>, RemoteMediaCl
         return (remoteMediaClient?.isPlaying ?: false) || overrideIsPlaying
     }
 
-    override fun getCurrentPosInSong(): Int {
+    override fun getCurrentPosition(): Int {
         return if (overrideIsPlaying) overridePosition ?: 0 else remoteMediaClient?.approximateStreamPosition?.toInt() ?: 0
     }
-
-    override val repeatOnNext: Boolean = true
 
     override fun onSessionResumeFailed(p0: Session?, p1: Int) {}
 
@@ -260,7 +249,7 @@ object CastPlayback : Playback(), SessionManagerListener<Session>, RemoteMediaCl
     override fun onSessionEnding(p0: Session?) {
         overrideIsPlaying = true
         overridePosition = remoteMediaClient?.approximateStreamPosition?.toInt()
-        SERVICE?.replacePlaybackEngine(LocalPlayback, true, true)
+        SERVICE?.replacePlaybackEngine(if (MusicPlaybackOptions.isGaplessPlaybackEnabled) GaplessPlayback else LocalPlayback, true, true)
     }
 
     override fun onSessionEnded(p0: Session?, p1: Int) {

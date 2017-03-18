@@ -25,6 +25,7 @@ import mobile.substance.sdk.music.loading.Library
 import mobile.substance.sdk.options.MusicCoreOptions
 import mobile.substance.sdk.options.MusicPlaybackOptions
 import java.lang.reflect.Field
+import kotlin.concurrent.thread
 
 /**
  * Created by Julian Os on 09.05.2016.
@@ -38,21 +39,21 @@ class SampleApp : Application() {
 
         Library.enable()
 
-        Thread() {
-            run {
-                MusicCoreOptions.defaultArt = R.drawable.default_artwork_gem
-                MusicPlaybackOptions.statusbarIconResId = R.drawable.ic_audiotrack_white_24dp
-                MusicPlaybackOptions.isCastEnabled = true
+        thread {
+            MusicCoreOptions.defaultArt = R.drawable.default_artwork_gem
+            MusicPlaybackOptions.statusbarIconResId = R.drawable.ic_audiotrack_white_24dp
+            MusicPlaybackOptions.isCastEnabled = true
+            MusicPlaybackOptions.isGaplessPlaybackEnabled
+            MusicPlaybackOptions.isLockscreenArtworkBlurEnabled = true
 
-                var field: Field? = null
-                try {
-                    field = BuildConfig::class.java.getField("CAST_APPLICATION_ID")
-                } catch (e: Exception) {
-                    Log.i("SampleApp", "There is no BuildConfig field 'CAST_APPLICATION_ID', the default receiver id will be used")
-                }
-                MusicPlaybackOptions.castApplicationId = if (field == null) CastMediaControlIntent.DEFAULT_MEDIA_RECEIVER_APPLICATION_ID else field.get(null) as String
+            var field: Field? = null
+            try {
+                field = BuildConfig::class.java.getField("CAST_APPLICATION_ID")
+            } catch (e: Exception) {
+                Log.i("SampleApp", "There is no BuildConfig field 'CAST_APPLICATION_ID', the default receiver id will be used")
             }
-        }.start()
+            MusicPlaybackOptions.castApplicationId = if (field == null) CastMediaControlIntent.DEFAULT_MEDIA_RECEIVER_APPLICATION_ID else field.get(null) as String
+        }
     }
 
 }

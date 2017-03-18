@@ -32,7 +32,6 @@ import mobile.substance.sdk.music.core.dataLinkers.MusicData
 import mobile.substance.sdk.music.core.objects.*
 import mobile.substance.sdk.utils.MusicCoreUtil
 import mobile.substance.sdk.music.playback.PlaybackRemote
-import mobile.substance.sdk.music.playback.RepeatModes
 import mobile.substance.sdk.music.playback.service.MusicQueue
 import mobile.substance.sdk.music.playback.service.MusicService
 import mobile.substance.sdk.utils.MusicCoreUtil.createSongFromFile
@@ -40,10 +39,9 @@ import java.util.*
 import kotlin.concurrent.thread
 
 abstract class Playback : MediaSessionCompat.Callback() {
+
     companion object {
-        val TAG = "Playback"
-        val ACTION_PLAY_FROM_LIST = "SUBSTANCE_SDK_SET_REPEAT_" + MusicService.UNIQUE_ID
-        val ACTION_SET_REPEAT = "SUBSTANCE_SDK_SET_REPEAT_" + MusicService.UNIQUE_ID
+        val TAG: String = Playback::class.java.simpleName
     }
 
     var SERVICE: MusicService? = null
@@ -196,21 +194,10 @@ abstract class Playback : MediaSessionCompat.Callback() {
     // Next
     ///////////////////////////////////////////////////////////////////////////
 
-    /**
-     * This also handles the next button with repeat. This way, calling next() will repeat if repeatMode equals [RepeatModes.REPEAT_ENABLED]. This can be turned off by overriding
-     * repeatOnNext to be false.
-     */
     fun next() {
         when (repeatMode) {
-            RepeatModes.REPEAT_DISABLED -> doNext()
-            RepeatModes.REPEAT_ENABLED -> if (repeatOnNext) play() else {
-                repeatMode = RepeatModes.REPEAT_DISABLED
-                doNext()
-            }
-            RepeatModes.REPEAT_ONCE -> {
-                repeatMode = RepeatModes.REPEAT_DISABLED
-                play()
-            }
+            PlaybackStateCompat.REPEAT_MODE_NONE, PlaybackStateCompat.REPEAT_MODE_ALL -> doNext()
+            PlaybackStateCompat.REPEAT_MODE_ONE -> play()
         }
     }
 
@@ -233,7 +220,7 @@ abstract class Playback : MediaSessionCompat.Callback() {
      */
     open fun restartOnPrevWhen(): Long = 5000
 
-    private fun shouldSkipBack() = getCurrentPosInSong() <= restartOnPrevWhen()
+    private fun shouldSkipBack() = getCurrentPosition() <= restartOnPrevWhen()
 
     override fun onSkipToPrevious() {
         if (shouldSkipBack()) {
@@ -274,14 +261,12 @@ abstract class Playback : MediaSessionCompat.Callback() {
             return
         }
 
-        if (time.toInt() > getCurrentPosInSong() || time.toInt() < getCurrentPosInSong()) doSeek(time)
+        if (time.toInt() > getCurrentPosition() || time.toInt() < getCurrentPosition()) doSeek(time)
     }
 
     abstract fun doSeek(time: Long)
 
-    override fun onSeekTo(pos: Long) {
-        seek(pos)
-    }
+    override fun onSeekTo(pos: Long) = seek(pos)
 
     ///////////////////////////////////////////////////////////////////////////
     // PlaybackState
@@ -294,16 +279,22 @@ abstract class Playback : MediaSessionCompat.Callback() {
     // Repeat
     ///////////////////////////////////////////////////////////////////////////
 
-    var repeatMode = RepeatModes.REPEAT_DISABLED
-        set(value) {
-            field = value
-            onRepeatModeChanged(value)
-            notifyRepeatModeChanged()
-        }
+    @PlaybackStateCompat.RepeatMode
+    var repeatMode: Int = PlaybackStateCompat.REPEAT_MODE_NONE
 
-    protected open fun onRepeatModeChanged(mode: Int) = Unit
+    override fun onSetRepeatMode(repeatMode: Int) {
+        this.repeatMode = repeatMode
+        notifyRepeatModeChanged()
+    }
 
-    open val repeatOnNext = false
+    ///////////////////////////////////////////////////////////////////////////
+    // Shuffle mode
+    ///////////////////////////////////////////////////////////////////////////
+
+    override fun onSetShuffleModeEnabled(enabled: Boolean) {
+        if (enabled) MusicQueue.initSecondaryQueue()
+        MusicQueue.isSecondaryActive = enabled
+    }
 
     ///////////////////////////////////////////////////////////////////////////
     // Others
@@ -313,18 +304,12 @@ abstract class Playback : MediaSessionCompat.Callback() {
 
     open fun isInitialized() = SERVICE != null
 
-    abstract fun getCurrentPosInSong(): Int
+    abstract fun getCurrentPosition(): Int
 
     fun getPlaybackSpeed() = 1.0f
 
-    override fun onCustomAction(action: String?, extras: Bundle?) {
-        /*if (ACTION_PLAY_FROM_LIST.equals(action)) {
-            play(PlaybackRemote.tempSongList, PlaybackRemote.tempListStartPos)
-        } else if (ACTION_SET_REPEAT.equals(action)) {
-            repeat(PlaybackRemote.tempRepeating)
-        }*/
-        //TODO
-    }
+    // Override if needed
+    override fun onCustomAction(action: String?, extras: Bundle?) = Unit
 
     ///////////////////////////////////////////////////////////////////////////
     // State handling

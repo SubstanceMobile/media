@@ -20,6 +20,7 @@ import android.util.Log
 import mobile.substance.sdk.music.core.objects.Song
 import mobile.substance.sdk.music.playback.PlaybackRemote
 import java.util.*
+import kotlin.collections.ArrayList
 
 /**
  * This is the class that stores the queue for the playback library
@@ -28,42 +29,61 @@ internal object MusicQueue {
     var POSITION: Int = 0
         private set
 
-    @Volatile private var QUEUE: MutableList<Song> = ArrayList()
+    @Volatile private var QUEUE_PRIMARY: MutableList<Song> = ArrayList()
+    @Volatile private var QUEUE_SECONDARY: MutableList<Song> = ArrayList()
+
+    var isSecondaryActive = false
+        set(value) {
+            field = value
+            notifyChanged()
+        }
+
+    private fun getActiveQueue(): MutableList<Song> = if (isSecondaryActive) QUEUE_SECONDARY else QUEUE_PRIMARY
+
+    fun size() = getActiveQueue().size
+    fun isLastPosition() = POSITION == getActiveQueue().lastIndex
+    fun isFirstPosition() = POSITION == 0
 
     fun getQueue(startAtPosition: Boolean = false): MutableList<Song> {
         if (startAtPosition) {
-            return if (POSITION + 1 > QUEUE.lastIndex) ArrayList() else QUEUE.subList(POSITION + 1, QUEUE.size)
-        } else return QUEUE
+            return if (POSITION + 1 > getActiveQueue().lastIndex) ArrayList() else getActiveQueue().subList(POSITION + 1, getActiveQueue().size)
+        } else return getActiveQueue()
     }
 
     fun getCurrentSong(): Song? = get(POSITION)
 
     fun get(position: Int): Song? {
-        if (QUEUE.isNotEmpty()) {
-            return if (position < 0) QUEUE[QUEUE.lastIndex] else if (position > QUEUE.lastIndex) QUEUE[0] else QUEUE[position]
+        if (QUEUE_PRIMARY.isNotEmpty()) {
+            return if (position < 0) getActiveQueue()[getActiveQueue().lastIndex] else if (position > getActiveQueue().lastIndex) getActiveQueue()[0] else getActiveQueue()[position]
         }
         return null
     }
 
     fun moveForward(by: Int) {
         POSITION += by
-        if (POSITION >= QUEUE.size) POSITION = 0
+        if (POSITION >= getActiveQueue().size) POSITION = 0
 
         notifyChanged()
     }
 
     fun moveBackward(by: Int) {
         POSITION -= by
-        if (POSITION < 0) POSITION = QUEUE.lastIndex
+        if (POSITION < 0) POSITION = getActiveQueue().lastIndex
 
         notifyChanged()
     }
 
     fun set(songs: MutableList<Song>, position: Int) {
-        QUEUE = songs
+        QUEUE_PRIMARY = songs
         POSITION = position
 
-        notifyChanged()
+        if (isSecondaryActive) isSecondaryActive = false else notifyChanged()
+    }
+
+    fun initSecondaryQueue() {
+        QUEUE_SECONDARY.clear()
+        QUEUE_SECONDARY.addAll(QUEUE_PRIMARY)
+        Collections.shuffle(QUEUE_SECONDARY)
     }
 
     fun notifyChanged() = PlaybackRemote.delegate { callback { onQueueChanged(getQueue()) } }
