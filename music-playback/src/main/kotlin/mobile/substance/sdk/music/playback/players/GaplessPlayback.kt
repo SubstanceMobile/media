@@ -70,6 +70,7 @@ object GaplessPlayback : Playback(),
         if (!isPrepared) {
             getActivePlayer()?.prepareWithDataSource(SERVICE!!, fileUri)
         } else {
+            println("The next song was prepared already, so we're gonna play it instantly!")
             isPrepared = false
             doResume()
         }
@@ -202,11 +203,7 @@ object GaplessPlayback : Playback(),
     }
 
     //Not checking it it is looping because onCompletion is never actually called if it is looping.
-    override fun onCompletion(mp: MediaPlayer?) {
-        if (!isPrepared) notifyIdle()
-        shutdownProgressThread()
-        next()
-    }
+    override fun onCompletion(mp: MediaPlayer?) = next()
 
     override fun onError(mp: MediaPlayer?, what: Int, extra: Int): Boolean {
         notifyError()

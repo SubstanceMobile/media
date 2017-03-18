@@ -43,7 +43,7 @@ class SampleApp : Application() {
             MusicCoreOptions.defaultArt = R.drawable.default_artwork_gem
             MusicPlaybackOptions.statusbarIconResId = R.drawable.ic_audiotrack_white_24dp
             MusicPlaybackOptions.isCastEnabled = true
-            MusicPlaybackOptions.isGaplessPlaybackEnabled
+            MusicPlaybackOptions.isGaplessPlaybackEnabled = true
             MusicPlaybackOptions.isLockscreenArtworkBlurEnabled = true
 
             var field: Field? = null
