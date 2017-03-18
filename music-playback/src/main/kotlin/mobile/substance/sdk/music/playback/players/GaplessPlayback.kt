@@ -4,16 +4,13 @@ import android.content.Context
 import android.media.AudioManager
 import android.media.MediaPlayer
 import android.net.Uri
-import android.os.Bundle
 import android.os.PowerManager
-import android.os.ResultReceiver
 import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
 import mobile.substance.sdk.music.playback.PlaybackRemote
 import mobile.substance.sdk.music.playback.destroy
 import mobile.substance.sdk.music.playback.prepareWithDataSource
 import mobile.substance.sdk.music.playback.service.MusicQueue
-import mobile.substance.sdk.utils.MusicCoreUtil
 
 object GaplessPlayback : Playback(),
         MediaPlayer.OnPreparedListener,
@@ -22,7 +19,7 @@ object GaplessPlayback : Playback(),
         AudioManager.OnAudioFocusChangeListener {
     val TAG = GaplessPlayback::class.java.simpleName
     private var players = arrayOfNulls<MediaPlayer>(2)
-    private var isPrepared = false
+    private var preparedSong: Uri? = null
     private var activePlayerIndex = 0
     private var audioManager: AudioManager? = null
     private var wasPlayingBeforeAction = false
@@ -67,11 +64,11 @@ object GaplessPlayback : Playback(),
         // Switch the active player
         switchPlayers()
 
-        if (!isPrepared) {
+        if (preparedSong != fileUri) {
             getActivePlayer()?.prepareWithDataSource(SERVICE!!, fileUri)
         } else {
             println("The next song was prepared already, so we're gonna play it instantly!")
-            isPrepared = false
+            preparedSong = null
             doResume()
         }
 
@@ -84,8 +81,10 @@ object GaplessPlayback : Playback(),
         if (shouldPrepareNext()) {
             println("GaplessPlayback.kt is preparing the next song...")
             if (repeatMode == PlaybackStateCompat.REPEAT_MODE_ONE) {
+                preparedSong = fileUri
                 getInactivePlayer()?.prepareWithDataSource(SERVICE!!, fileUri)
             } else if (!MusicQueue.isLastPosition() || repeatMode == PlaybackStateCompat.REPEAT_MODE_ALL) {
+                preparedSong = PlaybackRemote.getNextSong()!!.uri
                 getInactivePlayer()?.prepareWithDataSource(SERVICE!!, PlaybackRemote.getNextSong()!!.uri)
             }
         }
@@ -197,9 +196,7 @@ object GaplessPlayback : Playback(),
     ///////////////////////////////////////////////////////////////////////////
 
     override fun onPrepared(mp: MediaPlayer?) {
-        if (mp == getInactivePlayer()) {
-            isPrepared = true
-        } else doResume()
+        if (mp != getInactivePlayer()) doResume()
     }
 
     //Not checking it it is looping because onCompletion is never actually called if it is looping.
