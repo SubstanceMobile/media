@@ -82,7 +82,7 @@ open class MusicService : MediaBrowserServiceCompat(), CastStateListener {
         callback.onSongChanged(song)
         callback.onDurationChanged(song.songDuration?.toInt() ?: 0, song.songDurationString)
         callback.onStateChanged(engine.playbackState)
-        callback.onRepeatingChanged(engine.repeatMode)
+        callback.onRepeatModeChanged(engine.repeatMode)
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -131,7 +131,7 @@ open class MusicService : MediaBrowserServiceCompat(), CastStateListener {
         }
 
         // Reset old values that become deprecated with a new engine
-        callback { onRepeatingChanged(PlaybackStateCompat.REPEAT_MODE_NONE) }
+        callback { onRepeatModeChanged(PlaybackStateCompat.REPEAT_MODE_NONE) }
 
         Log.d(TAG, "Engine transaction complete")
     }

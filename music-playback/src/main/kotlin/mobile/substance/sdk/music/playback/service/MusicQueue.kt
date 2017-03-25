@@ -86,6 +86,9 @@ internal object MusicQueue {
         Collections.shuffle(QUEUE_SECONDARY)
     }
 
-    fun notifyChanged() = PlaybackRemote.delegate { callback { onQueueChanged(getQueue()) } }
+    fun notifyChanged() = PlaybackRemote.delegate {
+
+        callback { onQueueChanged(getQueue()) }
+    }
 
 }

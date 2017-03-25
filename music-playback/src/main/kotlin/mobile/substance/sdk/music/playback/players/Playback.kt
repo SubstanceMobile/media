@@ -285,10 +285,13 @@ abstract class Playback : MediaSessionCompat.Callback() {
 
     @PlaybackStateCompat.RepeatMode
     var repeatMode: Int = PlaybackStateCompat.REPEAT_MODE_NONE
+        set(value) {
+            field = value
+            dispatchRepeatModeChanged(value)
+        }
 
     override fun onSetRepeatMode(repeatMode: Int) {
         this.repeatMode = repeatMode
-        notifyRepeatModeChanged()
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -318,10 +321,10 @@ abstract class Playback : MediaSessionCompat.Callback() {
 
     private fun dispatchPlaybackState(callback: Boolean = false) = SERVICE!!.updatePlaybackState(callback)
 
-    protected fun passThroughPlaybackProgress(progress: Long? = null) = SERVICE!!.updatePlaybackProgress(progress)
+    protected fun dispatchPlaybackProgress(progress: Long? = null) = SERVICE!!.updatePlaybackProgress(progress)
 
-    protected fun notifyRepeatModeChanged() {
-        SERVICE!!.callback { onRepeatingChanged(repeatMode) }
+    protected fun dispatchRepeatModeChanged(@PlaybackStateCompat.RepeatMode repeatMode: Int) {
+        SERVICE!!.callback { onRepeatModeChanged(repeatMode) }
     }
 
     /**

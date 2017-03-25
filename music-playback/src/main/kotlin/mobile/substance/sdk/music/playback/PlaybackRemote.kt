@@ -132,9 +132,9 @@ object PlaybackRemote : ServiceConnection {
 
         fun onSongChanged(song: Song)
 
-        fun onStateChanged(state: Int)
+        fun onStateChanged(@PlaybackStateCompat.State state: Int)
 
-        fun onRepeatingChanged(mode: Int)
+        fun onRepeatModeChanged(@PlaybackStateCompat.RepeatMode mode: Int)
 
         fun onQueueChanged(queue: List<Song>)
 

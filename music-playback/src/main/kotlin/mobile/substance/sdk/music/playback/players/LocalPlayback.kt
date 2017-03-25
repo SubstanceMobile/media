@@ -159,7 +159,7 @@ object LocalPlayback : Playback(),
                     break
                 }
                 try {
-                    passThroughPlaybackProgress()
+                    dispatchPlaybackProgress()
                 } catch (e: Exception) {
                     e.printStackTrace()
                     Thread.currentThread().interrupt()

@@ -40,7 +40,7 @@ import java.io.File
 object CastPlayback : Playback(), SessionManagerListener<Session>, RemoteMediaClient.Listener, RemoteMediaClient.ProgressListener {
 
     override fun onProgressUpdated(p0: Long, p1: Long) {
-        passThroughPlaybackProgress(p0)
+        dispatchPlaybackProgress(p0)
     }
 
     override fun onAdBreakStatusUpdated() {

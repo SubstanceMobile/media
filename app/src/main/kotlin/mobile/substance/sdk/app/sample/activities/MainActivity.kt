@@ -116,7 +116,7 @@ class MainActivity : NavigationDrawerActivity(), PlaybackRemote.RemoteCallback {
         Log.d("MainActivity.kt", "onStateChanged(), $state")
     }
 
-    override fun onRepeatingChanged(mode: Int) {
+    override fun onRepeatModeChanged(mode: Int) {
     }
 
     override fun onQueueChanged(queue: List<Song>) {
