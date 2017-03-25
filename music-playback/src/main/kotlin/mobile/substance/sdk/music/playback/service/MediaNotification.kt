@@ -98,6 +98,7 @@ class DefaultMediaNotification : MediaNotification {
         val isPlaying = session?.controller?.playbackState?.state?.equals(PlaybackStateCompat.STATE_PLAYING) ?: false
         return NotificationCompat.Builder(context).setSmallIcon(MusicPlaybackOptions.statusbarIconResId)
                 .setPriority(Notification.PRIORITY_MAX)
+                .setVisibility(Notification.VISIBILITY_PUBLIC)
                 .setOngoing(false)
                 .setContentIntent(clickedIntent)
                 .setDeleteIntent(removedIntent)
