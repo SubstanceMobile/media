@@ -47,6 +47,7 @@ import mobile.substance.sdk.music.playback.service.MusicService
 import mobile.substance.sdk.options.MusicPlaybackOptions
 import mobile.substance.sdk.utils.MusicPlaybackUtil
 import java.util.*
+import kotlin.collections.ArrayList
 
 /**
  * This class is used to control all music playback.
@@ -61,7 +62,7 @@ object PlaybackRemote : ServiceConnection {
     // Manages Connections
     ///////////////////////////////////////////////////////////////////////////
 
-    private val SERVICE_BOUND_LISTENERS: MutableList<(MusicService) -> Unit> = arrayListOf()
+    private val SERVICE_BOUND_LISTENERS: MutableList<(MusicService) -> Unit> = ArrayList()
 
     private fun getService(listener: MusicService.() -> Unit) {
         val running = if (context != null) MusicPlaybackUtil.isServiceRunning(context!!, serviceClass) else false
@@ -85,7 +86,7 @@ object PlaybackRemote : ServiceConnection {
         try {
             for (listener in SERVICE_BOUND_LISTENERS) listener.invoke(service!!)
         } catch (e: KotlinNullPointerException) {
-            throw MusicApiInternalError()
+            e.printStackTrace()
         }
         SERVICE_BOUND_LISTENERS.clear()
     }

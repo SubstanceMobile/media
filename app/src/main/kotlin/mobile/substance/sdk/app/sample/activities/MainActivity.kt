@@ -79,6 +79,19 @@ class MainActivity : NavigationDrawerActivity(), PlaybackRemote.RemoteCallback {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        println(Library.isBuilt())
+        Library.registerBuildFinishedListener({
+            handleIntent()
+        }, true)
+    }
+
+    private fun handleIntent() {
+        println("handleIntent()")
+        if (intent.action.endsWith("SHUFFLE")) PlaybackRemote.shuffle()
+    }
+
     var duration: Int? = null
 
     override val drawer: DrawerLayout?

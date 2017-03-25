@@ -79,7 +79,9 @@ object Library : MusicLibraryData, LoaderManager.LoaderCallbacks<List<*>> {
         }
     }
 
-    fun isBuilt(): Boolean = buildState.all { it ?: true }
+    fun isInitialized() = activity != null
+
+    fun isBuilt(): Boolean = isInitialized() && buildState.all { it ?: true }
 
     fun enable() = MusicData.hook(this)
 

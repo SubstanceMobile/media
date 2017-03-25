@@ -22,6 +22,7 @@ import com.afollestad.assent.AssentActivity
 import com.afollestad.assent.AssentCallback
 import com.afollestad.assent.PermissionResultSet
 import java.util.*
+import kotlin.concurrent.thread
 
 abstract class BaseActivity : AssentActivity(), AssentCallback {
 
@@ -42,13 +43,11 @@ abstract class BaseActivity : AssentActivity(), AssentCallback {
         super.onCreate(savedInstanceState)
         this.savedInstanceState = savedInstanceState
         setContentView(layoutResId)
-        Thread() {
-            run {
-                if (!Assent.isPermissionGranted(Assent.READ_EXTERNAL_STORAGE) || !Assent.isPermissionGranted(Assent.WRITE_EXTERNAL_STORAGE)) {
-                    Assent.requestPermissions(this, UNIQUE_ASSENT_REQUEST_CODE, Assent.READ_EXTERNAL_STORAGE, Assent.WRITE_EXTERNAL_STORAGE)
-                } else runOnUiThread { init(savedInstanceState) }
-            }
-        }.start()
+        thread {
+            if (!Assent.isPermissionGranted(Assent.READ_EXTERNAL_STORAGE) || !Assent.isPermissionGranted(Assent.WRITE_EXTERNAL_STORAGE)) {
+                Assent.requestPermissions(this, UNIQUE_ASSENT_REQUEST_CODE, Assent.READ_EXTERNAL_STORAGE, Assent.WRITE_EXTERNAL_STORAGE)
+            } else runOnUiThread { init(savedInstanceState) }
+        }
     }
 
     abstract fun init(savedInstanceState: Bundle?)
