@@ -80,7 +80,7 @@ internal object MusicQueue {
         QUEUE_PRIMARY = songs
         POSITION = position
 
-        if (isSecondaryActive) PlaybackRemote.useShuffledQueue(false) else notifyChanged()
+        if (isSecondaryActive) PlaybackRemote.useShuffledQueue(false) else notifyChanged(true)
     }
 
     fun initSecondaryQueue() {
@@ -89,8 +89,8 @@ internal object MusicQueue {
         Collections.shuffle(QUEUE_SECONDARY)
     }
 
-    fun notifyChanged() = PlaybackRemote.delegate {
-
+    fun notifyChanged(fullSwap: Boolean = false) = PlaybackRemote.delegate {
+        if (fullSwap) control()?.transportControls?.setRepeatMode(PlaybackStateCompat.REPEAT_MODE_NONE)
         callback { onQueueChanged(getQueue()) }
     }
 

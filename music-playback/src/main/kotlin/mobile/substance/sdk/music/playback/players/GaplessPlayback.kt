@@ -23,7 +23,6 @@ object GaplessPlayback : Playback(),
     private var activePlayerIndex = 0
     private var audioManager: AudioManager? = null
     private var wasPlayingBeforeAction = false
-    private var isInitialState = true
 
     private fun getActivePlayer(): MediaPlayer? = players[activePlayerIndex]
     private fun getInactivePlayer(): MediaPlayer? = players[if (activePlayerIndex == 0) 1 else 0]
@@ -95,6 +94,15 @@ object GaplessPlayback : Playback(),
             getInactivePlayer()?.prepareWithDataSource(SERVICE!!, PlaybackRemote.getNextSong()!!.uri)
             println("GaplessPlayback.kt has prepared the next song in the queue")
         }
+    }
+
+    // We'll probably have prepared the next song already, a change of the repeat mode invalidates this
+    override fun onSetRepeatMode(repeatMode: Int) {
+        super.onSetRepeatMode(repeatMode)
+
+        getInactivePlayer()?.reset()
+        preparedSong = PlaybackRemote.getCurrentSong()?.uri
+        if (shouldPrepareNext()) prepareNextPlayer(preparedSong!!)
     }
 
     ////////////
