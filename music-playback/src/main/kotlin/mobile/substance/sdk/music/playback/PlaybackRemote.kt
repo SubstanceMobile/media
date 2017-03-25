@@ -190,7 +190,7 @@ object PlaybackRemote : ServiceConnection {
     fun playNext() = getService { control()?.transportControls?.skipToNext() }
 
     internal fun playNextInternal() = getService {
-        if (engine.repeatMode != PlaybackStateCompat.REPEAT_MODE_ALL || MusicQueue.isLastPosition()) MusicQueue.moveForward(1)
+        MusicQueue.moveForward(1)
         play()
     }
 

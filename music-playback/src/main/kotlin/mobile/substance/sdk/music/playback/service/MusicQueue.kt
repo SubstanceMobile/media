@@ -16,6 +16,7 @@
 
 package mobile.substance.sdk.music.playback.service
 
+import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
 import mobile.substance.sdk.music.core.objects.Song
 import mobile.substance.sdk.music.playback.PlaybackRemote
@@ -61,7 +62,9 @@ internal object MusicQueue {
 
     fun moveForward(by: Int) {
         POSITION += by
-        if (POSITION >= getActiveQueue().size) POSITION = 0
+        if (POSITION >= getActiveQueue().size) {
+            POSITION = if (PlaybackRemote.getRepeatMode() == PlaybackStateCompat.REPEAT_MODE_ALL) 0 else getActiveQueue().lastIndex
+        }
 
         notifyChanged()
     }

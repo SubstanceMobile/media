@@ -198,12 +198,7 @@ abstract class Playback : MediaSessionCompat.Callback() {
     // Next
     ///////////////////////////////////////////////////////////////////////////
 
-    fun next() {
-        when (repeatMode) {
-            PlaybackStateCompat.REPEAT_MODE_NONE, PlaybackStateCompat.REPEAT_MODE_ALL -> doNext()
-            PlaybackStateCompat.REPEAT_MODE_ONE -> play()
-        }
-    }
+    fun next() = if (repeatMode == PlaybackStateCompat.REPEAT_MODE_ONE) play() else doNext()
 
     open fun doNext() = PlaybackRemote.playNextInternal()
 
@@ -310,7 +305,7 @@ abstract class Playback : MediaSessionCompat.Callback() {
 
     abstract fun getCurrentPosition(): Int
 
-    fun getPlaybackSpeed() = 1.0f
+    fun getPlaybackSpeed() = 1.0F
 
     // Override if needed
     override fun onCustomAction(action: String?, extras: Bundle?) = Unit
