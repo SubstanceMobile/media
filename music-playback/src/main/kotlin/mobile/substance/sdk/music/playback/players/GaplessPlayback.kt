@@ -62,6 +62,8 @@ object GaplessPlayback : Playback(),
     ///////////////
 
     override fun doPlay(fileUri: Uri, artworkUri: Uri?) {
+        println("doPlay()")
+
         if (getActivePlayer()?.isPlaying ?: false) getActivePlayer()?.stop()
         if (getInactivePlayer()?.isPlaying ?: false) getInactivePlayer()?.stop()
 
@@ -70,7 +72,10 @@ object GaplessPlayback : Playback(),
 
         getActivePlayer()?.prepareWithDataSource(SERVICE!!, fileUri)
 
-        if (shouldPrepareNext()) prepareNextPlayer(fileUri)
+        if (shouldPrepareNext()) {
+            println("doPlay() preparing the next player")
+            prepareNextPlayer(fileUri)
+        }
     }
 
     private fun switchPlayers() {
@@ -84,9 +89,11 @@ object GaplessPlayback : Playback(),
         if (repeatMode == PlaybackStateCompat.REPEAT_MODE_ONE) {
             preparedSong = currentUri
             getInactivePlayer()?.prepareWithDataSource(SERVICE!!, currentUri)
+            println("GaplessPlayback.kt has prepared the current song again")
         } else if (!MusicQueue.isLastPosition() || repeatMode == PlaybackStateCompat.REPEAT_MODE_ALL) {
             preparedSong = PlaybackRemote.getNextSong()!!.uri
             getInactivePlayer()?.prepareWithDataSource(SERVICE!!, PlaybackRemote.getNextSong()!!.uri)
+            println("GaplessPlayback.kt has prepared the next song in the queue")
         }
     }
 
@@ -191,21 +198,31 @@ object GaplessPlayback : Playback(),
 
     override fun onPrepared(mp: MediaPlayer?) {
         if (mp == getActivePlayer()) {
+            println("onPrepared() the active player, starting it")
             doResume()
-        } else getActivePlayer()?.setNextMediaPlayer(mp)
+        } else {
+            println("onPrepared() the inactive player. Setting it as next")
+            getActivePlayer()?.setNextMediaPlayer(mp)
+        }
     }
 
     override fun onCompletion(mp: MediaPlayer?) {
         if (!shouldPrepareNext()) {
             next()
         } else {
-            MusicQueue.moveForward(1)
-            dispatchOnSongChanged(PlaybackRemote.getCurrentSong()!!)
+            if (repeatMode != PlaybackStateCompat.REPEAT_MODE_ONE) {
+                println("onCompletion() moving forward")
+                MusicQueue.moveForward(1)
+                dispatchOnSongChanged(PlaybackRemote.getCurrentSong()!!)
+            }
             switchPlayers()
 
             getInactivePlayer()?.reset()
 
-            if (shouldPrepareNext()) prepareNextPlayer(preparedSong!!)
+            if (shouldPrepareNext()) {
+                println("onCompletion() preparing the next song")
+                prepareNextPlayer(preparedSong!!)
+            }
         }
     }
 
