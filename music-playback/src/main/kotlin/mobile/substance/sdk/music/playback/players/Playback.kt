@@ -91,6 +91,10 @@ abstract class Playback : MediaSessionCompat.Callback() {
     fun play(song: Song) {
         doPlay(song)
         if (!(SERVICE!!.getMediaSession()?.isActive ?: false)) SERVICE!!.getMediaSession()?.isActive = true
+        dispatchOnSongChanged(song)
+    }
+
+    protected fun dispatchOnSongChanged(song: Song) {
         SERVICE!!.callback {
             onSongChanged(song)
             onDurationChanged(song.songDuration?.toInt() ?: 0, song.songDurationString)
@@ -312,7 +316,7 @@ abstract class Playback : MediaSessionCompat.Callback() {
     // State handling
     ///////////////////////////////////////////////////////////////////////////
 
-    private fun passThroughPlaybackState(callback: Boolean = false) = SERVICE!!.updatePlaybackState(callback)
+    private fun dispatchPlaybackState(callback: Boolean = false) = SERVICE!!.updatePlaybackState(callback)
 
     protected fun passThroughPlaybackProgress(progress: Long? = null) = SERVICE!!.updatePlaybackProgress(progress)
 
@@ -326,7 +330,7 @@ abstract class Playback : MediaSessionCompat.Callback() {
     protected fun notifyBuffering() {
         Log.d(TAG, "notifyBuffering()")
         playbackState = PlaybackStateCompat.STATE_BUFFERING
-        passThroughPlaybackState(true)
+        dispatchPlaybackState(true)
     }
 
     /**
@@ -335,7 +339,7 @@ abstract class Playback : MediaSessionCompat.Callback() {
     protected fun notifyError() {
         Log.d(TAG, "notifyError()")
         playbackState = PlaybackStateCompat.STATE_ERROR
-        passThroughPlaybackState(true)
+        dispatchPlaybackState(true)
         SERVICE!!.stopForeground(false)
         SERVICE!!.notify(PlaybackRemote.makeNotification())
     }
@@ -353,7 +357,7 @@ abstract class Playback : MediaSessionCompat.Callback() {
                 call.invoke()
             pendingCalls.clear()
         }
-        passThroughPlaybackState(true)
+        dispatchPlaybackState(true)
         SERVICE!!.updateMetadata()
         SERVICE!!.startForeground()
     }
@@ -365,7 +369,7 @@ abstract class Playback : MediaSessionCompat.Callback() {
         Log.d(TAG, "notifyPaused()")
         playbackState = PlaybackStateCompat.STATE_PAUSED
         SERVICE!!.stopForeground(false)
-        passThroughPlaybackState(true)
+        dispatchPlaybackState(true)
         SERVICE!!.notify(PlaybackRemote.makeNotification())
     }
 
@@ -375,7 +379,7 @@ abstract class Playback : MediaSessionCompat.Callback() {
     protected fun notifyIdle() {
         Log.d(TAG, "notifyIdle()")
         playbackState = PlaybackStateCompat.STATE_NONE
-        passThroughPlaybackState()
+        dispatchPlaybackState()
         SERVICE!!.stopForeground(true)
     }
 

@@ -23,7 +23,7 @@ object GaplessPlayback : Playback(),
     private var activePlayerIndex = 0
     private var audioManager: AudioManager? = null
     private var wasPlayingBeforeAction = false
-    private var ignoreCallToPlay = false
+    private var isInitialState = true
 
     private fun getActivePlayer(): MediaPlayer? = players[activePlayerIndex]
     private fun getInactivePlayer(): MediaPlayer? = players[if (activePlayerIndex == 0) 1 else 0]
@@ -62,36 +62,15 @@ object GaplessPlayback : Playback(),
     ///////////////
 
     override fun doPlay(fileUri: Uri, artworkUri: Uri?) {
-        // Switch the active player
-        switchPlayers()
+        if (getActivePlayer()?.isPlaying ?: false) getActivePlayer()?.stop()
+        if (getInactivePlayer()?.isPlaying ?: false) getInactivePlayer()?.stop()
 
-        if (!ignoreCallToPlay) {
-            if (preparedSong != fileUri) {
-                getActivePlayer()?.prepareWithDataSource(SERVICE!!, fileUri)
-            } else {
-                println("The next song was prepared already, so we're gonna play it instantly!")
-                preparedSong = null
-                doResume()
-            }
-        } else ignoreCallToPlay = false
+        getActivePlayer()?.reset()
+        getInactivePlayer()?.reset()
 
-        //Stop the old media player if a song is being played right now.
-        if (getInactivePlayer()?.isPlaying ?: false)
-            getInactivePlayer()?.stop()
+        getActivePlayer()?.prepareWithDataSource(SERVICE!!, fileUri)
 
-        getInactivePlayer()?.reset() // Reset the old MediaPlayeer, necessary to be able to setDataSource() again
-
-        if (shouldPrepareNext()) {
-            println("GaplessPlayback.kt is preparing the next song...")
-            if (repeatMode == PlaybackStateCompat.REPEAT_MODE_ONE) {
-                preparedSong = fileUri
-                getInactivePlayer()?.prepareWithDataSource(SERVICE!!, fileUri)
-            } else if (!MusicQueue.isLastPosition() || repeatMode == PlaybackStateCompat.REPEAT_MODE_ALL) {
-                preparedSong = PlaybackRemote.getNextSong()!!.uri
-                getInactivePlayer()?.prepareWithDataSource(SERVICE!!, PlaybackRemote.getNextSong()!!.uri)
-            }
-            getActivePlayer()?.setNextMediaPlayer(getInactivePlayer())
-        }
+        if (shouldPrepareNext()) prepareNextPlayer(fileUri)
     }
 
     private fun switchPlayers() {
@@ -99,6 +78,17 @@ object GaplessPlayback : Playback(),
     }
 
     private fun shouldPrepareNext(): Boolean = (!MusicQueue.isLastPosition() || repeatMode == PlaybackStateCompat.REPEAT_MODE_ALL) || (repeatMode == PlaybackStateCompat.REPEAT_MODE_ONE)
+
+    private fun prepareNextPlayer(currentUri: Uri) {
+        println("GaplessPlayback.kt is preparing the next song...")
+        if (repeatMode == PlaybackStateCompat.REPEAT_MODE_ONE) {
+            preparedSong = currentUri
+            getInactivePlayer()?.prepareWithDataSource(SERVICE!!, currentUri)
+        } else if (!MusicQueue.isLastPosition() || repeatMode == PlaybackStateCompat.REPEAT_MODE_ALL) {
+            preparedSong = PlaybackRemote.getNextSong()!!.uri
+            getInactivePlayer()?.prepareWithDataSource(SERVICE!!, PlaybackRemote.getNextSong()!!.uri)
+        }
+    }
 
     ////////////
     // Resume //
@@ -200,13 +190,23 @@ object GaplessPlayback : Playback(),
     ///////////////////////////////////////////////////////////////////////////
 
     override fun onPrepared(mp: MediaPlayer?) {
-        if (mp != getInactivePlayer()) doResume()
+        if (mp == getActivePlayer()) {
+            doResume()
+        } else getActivePlayer()?.setNextMediaPlayer(mp)
     }
 
-    //Not checking it it is looping because onCompletion is never actually called if it is looping.
     override fun onCompletion(mp: MediaPlayer?) {
-        ignoreCallToPlay = true
-        next()
+        if (!shouldPrepareNext()) {
+            next()
+        } else {
+            MusicQueue.moveForward(1)
+            dispatchOnSongChanged(PlaybackRemote.getCurrentSong()!!)
+            switchPlayers()
+
+            getInactivePlayer()?.reset()
+
+            if (shouldPrepareNext()) prepareNextPlayer(preparedSong!!)
+        }
     }
 
     override fun onError(mp: MediaPlayer?, what: Int, extra: Int): Boolean {
