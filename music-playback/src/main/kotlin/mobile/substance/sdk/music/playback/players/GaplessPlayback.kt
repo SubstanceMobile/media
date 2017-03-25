@@ -23,6 +23,7 @@ object GaplessPlayback : Playback(),
     private var activePlayerIndex = 0
     private var audioManager: AudioManager? = null
     private var wasPlayingBeforeAction = false
+    private var ignoreCallToPlay = false
 
     private fun getActivePlayer(): MediaPlayer? = players[activePlayerIndex]
     private fun getInactivePlayer(): MediaPlayer? = players[if (activePlayerIndex == 0) 1 else 0]
@@ -64,16 +65,18 @@ object GaplessPlayback : Playback(),
         // Switch the active player
         switchPlayers()
 
-        if (preparedSong != fileUri) {
-            getActivePlayer()?.prepareWithDataSource(SERVICE!!, fileUri)
-        } else {
-            println("The next song was prepared already, so we're gonna play it instantly!")
-            preparedSong = null
-            doResume()
-        }
+        if (!ignoreCallToPlay) {
+            if (preparedSong != fileUri) {
+                getActivePlayer()?.prepareWithDataSource(SERVICE!!, fileUri)
+            } else {
+                println("The next song was prepared already, so we're gonna play it instantly!")
+                preparedSong = null
+                doResume()
+            }
+        } else ignoreCallToPlay = false
 
         //Stop the old media player if a song is being played right now.
-        if (isPlaying())
+        if (getInactivePlayer()?.isPlaying ?: false)
             getInactivePlayer()?.stop()
 
         getInactivePlayer()?.reset() // Reset the old MediaPlayeer, necessary to be able to setDataSource() again
@@ -87,6 +90,7 @@ object GaplessPlayback : Playback(),
                 preparedSong = PlaybackRemote.getNextSong()!!.uri
                 getInactivePlayer()?.prepareWithDataSource(SERVICE!!, PlaybackRemote.getNextSong()!!.uri)
             }
+            getActivePlayer()?.setNextMediaPlayer(getInactivePlayer())
         }
     }
 
@@ -200,7 +204,10 @@ object GaplessPlayback : Playback(),
     }
 
     //Not checking it it is looping because onCompletion is never actually called if it is looping.
-    override fun onCompletion(mp: MediaPlayer?) = next()
+    override fun onCompletion(mp: MediaPlayer?) {
+        ignoreCallToPlay = true
+        next()
+    }
 
     override fun onError(mp: MediaPlayer?, what: Int, extra: Int): Boolean {
         notifyError()
