@@ -28,14 +28,13 @@ import com.google.android.gms.cast.framework.*
 import com.google.android.gms.cast.framework.media.RemoteMediaClient
 import com.google.android.gms.common.api.Status
 import com.google.android.gms.common.images.WebImage
-import mobile.substance.sdk.options.MusicCoreOptions
 import mobile.substance.sdk.music.core.dataLinkers.MusicData
 import mobile.substance.sdk.music.core.objects.Song
 import mobile.substance.sdk.music.playback.cast.HttpServer
+import mobile.substance.sdk.options.MusicCoreOptions
 import mobile.substance.sdk.options.MusicPlaybackOptions
 import mobile.substance.sdk.utils.MusicCoreUtil
 import mobile.substance.sdk.utils.MusicPlaybackUtil
-import java.io.File
 
 object CastPlayback : Playback(), SessionManagerListener<Session>, RemoteMediaClient.Listener, RemoteMediaClient.ProgressListener {
 
@@ -111,46 +110,46 @@ object CastPlayback : Playback(), SessionManagerListener<Session>, RemoteMediaCl
     }
 
     private fun doPlay(fileUri: Uri, artworkUri: Uri?, metadata: MediaMetadataCompat?) {
-        remoteMediaClient?.stop()
+        remoteMediaClient?.stop()?.setResultCallback {
+            try {
+                if (!MusicCoreUtil.isHttpUrl(fileUri.toString())) {
 
-        try {
-            if (!MusicCoreUtil.isHttpUrl(fileUri.toString())) {
+                    val filePath = MusicCoreUtil.getFilePath(SERVICE!!, fileUri)
+                    val fileType = filePath?.substring(filePath.lastIndexOf(".") + 1)
 
-                val filePath = MusicCoreUtil.getFilePath(SERVICE!!, fileUri)
-                val fileType = filePath?.substring(filePath.lastIndexOf(".") + 1)
-
-                fileServer.start()
-
-                val baseUrl = "http://${MusicPlaybackUtil.getIpAddressString(SERVICE!!)}:${MusicPlaybackUtil.SERVER_PORT}"
-                val audioUrl = baseUrl + filePath
-                val artworkUrl = baseUrl + artworkUri?.path
-
-                Log.d(TAG, "Serving files. URLS: audio: $audioUrl artwork: $artworkUrl")
-
-                val mediaInfo = MediaInfo.Builder(audioUrl)
-                        .setContentType("audio/$fileType")
-                        .setMetadata(buildMetadata(if (artworkUri != null) artworkUrl else MusicCoreOptions.defaultArtUrl, metadata ?: MediaMetadataCompat.Builder().build()))
-                        .setStreamType(MediaInfo.STREAM_TYPE_NONE)
-                        .build()
-                doLoad(mediaInfo, true)
-            } else {
-                var artworkUrl: String? = null
-
-                if (artworkUri != null && !MusicCoreUtil.isHttpUrl(artworkUri.toString())) {
                     fileServer.start()
-                    artworkUrl = "http://${MusicPlaybackUtil.getIpAddressString(SERVICE!!)}:${MusicPlaybackUtil.SERVER_PORT}${artworkUri.path}"
-                    Log.d(TAG, "Serving file. URL: artwork: $artworkUrl")
-                }
 
-                val mediaInfo = MediaInfo.Builder(fileUri.toString())
-                        .setContentType("audio/*")
-                        .setMetadata(buildMetadata(artworkUrl ?: artworkUri?.toString() ?: MusicCoreOptions.defaultArtUrl, metadata ?: MediaMetadataCompat.Builder().build()))
-                        .setStreamType(MediaInfo.STREAM_TYPE_LIVE)
-                        .build()
-                doLoad(mediaInfo, true)
+                    val baseUrl = "http://${MusicPlaybackUtil.getIpAddressString(SERVICE!!)}:${MusicPlaybackUtil.SERVER_PORT}"
+                    val audioUrl = baseUrl + filePath
+                    val artworkUrl = baseUrl + artworkUri?.path
+
+                    Log.d(TAG, "Serving files. URLS: audio: $audioUrl artwork: $artworkUrl")
+
+                    val mediaInfo = MediaInfo.Builder(audioUrl)
+                            .setContentType("audio/$fileType")
+                            .setMetadata(buildMetadata(if (artworkUri != null) artworkUrl else MusicCoreOptions.defaultArtUrl, metadata ?: MediaMetadataCompat.Builder().build()))
+                            .setStreamType(MediaInfo.STREAM_TYPE_NONE)
+                            .build()
+                    doLoad(mediaInfo, true)
+                } else {
+                    var artworkUrl: String? = null
+
+                    if (artworkUri != null && !MusicCoreUtil.isHttpUrl(artworkUri.toString())) {
+                        fileServer.start()
+                        artworkUrl = "http://${MusicPlaybackUtil.getIpAddressString(SERVICE!!)}:${MusicPlaybackUtil.SERVER_PORT}${artworkUri.path}"
+                        Log.d(TAG, "Serving file. URL: artwork: $artworkUrl")
+                    }
+
+                    val mediaInfo = MediaInfo.Builder(fileUri.toString())
+                            .setContentType("audio/*")
+                            .setMetadata(buildMetadata(artworkUrl ?: artworkUri?.toString() ?: MusicCoreOptions.defaultArtUrl, metadata ?: MediaMetadataCompat.Builder().build()))
+                            .setStreamType(MediaInfo.STREAM_TYPE_LIVE)
+                            .build()
+                    doLoad(mediaInfo, true)
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Unable to play $fileUri", e)
             }
-        } catch (e: Exception) {
-            Log.e(TAG, "Unable to play $fileUri", e)
         }
     }
 
