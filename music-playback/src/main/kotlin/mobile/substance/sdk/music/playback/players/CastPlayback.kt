@@ -30,6 +30,7 @@ import com.google.android.gms.common.api.Status
 import com.google.android.gms.common.images.WebImage
 import mobile.substance.sdk.music.core.dataLinkers.MusicData
 import mobile.substance.sdk.music.core.objects.Song
+import mobile.substance.sdk.music.playback.PlaybackRemote
 import mobile.substance.sdk.music.playback.cast.HttpServer
 import mobile.substance.sdk.options.MusicCoreOptions
 import mobile.substance.sdk.options.MusicPlaybackOptions
@@ -48,18 +49,21 @@ object CastPlayback : Playback(), SessionManagerListener<Session>, RemoteMediaCl
 
     override fun onStatusUpdated() {
         try {
-            when (remoteMediaClient?.mediaStatus?.playerState) {
-                MediaStatus.PLAYER_STATE_IDLE -> {
-                    notifyIdle()
-                    when (remoteMediaClient!!.mediaStatus.idleReason) {
-                        MediaStatus.IDLE_REASON_ERROR -> notifyError()
-                        MediaStatus.IDLE_REASON_FINISHED -> next()
+            // We need to block status updates from the cast receiver which might be playing a song while we had been force stopped
+            if (PlaybackRemote.isActive()) {
+                when (remoteMediaClient?.mediaStatus?.playerState) {
+                    MediaStatus.PLAYER_STATE_IDLE -> {
+                        notifyIdle()
+                        when (remoteMediaClient!!.mediaStatus.idleReason) {
+                            MediaStatus.IDLE_REASON_ERROR -> notifyError()
+                            MediaStatus.IDLE_REASON_FINISHED -> next()
+                        }
                     }
+                    MediaStatus.PLAYER_STATE_BUFFERING -> notifyBuffering()
+                    MediaStatus.PLAYER_STATE_PAUSED -> notifyPaused()
+                    MediaStatus.PLAYER_STATE_PLAYING -> notifyPlaying()
+                    MediaStatus.PLAYER_STATE_UNKNOWN -> notifyIdle()
                 }
-                MediaStatus.PLAYER_STATE_BUFFERING -> notifyBuffering()
-                MediaStatus.PLAYER_STATE_PAUSED -> notifyPaused()
-                MediaStatus.PLAYER_STATE_PLAYING -> notifyPlaying()
-                MediaStatus.PLAYER_STATE_UNKNOWN -> notifyIdle()
             }
         } catch (e: Exception) {
             e.printStackTrace()
