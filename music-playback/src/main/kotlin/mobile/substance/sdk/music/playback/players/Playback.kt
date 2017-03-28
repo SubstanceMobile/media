@@ -339,7 +339,7 @@ abstract class Playback : MediaSessionCompat.Callback() {
         playbackState = PlaybackStateCompat.STATE_ERROR
         dispatchPlaybackState(true)
         SERVICE!!.stopForeground(false)
-        SERVICE!!.notify(PlaybackRemote.makeNotification())
+        if (PlaybackRemote.isActive()) SERVICE!!.notify(PlaybackRemote.makeNotification())
     }
 
     /**

@@ -275,8 +275,7 @@ object GaplessPlayback : Playback(),
     override fun isPlaying(): Boolean {
         try {
             return getActivePlayer()?.isPlaying ?: false
-        } catch (e: IllegalStateException) {
-            e.printStackTrace()
+        } catch (ignored: IllegalStateException) {
             return false
         }
     }

@@ -232,7 +232,13 @@ object LocalPlayback : Playback(),
     // STATUS: COMPLETE
     ///////////////////////////////////////////////////////////////////////////
 
-    override fun isPlaying() = localPlayer?.isPlaying ?: false
+    override fun isPlaying(): Boolean {
+        try {
+            return localPlayer?.isPlaying ?: false
+        } catch (ignored: IllegalStateException) {
+            return false
+        }
+    }
 
     override fun getCurrentPosition(): Int {
         try {

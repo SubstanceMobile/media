@@ -46,7 +46,9 @@ import kotlin.concurrent.thread
 open class MusicService : MediaBrowserServiceCompat(), CastStateListener {
 
     override fun onCastStateChanged(p0: Int) {
-        if (p0 == CastState.CONNECTED) replacePlaybackEngine(CastPlayback, engine.isPlaying() || engine.getCurrentPosition() > 0, true)
+        when (p0) {
+            CastState.CONNECTED -> replacePlaybackEngine(CastPlayback, PlaybackRemote.isActive() && (engine.isPlaying() || engine.getCurrentPosition() > 0), true)
+        }
     }
 
     //Companion object for the unique ID and log tag.
