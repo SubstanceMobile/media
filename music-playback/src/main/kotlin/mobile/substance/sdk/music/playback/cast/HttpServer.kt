@@ -20,7 +20,6 @@ package mobile.substance.sdk.music.playback.cast
 import java.io.*
 import java.net.ServerSocket
 import java.net.Socket
-import java.net.URLEncoder
 import java.util.*
 
 /**
@@ -86,11 +85,11 @@ class HttpServer(private val tcpPort: Int) {
      *
      * @param uri  Percent-decoded URI without parameters, for example "/index.cgi"
      * @param method  "GET", "POST" etc.
-     * @param parms  Parsed, percent decoded parameters from URI and, in case of POST, data.
+     * @param parameters  Parsed, percent decoded parameters from URI and, in case of POST, data.
      * @param header  Header entries, percent decoded
      * @return HTTP response, see [Response] for details
      */
-    fun serve(uri: String, method: String, header: Properties, parms: Properties, files: Properties): Response? {
+    fun serve(uri: String, method: String, header: Properties, parameters: Properties, files: Properties): Response? {
         println("$method '$uri' ")
 
         var e = header.propertyNames()
@@ -98,17 +97,17 @@ class HttpServer(private val tcpPort: Int) {
             val value = e.nextElement() as String
             println("  HDR: '" + value + "' = '" + header.getProperty(value) + "'")
         }
-        e = parms.propertyNames()
+        e = parameters.propertyNames()
         while (e.hasMoreElements()) {
             val value = e.nextElement() as String
-            println("  PRM: '" + value + "' = '" + parms.getProperty(value) + "'")
+            println("  PRM: '" + value + "' = '" + parameters.getProperty(value) + "'")
         }
         e = files.propertyNames()
         while (e.hasMoreElements()) {
             val value = e.nextElement() as String
             println("  UPLOADED: '" + value + "' = '" + files.getProperty(value) + "'")
         }
-        return serveFile(uri, header, File("/"), true)
+        return serveFile(uri, header, File("/"))
     }
 
     /**
@@ -378,7 +377,7 @@ class HttpServer(private val tcpPort: Int) {
                 // case insensitive and vary by client.
                 if (st.hasMoreTokens()) {
                     var line: String? = `in`.readLine()
-                    while (line != null && line.trim { it <= ' ' }.length > 0) {
+                    while (line != null && line.trim { it <= ' ' }.isNotEmpty()) {
                         val p = line.indexOf(':')
                         if (p >= 0)
                             header.put(line.substring(0, p).trim { it <= ' ' }.toLowerCase(), line.substring(p + 1).trim { it <= ' ' })
@@ -410,7 +409,7 @@ class HttpServer(private val tcpPort: Int) {
                     boundarycount++
                     val item = Properties()
                     mpline = `in`.readLine()
-                    while (mpline != null && mpline.trim { it <= ' ' }.length > 0) {
+                    while (mpline != null && mpline.trim { it <= ' ' }.isNotEmpty()) {
                         val p = mpline.indexOf(':')
                         if (p != -1)
                             item.put(mpline.substring(0, p).trim { it <= ' ' }.toLowerCase(), mpline.substring(p + 1).trim { it <= ' ' })
@@ -527,8 +526,7 @@ class HttpServer(private val tcpPort: Int) {
          * file's data.
          */
         private fun stripMultipartHeaders(b: ByteArray, offset: Int): Int {
-            var i = 0
-            i = offset
+            var i = offset
             while (i < b.size) {
                 if (b[i].toChar() == '\r' && b[++i].toChar() == '\n' && b[++i].toChar() == '\r' && b[++i].toChar() == '\n')
                     break
@@ -657,47 +655,19 @@ class HttpServer(private val tcpPort: Int) {
     }
 
     /**
-     * URL-encodes everything between "/"-characters. Encodes spaces as '%20'
-     * instead of '+'.
-     */
-    protected fun encodeUri(uri: String): String {
-        var newUri = ""
-        val st = StringTokenizer(uri, "/ ", true)
-        while (st.hasMoreTokens()) {
-            val tok = st.nextToken()
-            if (tok == "/")
-                newUri += "/"
-            else if (tok == " ")
-                newUri += "%20"
-            else {
-                newUri += URLEncoder.encode(tok)
-                // For Java 1.4 you'll want to use this instead:
-                // try { newUri += URLEncoder.encode( tok, "UTF-8" ); } catch (
-                // java.io.UnsupportedEncodingException uee ) {}
-            }
-        }
-        return newUri
-    }
-
-    // ==================================================
-    // File server code
-    // ==================================================
-
-    /**
      * Serves file from homeDir and its' subdirectories (only). Uses only URI,
      * ignores all headers and HTTP parameters.
      */
-    fun serveFile(uri: String, header: Properties, homeDir: File, allowDirectoryListing: Boolean): Response {
-        var uri = uri
+    fun serveFile(uri: String, header: Properties, homeDir: File): Response {
         var res: Response? = null
 
         // Make sure we won't die of an exception later
         if (!homeDir.isDirectory)
             res = Response(HTTP_INTERNALERROR, MIME_PLAINTEXT, "INTERNAL ERRROR: serveFile(): given homeDir is not a directory.")
 
-        var f = File(homeDir, uri)
-        println(f.path)
-        if (res == null && !f.exists())
+        val requestedFile = File(homeDir, uri)
+        println(requestedFile.path)
+        if (res == null && !requestedFile.exists())
             res = Response(HTTP_NOTFOUND, MIME_PLAINTEXT, "Error 404, file not found.")
 
         try {
@@ -706,12 +676,12 @@ class HttpServer(private val tcpPort: Int) {
 
                 println("Retrieving the mime type...")
 
-                var mime: String = ""
+                val mime: String
 
-                val lastDotIndex = f.canonicalPath.lastIndexOf('.')
-                if (lastDotIndex >= 0 && !(f.canonicalPath.lastIndexOf("/") > lastDotIndex)) {
-                    val retrievedMime = f.canonicalPath.substring(lastDotIndex + 1).toLowerCase()
-                    mime = mimeTypes.get(retrievedMime) as String
+                val lastDotIndex = requestedFile.canonicalPath.lastIndexOf('.')
+                if (lastDotIndex >= 0 && requestedFile.canonicalPath.lastIndexOf("/") <= lastDotIndex) {
+                    val retrievedMime = requestedFile.canonicalPath.substring(lastDotIndex + 1).toLowerCase()
+                    mime = mimeTypes[retrievedMime] as String
                 } else mime = MIME_DEFAULT_JPG
 
                 // Support (simple) skipping:
@@ -727,16 +697,14 @@ class HttpServer(private val tcpPort: Int) {
                                 startFrom = java.lang.Long.parseLong(range.substring(0, minus))
                                 endAt = java.lang.Long.parseLong(range.substring(minus + 1))
                             }
-                        } catch (e: NumberFormatException) {
-                            e.printStackTrace()
+                        } catch (ignored: NumberFormatException) {
                         }
-
                     }
                 }
 
                 // Change return code and add Content-Range header when skipping
                 // is requested
-                val fileLength = f.length()
+                val fileLength = requestedFile.length()
                 if (range != null && startFrom >= 0) {
                     if (startFrom >= fileLength) {
                         println("The requested range is not satisfiable")
@@ -745,25 +713,24 @@ class HttpServer(private val tcpPort: Int) {
                     } else {
                         if (endAt < 0)
                             endAt = fileLength - 1
-                        var newLength = endAt - startFrom + 1
-                        if (newLength < 0)
-                            newLength = 0
+                        var requestedLength = endAt - startFrom + 1
+                        if (requestedLength < 0)
+                            requestedLength = 0
 
-                        val dataLength = newLength
-                        val inputStream = object : FileInputStream(f) {
+                        val inputStream = object : FileInputStream(requestedFile) {
                             @Throws(IOException::class)
                             override fun available(): Int {
-                                return dataLength.toInt()
+                                return requestedLength.toInt()
                             }
                         }
                         inputStream.skip(startFrom)
 
                         res = Response(HTTP_PARTIALCONTENT, mime, inputStream)
-                        res.addHeader("Content-Length", "" + dataLength)
+                        res.addHeader("Content-Length", "" + requestedLength)
                         res.addHeader("Content-Range", "bytes $startFrom-$endAt/$fileLength")
                     }
                 } else {
-                    res = Response(HTTP_OK, mime, FileInputStream(f))
+                    res = Response(HTTP_OK, mime, FileInputStream(requestedFile))
                     res.addHeader("Content-Length", "" + fileLength)
                 }
             }

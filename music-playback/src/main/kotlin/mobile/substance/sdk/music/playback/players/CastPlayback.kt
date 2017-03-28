@@ -76,7 +76,7 @@ object CastPlayback : Playback(), SessionManagerListener<Session>, RemoteMediaCl
     }
 
     override fun onSendingRemoteMediaRequest() {
-
+        println("onSendingRemoteMediaRequest()")
     }
 
     override fun onMetadataUpdated() {
@@ -164,9 +164,7 @@ object CastPlayback : Playback(), SessionManagerListener<Session>, RemoteMediaCl
     private fun doLoad(info: MediaInfo, autoPlay: Boolean) {
         notifyBuffering()
         remoteMediaClient?.load(info, autoPlay)?.setResultCallback {
-            if (!(it.status?.isSuccess ?: false)) {
-                logStatus(it.status, "Playback failed")
-            } else notifyPlaying()
+            if (!it.status.isSuccess) logStatus(it.status, "Playback failed")
         }
     }
 

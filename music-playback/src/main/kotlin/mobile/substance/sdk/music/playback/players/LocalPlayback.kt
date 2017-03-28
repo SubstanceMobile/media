@@ -237,8 +237,7 @@ object LocalPlayback : Playback(),
     override fun getCurrentPosition(): Int {
         try {
             return localPlayer?.currentPosition ?: 0
-        } catch (e: IllegalStateException) {
-            e.printStackTrace()
+        } catch (ignored: IllegalStateException) {
             return 0
         }
     }

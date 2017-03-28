@@ -284,8 +284,7 @@ object GaplessPlayback : Playback(),
     override fun getCurrentPosition(): Int {
         try {
             return getActivePlayer()?.currentPosition ?: 0
-        } catch (e: IllegalStateException) {
-            e.printStackTrace()
+        } catch (ignored: IllegalStateException) {
             return 0
         }
     }
