@@ -67,15 +67,46 @@ class Album : MediaObject() {
     }
 
     fun requestArt(request: ArtRequest) {
-        Glide.with(getContext()).load(albumArtworkPath).asBitmap().placeholder(MusicCoreOptions.defaultArt).diskCacheStrategy(DiskCacheStrategy.SOURCE).animate(android.R.anim.fade_in).centerCrop().into(object : SimpleTarget<Bitmap>() {
+        val target = object : SimpleTarget<Bitmap>() {
             override fun onResourceReady(resource: Bitmap, glideAnimation: GlideAnimation<in Bitmap>) {
                 request.respond(resource)
             }
-        })
+        }
+        if (MusicCoreOptions.glidePreferPlaceholder) {
+            Glide.with(getContext())
+                    .load(albumArtworkPath)
+                    .asBitmap()
+                    .placeholder(MusicCoreOptions.defaultArt)
+                    .diskCacheStrategy(DiskCacheStrategy.SOURCE)
+                    .animate(android.R.anim.fade_in)
+                    .centerCrop()
+                    .into(target)
+        } else Glide.with(getContext())
+                .load(albumArtworkPath)
+                .asBitmap()
+                .error(MusicCoreOptions.defaultArt)
+                .diskCacheStrategy(DiskCacheStrategy.SOURCE)
+                .animate(android.R.anim.fade_in)
+                .centerCrop()
+                .into(target)
     }
 
     fun requestArt(imageView: ImageView) {
-        Glide.with(getContext()).load(albumArtworkPath).placeholder(MusicCoreOptions.defaultArt).diskCacheStrategy(DiskCacheStrategy.SOURCE).crossFade().centerCrop().into(imageView)
+        if (MusicCoreOptions.glidePreferPlaceholder) {
+            Glide.with(getContext())
+                    .load(albumArtworkPath)
+                    .placeholder(MusicCoreOptions.defaultArt)
+                    .diskCacheStrategy(DiskCacheStrategy.SOURCE)
+                    .crossFade()
+                    .centerCrop()
+                    .into(imageView)
+        } else Glide.with(getContext())
+                .load(albumArtworkPath)
+                .error(MusicCoreOptions.defaultArt)
+                .diskCacheStrategy(DiskCacheStrategy.SOURCE)
+                .crossFade()
+                .centerCrop()
+                .into(imageView)
     }
 
     ///////////////////////////////////////////////////////////////////////////
