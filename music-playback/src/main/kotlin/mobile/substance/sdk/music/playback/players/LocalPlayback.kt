@@ -197,7 +197,6 @@ object LocalPlayback : Playback(),
     override fun onError(mp: MediaPlayer?, what: Int, extra: Int): Boolean {
         notifyError()
         shutdownProgressThread()
-        //TODO: Handle this with some some sort of callback
         return true
     }
 

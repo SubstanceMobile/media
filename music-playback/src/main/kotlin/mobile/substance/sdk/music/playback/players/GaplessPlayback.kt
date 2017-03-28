@@ -56,9 +56,9 @@ object GaplessPlayback : Playback(),
     // Controls
     ///////////////////////////////////////////////////////////////////////////
 
-    ////////////////
-    // Play TODO //
-    ///////////////
+    //////////
+    // Play //
+    //////////
 
     override fun doPlay(fileUri: Uri, artworkUri: Uri?) {
         println("doPlay()")
@@ -201,7 +201,6 @@ object GaplessPlayback : Playback(),
 
     ///////////////////////////////////////////////////////////////////////////
     // Media Player Callbacks
-    // STATUS: TODO
     ///////////////////////////////////////////////////////////////////////////
 
     override fun onPrepared(mp: MediaPlayer?) {
@@ -218,6 +217,7 @@ object GaplessPlayback : Playback(),
         if (!shouldPrepareNext()) {
             next()
         } else {
+            notifyPlaying()
             if (repeatMode != PlaybackStateCompat.REPEAT_MODE_ONE) {
                 println("onCompletion() moving forward")
                 MusicQueue.moveForward(1)
@@ -237,7 +237,6 @@ object GaplessPlayback : Playback(),
     override fun onError(mp: MediaPlayer?, what: Int, extra: Int): Boolean {
         notifyError()
         shutdownProgressThread()
-        //TODO: Handle this with some some sort of callback
         return true
     }
 
