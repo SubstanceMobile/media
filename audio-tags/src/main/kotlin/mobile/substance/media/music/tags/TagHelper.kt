@@ -19,11 +19,11 @@ package mobile.substance.media.music.tags
 import android.content.Context
 import android.net.Uri
 import android.os.AsyncTask
-import mobile.substance.media.core.music.MusicDataHolder
-import mobile.substance.media.core.music.objects.Album
+import mobile.substance.media.core.audio.AudioHolder
+import mobile.substance.media.core.audio.objects.Album
 import mobile.substance.media.core.MediaObject
-import mobile.substance.media.core.music.objects.Song
-import mobile.substance.media.utils.MusicCoreUtil
+import mobile.substance.media.core.audio.objects.Song
+import mobile.substance.media.utils.AudioCoreUtil
 import org.jaudiotagger.audio.AudioFileIO
 import org.jaudiotagger.tag.FieldKey
 import org.jaudiotagger.tag.Tag
@@ -59,7 +59,7 @@ class TagHelper {
 
         fun read(context: Context, song: Song): TagSong? {
             val tag: Tag?
-            val filePath = MusicCoreUtil.getFilePath(context, song.uri)
+            val filePath = AudioCoreUtil.getFilePath(context, song.uri)
             try {
                 tag = AudioFileIO.read(File(filePath)).tag
             } catch (e: Exception) {
@@ -83,7 +83,7 @@ class TagHelper {
 
         fun read(context: Context, album: Album): TagAlbum? {
             val songs = ArrayList<TagSong>()
-            MusicDataHolder.findSongsForAlbum(album).forEach {
+            AudioHolder.findSongsForAlbum(album).forEach {
                 songs.add(read(context, it)!!)
             }
 
@@ -96,7 +96,7 @@ class TagHelper {
 
 
             if (album.albumArtworkPath != null && album.albumArtworkPath.orEmpty().length > 0) {
-                tagAlbum.setArtwork(ArtworkFactory.createArtworkFromFile(File(MusicCoreUtil.getFilePath(context, Uri.parse("file://" + album.albumArtworkPath)))))
+                tagAlbum.setArtwork(ArtworkFactory.createArtworkFromFile(File(AudioCoreUtil.getFilePath(context, Uri.parse("file://" + album.albumArtworkPath)))))
             }
 
             return tagAlbum.build()

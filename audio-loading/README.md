@@ -1,8 +1,8 @@
-# Music-Loading
+# audio-Loading
 ### Install
-This library is used to load ```music-core``` objects from MediaStore.
+This library is used to load ```audio-core``` objects from MediaStore.
 ```
-compile('com.github.SubstanceMobile.SDK:music-loading:-SNAPSHOT'@aar){
+compile('com.github.SubstanceMobile.SDK:audio-loading:-SNAPSHOT'@aar){
     transitive = true
 }
 ```
@@ -11,7 +11,7 @@ compile('com.github.SubstanceMobile.SDK:music-loading:-SNAPSHOT'@aar){
 The basic use for this library is this:
 ```
 Library.init(Context, LibraryConfig() // Initialization
-        .put(MusicType.SONGS)
+        .put(AUDIO_TYPE_SONGS)
         .hookPlayback()
         .hookTags())
 Library.registerListener(LibraryListener) // Get notified of all loading events

@@ -16,7 +16,7 @@
 
 package mobile.substance.media.music.tags
 
-import mobile.substance.media.core.music.objects.Album
+import mobile.substance.media.core.audio.objects.Album
 import org.jaudiotagger.tag.images.Artwork
 
 /**

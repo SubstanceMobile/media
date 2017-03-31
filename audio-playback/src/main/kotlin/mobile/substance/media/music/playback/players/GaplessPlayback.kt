@@ -10,7 +10,7 @@ import android.util.Log
 import mobile.substance.media.music.playback.PlaybackRemote
 import mobile.substance.media.music.playback.destroy
 import mobile.substance.media.music.playback.prepareWithDataSource
-import mobile.substance.media.music.playback.service.MusicQueue
+import mobile.substance.media.music.playback.service.AudioQueue
 
 object GaplessPlayback : Playback(),
         MediaPlayer.OnPreparedListener,
@@ -81,7 +81,7 @@ object GaplessPlayback : Playback(),
         activePlayerIndex = if (activePlayerIndex == 0) 1 else 0
     }
 
-    private fun shouldPrepareNext(): Boolean = (!MusicQueue.isLastPosition() || repeatMode == PlaybackStateCompat.REPEAT_MODE_ALL) || (repeatMode == PlaybackStateCompat.REPEAT_MODE_ONE)
+    private fun shouldPrepareNext(): Boolean = (!AudioQueue.isLastPosition() || repeatMode == PlaybackStateCompat.REPEAT_MODE_ALL) || (repeatMode == PlaybackStateCompat.REPEAT_MODE_ONE)
 
     private fun prepareNextPlayer(currentUri: Uri) {
         println("GaplessPlayback.kt is preparing the next song...")
@@ -89,7 +89,7 @@ object GaplessPlayback : Playback(),
             preparedSong = currentUri
             getInactivePlayer()?.prepareWithDataSource(SERVICE!!, currentUri)
             println("GaplessPlayback.kt has prepared the current song again")
-        } else if (!MusicQueue.isLastPosition() || repeatMode == PlaybackStateCompat.REPEAT_MODE_ALL) {
+        } else if (!AudioQueue.isLastPosition() || repeatMode == PlaybackStateCompat.REPEAT_MODE_ALL) {
             preparedSong = PlaybackRemote.getNextSong()!!.uri
             getInactivePlayer()?.prepareWithDataSource(SERVICE!!, PlaybackRemote.getNextSong()!!.uri)
             println("GaplessPlayback.kt has prepared the next song in the queue")
@@ -200,7 +200,7 @@ object GaplessPlayback : Playback(),
     }
 
     ///////////////////////////////////////////////////////////////////////////
-    // Media Player Callbacks
+    // MediaCore Player Callbacks
     ///////////////////////////////////////////////////////////////////////////
 
     override fun onPrepared(mp: MediaPlayer?) {
@@ -220,7 +220,7 @@ object GaplessPlayback : Playback(),
             notifyPlaying()
             if (repeatMode != PlaybackStateCompat.REPEAT_MODE_ONE) {
                 println("onCompletion() moving forward")
-                MusicQueue.moveForward(1)
+                AudioQueue.moveForward(1)
                 dispatchOnSongChanged(PlaybackRemote.getCurrentSong()!!)
             }
             switchPlayers()

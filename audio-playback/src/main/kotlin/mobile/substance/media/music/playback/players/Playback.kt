@@ -28,13 +28,13 @@ import android.support.v4.media.session.PlaybackStateCompat
 import android.support.v4.media.session.PlaybackStateCompat.STATE_NONE
 import android.util.Log
 import android.widget.Toast
-import mobile.substance.media.core.music.MusicDataHolder
-import mobile.substance.media.core.music.objects.*
-import mobile.substance.media.utils.MusicCoreUtil
+import mobile.substance.media.core.audio.AudioHolder
+import mobile.substance.media.core.audio.objects.*
+import mobile.substance.media.utils.AudioCoreUtil
 import mobile.substance.media.music.playback.PlaybackRemote
-import mobile.substance.media.music.playback.service.MusicQueue
-import mobile.substance.media.music.playback.service.MusicService
-import mobile.substance.media.utils.MusicCoreUtil.createSongFromFile
+import mobile.substance.media.music.playback.service.AudioQueue
+import mobile.substance.media.music.playback.service.AudioService
+import mobile.substance.media.utils.AudioCoreUtil.createSongFromFile
 import java.util.*
 import kotlin.concurrent.thread
 
@@ -44,9 +44,9 @@ abstract class Playback : MediaSessionCompat.Callback() {
         val TAG: String = Playback::class.java.simpleName
     }
 
-    var SERVICE: MusicService? = null
+    var SERVICE: AudioService? = null
 
-    fun init(service: MusicService) {
+    fun init(service: AudioService) {
         SERVICE = service
         Log.i(TAG, "Service has been set. We are now initialized")
 
@@ -86,7 +86,7 @@ abstract class Playback : MediaSessionCompat.Callback() {
     // Play from Uri //
     ///////////////////
 
-    fun play() = play(MusicQueue.getCurrentSong()!!)
+    fun play() = play(AudioQueue.getCurrentSong()!!)
 
     fun play(song: Song) {
         doPlay(song)
@@ -104,11 +104,11 @@ abstract class Playback : MediaSessionCompat.Callback() {
     private fun play(uri: Uri) = thread {
         var mediaId: Long? = null
         if (uri.scheme == "content") {
-            mediaId = MusicCoreUtil.findByMediaId(ContentUris.parseId(uri), MusicDataHolder.getAlbums(), MusicDataHolder.getSongs())?.id
+            mediaId = AudioCoreUtil.findByMediaId(ContentUris.parseId(uri), AudioHolder.getAlbums(), AudioHolder.getSongs())?.id
         } else {
-            mediaId = MusicCoreUtil.retrieveMediaId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, SERVICE!!, uri.path)
+            mediaId = AudioCoreUtil.retrieveMediaId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, SERVICE!!, uri.path)
         }
-        val song = MusicDataHolder.findSongById(mediaId ?: 0) ?: createSongFromFile(uri.path)
+        val song = AudioHolder.findSongById(mediaId ?: 0) ?: createSongFromFile(uri.path)
         Handler(Looper.getMainLooper()).post {
             PlaybackRemote.play(song)
         }
@@ -120,12 +120,12 @@ abstract class Playback : MediaSessionCompat.Callback() {
     }
 
     override fun onPlayFromMediaId(mediaId: String?, extras: Bundle?) {
-        val song = MusicDataHolder.findSongById(mediaId!!.toLong())
+        val song = AudioHolder.findSongById(mediaId!!.toLong())
         if (song != null) play(song) else Log.d(TAG, "onPlayFromMediaId: no song with such ID exists")
     }
 
     open fun doPlay(song: Song) {
-        val artworkPath: String? = MusicDataHolder.findAlbumById(song.songAlbumId ?: 0)?.albumArtworkPath
+        val artworkPath: String? = AudioHolder.findAlbumById(song.songAlbumId ?: 0)?.albumArtworkPath
         doPlay(song.uri, if (artworkPath == null) song.explicitArtworkUri else Uri.parse("file://$artworkPath"))
     }
 
@@ -158,16 +158,16 @@ abstract class Playback : MediaSessionCompat.Callback() {
         var songs: List<Song>? = null
         try {
             when (extras.get(MediaStore.EXTRA_MEDIA_FOCUS)) {
-                MediaStore.Audio.Media.ENTRY_CONTENT_TYPE -> songs = MusicDataHolder.search(extras.getString(MediaStore.EXTRA_MEDIA_TITLE))
-                MediaStore.Audio.Albums.ENTRY_CONTENT_TYPE -> songs = MusicDataHolder.findSongsForAlbum(MusicDataHolder.search<Album>(extras.getString(MediaStore.EXTRA_MEDIA_ALBUM))!!.first())
-                MediaStore.Audio.Artists.ENTRY_CONTENT_TYPE -> songs = MusicDataHolder.findSongsForArtist(MusicDataHolder.search<Artist>(extras.getString(MediaStore.EXTRA_MEDIA_ARTIST))!!.first())
+                MediaStore.Audio.Media.ENTRY_CONTENT_TYPE -> songs = AudioHolder.search(extras.getString(MediaStore.EXTRA_MEDIA_TITLE))
+                MediaStore.Audio.Albums.ENTRY_CONTENT_TYPE -> songs = AudioHolder.findSongsForAlbum(AudioHolder.search<Album>(extras.getString(MediaStore.EXTRA_MEDIA_ALBUM))!!.first())
+                MediaStore.Audio.Artists.ENTRY_CONTENT_TYPE -> songs = AudioHolder.findSongsForArtist(AudioHolder.search<Artist>(extras.getString(MediaStore.EXTRA_MEDIA_ARTIST))!!.first())
                 MediaStore.Audio.Playlists.ENTRY_CONTENT_TYPE -> {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) songs = MusicDataHolder.findSongsForPlaylist(MusicDataHolder.search<Playlist>(extras.getString(MediaStore.EXTRA_MEDIA_PLAYLIST))!!.first())
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) songs = AudioHolder.findSongsForPlaylist(AudioHolder.search<Playlist>(extras.getString(MediaStore.EXTRA_MEDIA_PLAYLIST))!!.first())
                 }
                 MediaStore.Audio.Genres.ENTRY_CONTENT_TYPE -> {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) songs = MusicDataHolder.findSongsForGenre(MusicDataHolder.search<Genre>(extras.getString(MediaStore.EXTRA_MEDIA_GENRE))!!.first())
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) songs = AudioHolder.findSongsForGenre(AudioHolder.search<Genre>(extras.getString(MediaStore.EXTRA_MEDIA_GENRE))!!.first())
                 }
-                else -> songs = MusicDataHolder.search(query)
+                else -> songs = AudioHolder.search(query)
             }
         } catch (e: KotlinNullPointerException) {
             e.printStackTrace()

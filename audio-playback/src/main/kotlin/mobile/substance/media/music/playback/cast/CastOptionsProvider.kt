@@ -21,7 +21,7 @@ import com.google.android.gms.cast.framework.CastOptions
 import com.google.android.gms.cast.framework.OptionsProvider
 import com.google.android.gms.cast.framework.SessionProvider
 import com.google.android.gms.cast.framework.media.CastMediaOptions
-import mobile.substance.media.options.MusicPlaybackOptions
+import mobile.substance.media.options.AudioPlaybackOptions
 
 class CastOptionsProvider : OptionsProvider {
 
@@ -31,7 +31,7 @@ class CastOptionsProvider : OptionsProvider {
 
     override fun getCastOptions(p0: Context?): CastOptions? {
         return CastOptions.Builder()
-                .setReceiverApplicationId(MusicPlaybackOptions.castApplicationId)
+                .setReceiverApplicationId(AudioPlaybackOptions.castApplicationId)
                 .setEnableReconnectionService(true)
                 .setResumeSavedSession(true)
                 .setCastMediaOptions(CastMediaOptions.Builder()

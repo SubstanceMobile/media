@@ -5,17 +5,17 @@ import android.media.MediaPlayer
 import android.net.Uri
 import android.support.v4.media.session.MediaSessionCompat
 import android.util.Log
-import mobile.substance.media.music.playback.players.GaplessPlayback
+import mobile.substance.media.utils.CoreUtil.toFilePath
 import mobile.substance.media.music.playback.players.Playback
-import mobile.substance.media.utils.MusicCoreUtil
+import mobile.substance.media.utils.AudioCoreUtil
 
 fun MediaPlayer.prepareWithDataSource(context: Context, dataSource: Uri) {
     try {
         val url = dataSource.toString()
         Log.d("Checking url validity", url)
-        if (!MusicCoreUtil.isHttpUrl(url)) setDataSource(GaplessPlayback.SERVICE!!.applicationContext, dataSource) else setDataSource(url)
+        if (!AudioCoreUtil.isHttpUrl(url)) setDataSource(context, dataSource) else setDataSource(url)
     } catch (e: Exception) {
-        Log.e(Playback.TAG, "Unable to play " + MusicCoreUtil.getFilePath(GaplessPlayback.SERVICE!!, dataSource), e)
+        Log.e(Playback.TAG, "Unable to play " + dataSource.toFilePath(context), e)
     } finally {
         prepareAsync()
     }

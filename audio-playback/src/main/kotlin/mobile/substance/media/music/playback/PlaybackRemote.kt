@@ -25,27 +25,21 @@ import android.content.ServiceConnection
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
-import android.os.Handler
 import android.os.IBinder
-import android.os.Looper
-import android.support.annotation.IntDef
-import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import android.support.v7.app.NotificationCompat
 import android.util.Log
 import co.metalab.asyncawait.async
 import com.google.android.gms.cast.framework.CastContext
-import mobile.substance.media.core.music.MusicApiInternalError
-import mobile.substance.media.core.music.MusicDataHolder
-import mobile.substance.media.core.music.objects.Song
-import mobile.substance.media.utils.MusicCoreUtil
+import mobile.substance.media.core.audio.Song
+import mobile.substance.media.utils.AudioCoreUtil
 import mobile.substance.media.music.playback.players.Playback
 import mobile.substance.media.music.playback.service.DefaultMediaNotification
 import mobile.substance.media.music.playback.service.MediaNotification
-import mobile.substance.media.music.playback.service.MusicQueue
-import mobile.substance.media.music.playback.service.MusicService
-import mobile.substance.media.options.MusicPlaybackOptions
-import mobile.substance.media.utils.MusicPlaybackUtil
+import mobile.substance.media.music.playback.service.AudioQueue
+import mobile.substance.media.music.playback.service.AudioService
+import mobile.substance.media.options.AudioPlaybackOptions
+import mobile.substance.media.utils.AudioPlaybackUtil
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -54,18 +48,18 @@ import kotlin.collections.ArrayList
  */
 object PlaybackRemote : ServiceConnection {
     private var context: Context? = null
-    private var serviceClass: Class<*> = MusicService::class.java
-    private var service: MusicService? = null
+    private var serviceClass: Class<*> = AudioService::class.java
+    private var service: AudioService? = null
     private var isBound = false
 
     ///////////////////////////////////////////////////////////////////////////
     // Manages Connections
     ///////////////////////////////////////////////////////////////////////////
 
-    private val SERVICE_BOUND_LISTENERS: MutableList<(MusicService) -> Unit> = ArrayList()
+    private val SERVICE_BOUND_LISTENERS: MutableList<(AudioService) -> Unit> = ArrayList()
 
-    private fun getService(listener: MusicService.() -> Unit) {
-        val running = if (context != null) MusicPlaybackUtil.isServiceRunning(context!!, serviceClass) else false
+    private fun getService(listener: AudioService.() -> Unit) {
+        val running = if (context != null) AudioPlaybackUtil.isServiceRunning(context!!, serviceClass) else false
         if (running && isBound && service != null) {
             listener.invoke(service!!)
             return
@@ -78,10 +72,10 @@ object PlaybackRemote : ServiceConnection {
         SERVICE_BOUND_LISTENERS.add(listener)
     }
 
-    internal fun delegate(call: MusicService.() -> Any) = getService { this.call() }
+    internal fun delegate(call: AudioService.() -> Any) = getService { this.call() }
 
     override fun onServiceConnected(name: ComponentName?, binder: IBinder?) {
-        service = (binder as MusicService.ServiceBinder).service
+        service = (binder as AudioService.ServiceBinder).service
         isBound = true
         try {
             for (listener in SERVICE_BOUND_LISTENERS) listener.invoke(service!!)
@@ -100,10 +94,10 @@ object PlaybackRemote : ServiceConnection {
     // Main
     ///////////////////////////////////////////////////////////////////////////
 
-    fun <S : MusicService> init(serviceClass: Class<S>, context: Context) {
+    fun <S : AudioService> init(serviceClass: Class<S>, context: Context) {
         this.serviceClass = serviceClass
         this.context = context
-        if (MusicPlaybackOptions.isCastEnabled) CastContext.getSharedInstance(context)
+        if (AudioPlaybackOptions.isCastEnabled) CastContext.getSharedInstance(context)
     }
 
     fun cleanup() {
@@ -161,8 +155,8 @@ object PlaybackRemote : ServiceConnection {
     fun play(songs: List<Song>, position: Int) {
         var play = true
         //Make sure we are not already playing the first song in the list. If we are, then just keep playing and quietly update the queue in the background (unless specified otherwise)
-        if (getCurrentSong() != null) play = songs[position].id != getCurrentSong()?.id
-        MusicQueue.set(songs.toMutableList(), position)
+        if (getCurrentSong() != null) play = songs[position] != getCurrentSong()
+        AudioQueue.set(songs.toMutableList(), position)
         if (play) play()
     }
 
@@ -190,7 +184,7 @@ object PlaybackRemote : ServiceConnection {
     fun playNext() = getService { control()?.transportControls?.skipToNext() }
 
     internal fun playNextInternal() = getService {
-        MusicQueue.moveForward(1)
+        AudioQueue.moveForward(1)
         play()
     }
 
@@ -200,7 +194,7 @@ object PlaybackRemote : ServiceConnection {
     fun playPrevious() = getService { control()?.transportControls?.skipToPrevious() }
 
     internal fun playPreviousInternal() {
-        MusicQueue.moveBackward(1)
+        AudioQueue.moveBackward(1)
         play()
     }
 
@@ -228,21 +222,11 @@ object PlaybackRemote : ServiceConnection {
     fun seekTo(progress: Int) = getService { control()!!.transportControls.seekTo(progress.toLong()) }
 
     /**
-     * Shuffle the hooked songs
-     */
-    fun shuffle() {
-        val songs = ArrayList<Song>()
-        songs.addAll(MusicDataHolder.getSongs())
-        Collections.shuffle(songs)
-        play(songs, 0)
-    }
-
-    /**
      * Shuffle the current queue
      */
     fun useShuffledQueue(useShuffledQueue: Boolean) {
-        if (!MusicQueue.isSecondaryActive && useShuffledQueue) MusicQueue.initSecondaryQueue()
-        MusicQueue.isSecondaryActive
+        if (!AudioQueue.isSecondaryActive && useShuffledQueue) AudioQueue.initSecondaryQueue()
+        AudioQueue.isSecondaryActive
     }
 
     /**
@@ -265,41 +249,41 @@ object PlaybackRemote : ServiceConnection {
     // Queue
     ///////////////////////////////////////////////////////////////////////////
 
-    fun getCurrentSong(): Song? = MusicQueue.getCurrentSong()
+    fun getCurrentSong(): Song? = AudioQueue.getCurrentSong()
 
-    fun getNextSong(): Song? = MusicQueue.get(MusicQueue.POSITION + 1)
+    fun getNextSong(): Song? = AudioQueue.get(AudioQueue.POSITION + 1)
 
-    fun getPreviousSong(): Song? = MusicQueue.get(MusicQueue.POSITION - 1)
+    fun getPreviousSong(): Song? = AudioQueue.get(AudioQueue.POSITION - 1)
 
-    fun getQueue(startAtCurrentPosition: Boolean = false): List<Song> = MusicQueue.getQueue(startAtCurrentPosition)
+    fun getQueue(startAtCurrentPosition: Boolean = false): List<Song> = AudioQueue.getQueue(startAtCurrentPosition)
 
-    fun getCurrentPosition() = MusicQueue.POSITION
+    fun getCurrentPosition() = AudioQueue.POSITION
 
-    fun setQueue(queue: MutableList<Song>, position: Int) = MusicQueue.set(queue, position)
+    fun setQueue(queue: MutableList<Song>, position: Int) = AudioQueue.set(queue, position)
 
     /**
      * Swaps the two songs at the given positions. You may want to use this in your UI, e.g. when using a drag-drop style queue reordering
      */
     fun swapQueueItems(fromPosition: Int, toPosition: Int, startAtCurrentPosition: Boolean = false, triggerCallbacks: Boolean = false) {
-        Collections.swap(MusicQueue.getQueue(), if (startAtCurrentPosition) fromPosition + MusicQueue.POSITION + 1 else fromPosition, if (startAtCurrentPosition) toPosition + MusicQueue.POSITION + 1 else toPosition)
-        if (triggerCallbacks) MusicQueue.notifyChanged()
+        Collections.swap(AudioQueue.getQueue(), if (startAtCurrentPosition) fromPosition + AudioQueue.POSITION + 1 else fromPosition, if (startAtCurrentPosition) toPosition + AudioQueue.POSITION + 1 else toPosition)
+        if (triggerCallbacks) AudioQueue.notifyChanged()
     }
 
     fun removeFromQueue(pos: Int, startsAtCurrentPosition: Boolean = false, triggerCallbacks: Boolean = false) {
-        MusicQueue.getQueue().removeAt(if (startsAtCurrentPosition) MusicQueue.POSITION + 1 + pos else pos)
-        if (triggerCallbacks) MusicQueue.notifyChanged()
+        AudioQueue.getQueue().removeAt(if (startsAtCurrentPosition) AudioQueue.POSITION + 1 + pos else pos)
+        if (triggerCallbacks) AudioQueue.notifyChanged()
     }
 
     fun addToQueueAsNext(song: Song, triggerCallbacks: Boolean = false) {
-        MusicQueue.getQueue().add(MusicQueue.POSITION + 1, song)
-        if (triggerCallbacks) MusicQueue.notifyChanged()
+        AudioQueue.getQueue().add(AudioQueue.POSITION + 1, song)
+        if (triggerCallbacks) AudioQueue.notifyChanged()
     }
 
     fun addToQueue(song: Song, triggerCallbacks: Boolean = false) = addToQueue(listOf(song), triggerCallbacks)
 
     fun addToQueue(songs: List<Song>, triggerCallbacks: Boolean = false) {
-        MusicQueue.getQueue().addAll(songs)
-        if (triggerCallbacks) MusicQueue.notifyChanged()
+        AudioQueue.getQueue().addAll(songs)
+        if (triggerCallbacks) AudioQueue.notifyChanged()
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -323,7 +307,7 @@ object PlaybackRemote : ServiceConnection {
 
     fun makeNotification(updateInterface: NotificationUpdateInterface): Notification {
         async {
-            updateInterface.updateNotification(makeNotification(await { MusicCoreUtil.getArtwork(MusicQueue.getCurrentSong()!!, service!!) }))
+            updateInterface.updateNotification(makeNotification(await { AudioCoreUtil.getArtwork(AudioQueue.getCurrentSong()!!, service!!) }))
         }
         return makeNotification(null)
     }
@@ -331,18 +315,18 @@ object PlaybackRemote : ServiceConnection {
     internal fun makeNotification(albumArt: Bitmap?): Notification {
         if (notificationBuilder == null) {
             notificationBuilder = notificationCreator.createNotification(context!!, getMediaSession(),
-                    MusicPlaybackUtil.getPendingIntent(context!!, MusicPlaybackUtil.Action.PLAY, serviceClass),
-                    MusicPlaybackUtil.getPendingIntent(context!!, MusicPlaybackUtil.Action.PAUSE, serviceClass),
-                    MusicPlaybackUtil.getPendingIntent(context!!, MusicPlaybackUtil.Action.SKIP_FORWARD, serviceClass),
-                    MusicPlaybackUtil.getPendingIntent(context!!, MusicPlaybackUtil.Action.SKIP_BACKWARD, serviceClass),
-                    MusicPlaybackUtil.getPendingIntent(context!!, MusicPlaybackUtil.Action.NOTIFICATION, serviceClass),
-                    MusicPlaybackUtil.getPendingIntent(context!!, MusicPlaybackUtil.Action.STOP, serviceClass))
+                    AudioPlaybackUtil.getPendingIntent(context!!, AudioPlaybackUtil.Action.PLAY, serviceClass),
+                    AudioPlaybackUtil.getPendingIntent(context!!, AudioPlaybackUtil.Action.PAUSE, serviceClass),
+                    AudioPlaybackUtil.getPendingIntent(context!!, AudioPlaybackUtil.Action.SKIP_FORWARD, serviceClass),
+                    AudioPlaybackUtil.getPendingIntent(context!!, AudioPlaybackUtil.Action.SKIP_BACKWARD, serviceClass),
+                    AudioPlaybackUtil.getPendingIntent(context!!, AudioPlaybackUtil.Action.NOTIFICATION, serviceClass),
+                    AudioPlaybackUtil.getPendingIntent(context!!, AudioPlaybackUtil.Action.STOP, serviceClass))
         }
         notificationCreator.populate(getCurrentSong()!!,
                 notificationBuilder!!,
                 getMediaSession(),
-                MusicPlaybackUtil.getPendingIntent(context!!, MusicPlaybackUtil.Action.PLAY, serviceClass),
-                MusicPlaybackUtil.getPendingIntent(context!!, MusicPlaybackUtil.Action.PAUSE, serviceClass))
+                AudioPlaybackUtil.getPendingIntent(context!!, AudioPlaybackUtil.Action.PLAY, serviceClass),
+                AudioPlaybackUtil.getPendingIntent(context!!, AudioPlaybackUtil.Action.PAUSE, serviceClass))
         if (albumArt != null) notificationCreator.loadArt(albumArt, notificationBuilder!!)
         return notificationCreator.buildNotification(notificationBuilder!!)
     }
@@ -355,7 +339,7 @@ object PlaybackRemote : ServiceConnection {
      * <b>WARNING: Do not call this unless really necessary or you know what you are doing</b>
      *
      * Feel free to override Playback and set it here. This will tell the service to control this instead of the default LocalPlayback, GaplessPlayback and CastPlayback classes. As a warning, if you start cast playback this will be replaced.
-     * Be warned that if you stop cast playback there will first be a call to MusicPlaybackOptions to create a custom player instance. Make sure you call that too.
+     * Be warned that if you stop cast playback there will first be a call to AudioPlaybackOptions to create a custom player instance. Make sure you call that too.
      *
      * If you want all state to be transferred between players, make sure you leave the hotswap (the second parameter) as true. This will automatically transfer playback state
      * position, and current song between players to ensure consistent playback. If you have an option in your settings activity for setting a custom player, it is recommended

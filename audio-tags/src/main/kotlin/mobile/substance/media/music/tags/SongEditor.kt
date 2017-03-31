@@ -18,7 +18,7 @@ package mobile.substance.media.music.tags
 
 import android.content.Context
 import android.net.Uri
-import mobile.substance.media.utils.MusicCoreUtil
+import mobile.substance.media.utils.AudioCoreUtil
 
 import org.jaudiotagger.audio.AudioFile
 import org.jaudiotagger.audio.AudioFileIO
@@ -101,7 +101,7 @@ class SongEditor(private val context: Context, private val song: TagSong) {
 
     fun setArtwork(context: Context, uri: Uri): SongEditor {
         try {
-            this.artwork = ArtworkFactory.createArtworkFromFile(File(MusicCoreUtil.getFilePath(context, uri)))
+            this.artwork = ArtworkFactory.createArtworkFromFile(File(AudioCoreUtil.getFilePath(context, uri)))
         } catch (e: IOException) {
             e.printStackTrace()
         }

@@ -24,8 +24,8 @@ import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import android.support.v7.app.NotificationCompat
 import android.util.Log
-import mobile.substance.media.core.music.objects.Song
-import mobile.substance.media.options.MusicPlaybackOptions
+import mobile.substance.media.core.audio.Song
+import mobile.substance.media.options.AudioPlaybackOptions
 import mobile.substance.media.music.playback.PlaybackRemote
 import mobile.substance.media.music.playback.R
 
@@ -38,7 +38,7 @@ import mobile.substance.media.music.playback.R
 interface MediaNotification {
 
     /**
-     * This function is called whenever a notification needs to be created by the service. Do NOT populate this notification with any data such as album art and song metadata.
+     * This function is called whenever a notification needs to be created by the service. Do NOT populate this notification with any data such as albumTitle art and song metadata.
      * That will be handled by the populate function.
      * @param playIntent The intent you should pass to your created notification in order to resume music.
      * @param pauseIntent The intent you should pass to your created notification in order to pause music.
@@ -56,11 +56,13 @@ interface MediaNotification {
      * Populate the notification with the current song's details. Override this for custom notifications
      */
     fun populate(song: Song, notificationBuilder: NotificationCompat.Builder, session: MediaSessionCompat?, playIntent: PendingIntent, pauseIntent: PendingIntent) {
-        notificationBuilder.setContentTitle(song.songTitle).setContentText(song.songArtistName).setSubText(song.songAlbumName)
+        notificationBuilder.setContentTitle(song.title)
+                .setContentText(song.artistName)
+                .setSubText(song.albumTitle)
     }
 
     /**
-     * Override this if you use a custom notification layout in order to set a loaded album art.
+     * Override this if you use a custom notification layout in order to set a loaded albumTitle art.
      */
     fun loadArt(albumArt: Bitmap, notificationBuilder: NotificationCompat.Builder) {
         notificationBuilder.setLargeIcon(albumArt)
@@ -96,7 +98,7 @@ class DefaultMediaNotification : MediaNotification {
                                     playIntent: PendingIntent, pauseIntent: PendingIntent, nextIntent: PendingIntent, prevIntent: PendingIntent,
                                     clickedIntent: PendingIntent, removedIntent: PendingIntent): NotificationCompat.Builder {
         val isPlaying = session?.controller?.playbackState?.state?.equals(PlaybackStateCompat.STATE_PLAYING) ?: false
-        return NotificationCompat.Builder(context).setSmallIcon(MusicPlaybackOptions.statusbarIconResId)
+        return NotificationCompat.Builder(context).setSmallIcon(AudioPlaybackOptions.statusbarIconResId)
                 .setPriority(Notification.PRIORITY_MAX)
                 .setVisibility(Notification.VISIBILITY_PUBLIC)
                 .setOngoing(false)

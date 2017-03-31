@@ -24,7 +24,7 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import android.widget.Toast
-import mobile.substance.media.utils.MusicCoreUtil
+import mobile.substance.media.utils.AudioCoreUtil
 
 import org.jaudiotagger.audio.AudioFile
 import org.jaudiotagger.audio.AudioFileIO
@@ -121,7 +121,7 @@ class AlbumEditor(private val context: Context, private val album: TagAlbum) {
 
     fun setArtwork(context: Context, uri: Uri): AlbumEditor {
         try {
-            this.artwork = ArtworkFactory.createArtworkFromFile(File(MusicCoreUtil.getFilePath(context, uri)))
+            this.artwork = ArtworkFactory.createArtworkFromFile(File(AudioCoreUtil.getFilePath(context, uri)))
         } catch (e: IOException) {
             e.printStackTrace()
         }

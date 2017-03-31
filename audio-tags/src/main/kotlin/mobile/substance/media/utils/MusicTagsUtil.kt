@@ -23,7 +23,7 @@ import android.net.Uri
 import android.provider.MediaStore
 import android.support.v4.content.ContentResolverCompat
 import android.util.Log
-import mobile.substance.media.core.music.objects.Song
+import mobile.substance.media.core.audio.objects.Song
 
 object MusicTagsUtil {
 

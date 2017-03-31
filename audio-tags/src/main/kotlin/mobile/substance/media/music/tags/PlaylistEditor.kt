@@ -21,8 +21,8 @@ import android.util.Log
 
 import java.util.ArrayList
 
-import mobile.substance.media.core.music.objects.Playlist
-import mobile.substance.media.core.music.objects.Song
+import mobile.substance.media.core.audio.objects.Playlist
+import mobile.substance.media.core.audio.objects.Song
 import mobile.substance.media.utils.MusicTagsUtil
 
 /**

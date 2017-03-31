@@ -44,5 +44,6 @@ dependencies {
     testCompile 'junit:junit:4.12'
     compile "com.android.support:appcompat-v7:$project.supportLibVersion"
     compile project(':audio-core')
+    compile project(':loading-core')
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 }

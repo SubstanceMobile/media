@@ -23,8 +23,8 @@ import android.net.Uri
 import android.os.Build
 import android.os.PowerManager
 import android.util.Log
-import mobile.substance.media.core.music.objects.Song
-import mobile.substance.media.utils.MusicCoreUtil
+import mobile.substance.media.core.audio.objects.Song
+import mobile.substance.media.utils.AudioCoreUtil
 import mobile.substance.media.music.playback.destroy
 
 
@@ -79,9 +79,9 @@ object LocalPlayback : Playback(),
         try {
             val url = fileUri.toString()
             Log.d("Checking url validity", url)
-            if (!MusicCoreUtil.isHttpUrl(url)) localPlayer?.setDataSource(SERVICE!!.applicationContext, fileUri) else localPlayer?.setDataSource(url)
+            if (!AudioCoreUtil.isHttpUrl(url)) localPlayer?.setDataSource(SERVICE!!.applicationContext, fileUri) else localPlayer?.setDataSource(url)
         } catch (e: Exception) {
-            Log.e(TAG, "Unable to play " + MusicCoreUtil.getFilePath(SERVICE!!, fileUri), e)
+            Log.e(TAG, "Unable to play " + AudioCoreUtil.getFilePath(SERVICE!!, fileUri), e)
         } finally {
             notifyBuffering()
             localPlayer?.prepareAsync()
@@ -181,7 +181,7 @@ object LocalPlayback : Playback(),
     }
 
     ///////////////////////////////////////////////////////////////////////////
-    // Media Player Callbacks
+    // MediaCore Player Callbacks
     // STATUS: TODO
     ///////////////////////////////////////////////////////////////////////////
 

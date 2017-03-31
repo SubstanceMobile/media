@@ -10,14 +10,13 @@
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/app" />
-            <option value="$PROJECT_DIR$/dynamic-colors" />
-            <option value="$PROJECT_DIR$/music" />
-            <option value="$PROJECT_DIR$/music-core" />
-            <option value="$PROJECT_DIR$/music-loading" />
-            <option value="$PROJECT_DIR$/music-playback" />
-            <option value="$PROJECT_DIR$/music-tags" />
-            <option value="$PROJECT_DIR$/plugin-support" />
-            <option value="$PROJECT_DIR$/theme-engine" />
+            <option value="$PROJECT_DIR$/audio-core" />
+            <option value="$PROJECT_DIR$/audio-loading" />
+            <option value="$PROJECT_DIR$/audio-local" />
+            <option value="$PROJECT_DIR$/audio-playback" />
+            <option value="$PROJECT_DIR$/audio-tags" />
+            <option value="$PROJECT_DIR$/core" />
+            <option value="$PROJECT_DIR$/loading-core" />
           </set>
         </option>
         <option name="resolveModulePerSourceSet" value="false" />

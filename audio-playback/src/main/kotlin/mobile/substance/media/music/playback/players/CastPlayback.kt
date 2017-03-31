@@ -28,14 +28,14 @@ import com.google.android.gms.cast.framework.*
 import com.google.android.gms.cast.framework.media.RemoteMediaClient
 import com.google.android.gms.common.api.Status
 import com.google.android.gms.common.images.WebImage
-import mobile.substance.media.core.music.MusicDataHolder
-import mobile.substance.media.core.music.objects.Song
+import mobile.substance.media.core.audio.AudioHolder
+import mobile.substance.media.core.audio.objects.Song
 import mobile.substance.media.music.playback.PlaybackRemote
 import mobile.substance.media.music.playback.cast.HttpServer
-import mobile.substance.media.options.MusicCoreOptions
-import mobile.substance.media.options.MusicPlaybackOptions
-import mobile.substance.media.utils.MusicCoreUtil
-import mobile.substance.media.utils.MusicPlaybackUtil
+import mobile.substance.media.options.AudioCoreOptions
+import mobile.substance.media.options.AudioPlaybackOptions
+import mobile.substance.media.utils.AudioCoreUtil
+import mobile.substance.media.utils.AudioPlaybackUtil
 
 object CastPlayback : Playback(), SessionManagerListener<Session>, RemoteMediaClient.Listener, RemoteMediaClient.ProgressListener {
 
@@ -93,7 +93,7 @@ object CastPlayback : Playback(), SessionManagerListener<Session>, RemoteMediaCl
     private var overrideIsPlaying = false
     private var overridePosition: Int? = null
 
-    private var fileServer = HttpServer(MusicPlaybackUtil.SERVER_PORT)
+    private var fileServer = HttpServer(AudioPlaybackUtil.SERVER_PORT)
     // private var artworkServer = AsyncHttpServer()
 
     override fun init() {
@@ -116,14 +116,14 @@ object CastPlayback : Playback(), SessionManagerListener<Session>, RemoteMediaCl
     private fun doPlay(fileUri: Uri, artworkUri: Uri?, metadata: MediaMetadataCompat?) {
         remoteMediaClient?.stop()?.setResultCallback {
             try {
-                if (!MusicCoreUtil.isHttpUrl(fileUri.toString())) {
+                if (!AudioCoreUtil.isHttpUrl(fileUri.toString())) {
 
-                    val filePath = MusicCoreUtil.getFilePath(SERVICE!!, fileUri)
+                    val filePath = AudioCoreUtil.getFilePath(SERVICE!!, fileUri)
                     val fileType = filePath?.substring(filePath.lastIndexOf(".") + 1)
 
                     fileServer.start()
 
-                    val baseUrl = "http://${MusicPlaybackUtil.getIpAddressString(SERVICE!!)}:${MusicPlaybackUtil.SERVER_PORT}"
+                    val baseUrl = "http://${AudioPlaybackUtil.getIpAddressString(SERVICE!!)}:${AudioPlaybackUtil.SERVER_PORT}"
                     val audioUrl = baseUrl + filePath
                     val artworkUrl = baseUrl + artworkUri?.path
 
@@ -131,22 +131,22 @@ object CastPlayback : Playback(), SessionManagerListener<Session>, RemoteMediaCl
 
                     val mediaInfo = MediaInfo.Builder(audioUrl)
                             .setContentType("audio/$fileType")
-                            .setMetadata(buildMetadata(if (artworkUri != null) artworkUrl else MusicCoreOptions.defaultArtUrl, metadata ?: MediaMetadataCompat.Builder().build()))
+                            .setMetadata(buildMetadata(if (artworkUri != null) artworkUrl else AudioCoreOptions.defaultArtUri, metadata ?: MediaMetadataCompat.Builder().build()))
                             .setStreamType(MediaInfo.STREAM_TYPE_NONE)
                             .build()
                     doLoad(mediaInfo, true)
                 } else {
                     var artworkUrl: String? = null
 
-                    if (artworkUri != null && !MusicCoreUtil.isHttpUrl(artworkUri.toString())) {
+                    if (artworkUri != null && !AudioCoreUtil.isHttpUrl(artworkUri.toString())) {
                         fileServer.start()
-                        artworkUrl = "http://${MusicPlaybackUtil.getIpAddressString(SERVICE!!)}:${MusicPlaybackUtil.SERVER_PORT}${artworkUri.path}"
+                        artworkUrl = "http://${AudioPlaybackUtil.getIpAddressString(SERVICE!!)}:${AudioPlaybackUtil.SERVER_PORT}${artworkUri.path}"
                         Log.d(TAG, "Serving file. URL: artwork: $artworkUrl")
                     }
 
                     val mediaInfo = MediaInfo.Builder(fileUri.toString())
                             .setContentType("audio/*")
-                            .setMetadata(buildMetadata(artworkUrl ?: artworkUri?.toString() ?: MusicCoreOptions.defaultArtUrl, metadata ?: MediaMetadataCompat.Builder().build()))
+                            .setMetadata(buildMetadata(artworkUrl ?: artworkUri?.toString() ?: AudioCoreOptions.defaultArtUri, metadata ?: MediaMetadataCompat.Builder().build()))
                             .setStreamType(MediaInfo.STREAM_TYPE_LIVE)
                             .build()
                     doLoad(mediaInfo, true)
@@ -158,7 +158,7 @@ object CastPlayback : Playback(), SessionManagerListener<Session>, RemoteMediaCl
     }
 
     override fun doPlay(song: Song) {
-        val artworkPath: String? = MusicDataHolder.findAlbumById(song.songAlbumId ?: 0)?.albumArtworkPath
+        val artworkPath: String? = AudioHolder.findAlbumById(song.songAlbumId ?: 0)?.albumArtworkPath
         doPlay(song.uri, if (artworkPath == null) song.explicitArtworkUri else Uri.parse("file://$artworkPath"), song.getMetadata())
     }
 
@@ -250,7 +250,7 @@ object CastPlayback : Playback(), SessionManagerListener<Session>, RemoteMediaCl
     override fun onSessionEnding(p0: Session?) {
         overrideIsPlaying = true
         overridePosition = remoteMediaClient?.approximateStreamPosition?.toInt()
-        SERVICE?.replacePlaybackEngine(if (MusicPlaybackOptions.isGaplessPlaybackEnabled) GaplessPlayback else LocalPlayback, true, true)
+        SERVICE?.replacePlaybackEngine(if (AudioPlaybackOptions.isGaplessPlaybackEnabled) GaplessPlayback else LocalPlayback, true, true)
     }
 
     override fun onSessionEnded(p0: Session?, p1: Int) {

@@ -24,7 +24,7 @@ import android.media.MediaScannerConnection
 import android.net.Uri
 import android.provider.MediaStore
 import android.util.Log
-import mobile.substance.media.core.music.objects.Album
+import mobile.substance.media.core.audio.objects.Album
 
 object MediaStoreHelper {
 

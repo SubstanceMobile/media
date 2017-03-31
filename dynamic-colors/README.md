@@ -38,7 +38,7 @@ For configuration it is pretty simple. To set default colors, call `DynamicColor
 
 ### Features
 ###### Smart Picking
-This feature calculates the most used color palette from the album art, giving you the most accurate color possible using palette. This system has been used before in [GEM Player](https://github.com/SubstanceMobile/GEM) and is more accurate than standard color extraction methods.
+This feature calculates the most used color palette from the albumTitle art, giving you the most accurate color possible using palette. This system has been used before in [GEM Player](https://github.com/SubstanceMobile/GEM) and is more accurate than standard color extraction methods.
 
 ###### Smart Text Picking
 Palette tends to make the wrong choices about text color. This is why smart text picking was created. It uses the lightness of the primary color in order to choose primary, secondary, and disabled text colors. Same thing happens with accent. All of the colors used are from the material guidelines. 
