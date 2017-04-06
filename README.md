@@ -28,7 +28,7 @@ compile('com.github.SubstanceMobile:SDK:-SNAPSHOT'@aar){
 Click "Read More" on the corresponding section for a description of features, installation instructions, and API tutorials.
 
 ## Music
-The music package contains the entire playback engine from [GEM Player](https://github.com/SubstanceMobile/GEM). It will help you make an extremely functional music player with very little code. To install, follow the instructions above and then add this to your `build.gradle` file:
+The audio package contains the entire playback engine from [GEM Player](https://github.com/SubstanceMobile/GEM). It will help you make an extremely functional audio player with very little code. To install, follow the instructions above and then add this to your `build.gradle` file:
 ```
 compile('com.github.SubstanceMobile.SDK:Music:-SNAPSHOT'@aar){
     transitive = true
@@ -41,7 +41,7 @@ This is the core library. It contains the core media objects: `Song`, `Album`, `
 You can also set defaults for the libraries' other three parts in `MusicOptions`
 #### Loading
 This library is used to load the data from MediaStore into lists of core objects. It's pretty simple to set up.
-You initialize it just by calling `Library.init(Context, LibraryConfig);` and start loading items with `Library.build();`
+You initialize it just by calling `Library.withActivity(Context, LibraryConfig);` and start loading items with `Library.build();`
 
 You can register Listeners from everywhere in your code to get notified of load events:
 
@@ -55,9 +55,9 @@ An example usage loading only Songs and Albums where `this` stands for the `Acti
 
 ```
 // Initialization
-Library.init(this, new LibraryConfig()
-        .put(MusicType.SONGS)
-        .put(MusicType.ALBUMS));
+Library.withActivity(this, new LibraryConfig()
+        .put(AUDIO_TYPE_SONGS)
+        .put(AUDIO_TYPE_ALBUMS));
         
 // Listener
 Library.registerListener(this);
@@ -76,7 +76,7 @@ Some things to note:
 - You can have only **one** Activity bound to `PlaybackRemote` at a time.
 - You initialize Google Cast by calling `PlaybackRemote.initCast(MenuItem)`  **once**. The passed menu item must have `app:actionProviderClass="android.support.v7.app.MediaRouteActionProvider"` set as xml attribute. Also, make sure you configured your application id in `MusicOptions`.
 - You can use your own, custom notification by calling `PlaybackRemote.setNotificationCallback(NotificationCallback)`. This returns a `Callable<Notification>`. You also have the ability to ignore this and the Service will fall back to its own Notification which uses a `NotificationCompat.Builder`
-- You are notified of playback events with the `RemoteCallback` you passed in when calling `PlaybackRemote.registerActivity()` which gives you all necessary information. **But**, you can have multiple of them: Call `PlaybackRemote.registerCallback()` to add a new one and `PlaybackRemote.unregisterCallback()` to remove it when you're finished
+- You are notified of playback events with the `RemoteCallback` you passed in when calling `PlaybackRemote.registerActivity()` which gives you all necessary information. **But**, you can have multiple of them: Call `PlaybackRemote.registerRemoteCallback()` to add a new one and `PlaybackRemote.unregisterRemoteCallback()` to remove it when you're finished
 
 #### Tags
 This library is used to edit your media tags. It can also control your playlists. **COMING SOON**
@@ -94,8 +94,8 @@ This library is used to theme views. Based on `app-theme-engine` by [@afollestad
 
 # Structure
 * SDK
-    * music
-       * music-core
+    * audio
+       * audio-core
        * loading
        * Playback Library
        * tags

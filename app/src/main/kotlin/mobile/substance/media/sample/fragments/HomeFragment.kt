@@ -19,8 +19,8 @@ package mobile.substance.media.sample.fragments
 import android.os.Bundle
 import android.support.v7.widget.Toolbar
 import butterknife.bindView
+import mobile.substance.media.sample.R
 import mobile.substance.media.sample.helpers.NavigationHelper
-import mobile.substance.sdk.R
 
 class HomeFragment : NavigationDrawerFragment() {
     private val toolbar: Toolbar by bindView<Toolbar>(R.id.fragment_home_toolbar)

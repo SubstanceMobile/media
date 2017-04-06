@@ -21,7 +21,7 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.net.wifi.WifiManager
-import mobile.substance.media.music.playback.service.AudioService
+import mobile.substance.media.audio.playback.service.AudioService
 import java.math.BigInteger
 import java.net.InetAddress
 import java.net.UnknownHostException

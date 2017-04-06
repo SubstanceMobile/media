@@ -16,6 +16,6 @@
 
 package mobile.substance.media.sample
 
-import mobile.substance.media.music.playback.service.AudioService
+import mobile.substance.media.audio.playback.service.AudioService
 
 class MyMusicServiceSubclass : AudioService()

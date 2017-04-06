@@ -16,11 +16,18 @@
 
 package mobile.substance.media.core.audio
 
+import android.support.v4.media.MediaMetadataCompat
 import mobile.substance.media.core.MediaObject
 
-abstract class Playlist : MediaObject() {
+abstract class Playlist : AudioObject() {
     open var title: String? = null
     open var numberOfSongs: Int? = null
 
     abstract fun getSongs(): List<Song>?
+
+    override fun MediaMetadataCompat.Builder.withMetadata(): MediaMetadataCompat.Builder {
+        putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_TITLE, title)
+        putLong(MediaMetadataCompat.METADATA_KEY_NUM_TRACKS, numberOfSongs?.toLong() ?: 0L)
+        return this
+    }
 }

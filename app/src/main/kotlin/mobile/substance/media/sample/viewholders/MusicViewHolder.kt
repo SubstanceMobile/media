@@ -20,7 +20,7 @@ import android.support.v7.widget.RecyclerView
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
-import mobile.substance.sdk.R
+import mobile.substance.media.sample.R
 
 class MusicViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
     var title: TextView? = null

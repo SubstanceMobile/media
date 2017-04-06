@@ -19,20 +19,20 @@ package mobile.substance.media.sample
 import android.app.Application
 import android.util.Log
 import com.google.android.gms.cast.CastMediaControlIntent
+import mobile.substance.media.audio.local.MediaStoreAudioHolder
+import mobile.substance.media.core.MediaCore
 import mobile.substance.media.options.AudioCoreOptions
 import mobile.substance.media.options.AudioPlaybackOptions
-import mobile.substance.sdk.BuildConfig
-import mobile.substance.sdk.R
 import java.lang.reflect.Field
 import kotlin.concurrent.thread
 
 class SampleApp : Application() {
 
-
     override fun onCreate() {
         super.onCreate()
 
         thread {
+            MediaCore.activate(MediaStoreAudioHolder)
             AudioCoreOptions.defaultArtResId = R.drawable.default_artwork_gem
             AudioPlaybackOptions.statusbarIconResId = R.drawable.ic_audiotrack_white_24dp
             AudioPlaybackOptions.isCastEnabled = true

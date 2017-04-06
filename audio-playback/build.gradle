@@ -44,7 +44,6 @@ dependencies {
     testCompile 'junit:junit:4.12'
     compile "com.android.support:appcompat-v7:$project.supportLibVersion"
     compile "com.google.android.gms:play-services-cast-framework:$project.castLibVersion"
-    compile project(':audio-loading')
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     compile project(':audio-core')
 }

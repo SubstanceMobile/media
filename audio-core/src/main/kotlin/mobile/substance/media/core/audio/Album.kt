@@ -16,12 +16,18 @@
 
 package mobile.substance.media.core.audio
 
+import android.net.Uri
+import android.support.v4.media.MediaMetadataCompat
+import android.widget.ImageView
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import mobile.substance.media.core.MediaObject
+import mobile.substance.media.options.AudioCoreOptions
 
-abstract class Album : MediaObject() {
+abstract class Album : AudioObject() {
     open var title: String? = null
     open var artistName: String? = null
-    open var artworkUri: String? = null
+    open var artworkUri: Uri? = null
     open var genre: String? = null
     open var numberOfSongs: Int? = null
     open var year: String? = null
@@ -31,4 +37,33 @@ abstract class Album : MediaObject() {
     abstract fun getArtist(): Artist?
 
     abstract fun getGenre(): Genre?
+
+    final override fun MediaMetadataCompat.Builder.withMetadata(): MediaMetadataCompat.Builder {
+        putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_TITLE, title)
+        putString(MediaMetadataCompat.METADATA_KEY_ALBUM_ART_URI, artworkUri.toString())
+        putString(MediaMetadataCompat.METADATA_KEY_ARTIST, artistName)
+        putString(MediaMetadataCompat.METADATA_KEY_GENRE, genre)
+        putLong(MediaMetadataCompat.METADATA_KEY_NUM_TRACKS, numberOfSongs?.toLong() ?: 0L)
+        putLong(MediaMetadataCompat.METADATA_KEY_YEAR, year?.toLong() ?: 0L)
+        return this
+    }
+
+    override fun loadArtwork(target: ImageView) {
+        if (AudioCoreOptions.glidePreferPlaceholder) {
+            Glide.with(getContext())
+                    .load(artworkUri)
+                    .placeholder(AudioCoreOptions.defaultArtResId)
+                    .diskCacheStrategy(DiskCacheStrategy.SOURCE)
+                    .crossFade()
+                    .centerCrop()
+                    .into(target)
+        } else Glide.with(getContext())
+                .load(artworkUri)
+                .error(AudioCoreOptions.defaultArtResId)
+                .diskCacheStrategy(DiskCacheStrategy.SOURCE)
+                .crossFade()
+                .centerCrop()
+                .into(target)
+    }
+
 }

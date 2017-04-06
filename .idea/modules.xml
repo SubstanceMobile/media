@@ -4,13 +4,14 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/SDK.iml" filepath="$PROJECT_DIR$/SDK.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/audio/audio.iml" filepath="$PROJECT_DIR$/audio/audio.iml" />
       <module fileurl="file://$PROJECT_DIR$/audio-core/audio-core.iml" filepath="$PROJECT_DIR$/audio-core/audio-core.iml" />
-      <module fileurl="file://$PROJECT_DIR$/audio-loading/audio-loading.iml" filepath="$PROJECT_DIR$/audio-loading/audio-loading.iml" />
       <module fileurl="file://$PROJECT_DIR$/audio-local/audio-local.iml" filepath="$PROJECT_DIR$/audio-local/audio-local.iml" />
+      <module fileurl="file://$PROJECT_DIR$/audio-local-playback/audio-local-playback.iml" filepath="$PROJECT_DIR$/audio-local-playback/audio-local-playback.iml" />
       <module fileurl="file://$PROJECT_DIR$/audio-playback/audio-playback.iml" filepath="$PROJECT_DIR$/audio-playback/audio-playback.iml" />
       <module fileurl="file://$PROJECT_DIR$/audio-tags/audio-tags.iml" filepath="$PROJECT_DIR$/audio-tags/audio-tags.iml" />
       <module fileurl="file://$PROJECT_DIR$/core/core.iml" filepath="$PROJECT_DIR$/core/core.iml" />
-      <module fileurl="file://$PROJECT_DIR$/loading-core/loading-core.iml" filepath="$PROJECT_DIR$/loading-core/loading-core.iml" />
+      <module fileurl="file://$PROJECT_DIR$/local-core/local-core.iml" filepath="$PROJECT_DIR$/local-core/local-core.iml" />
     </modules>
   </component>
 </project>

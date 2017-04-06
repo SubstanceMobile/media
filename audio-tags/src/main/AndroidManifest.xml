@@ -15,7 +15,7 @@
   -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="mobile.substance.media.music.tags">
+    package="mobile.substance.media.audio.tags">
 
     <application
         android:allowBackup="true"

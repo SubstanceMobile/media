@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package mobile.substance.sdk.app.sample.adapters
+package mobile.substance.media.sample.adapters
 
 import android.content.Context
 import android.net.Uri
@@ -23,26 +23,22 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import com.bumptech.glide.Glide
-import mobile.substance.sdk.R
-import mobile.substance.sdk.music.core.dataLinkers.MusicData
-import mobile.substance.sdk.music.core.dataLinkers.MusicLibraryData
-import mobile.substance.sdk.music.core.objects.*
-import mobile.substance.sdk.music.loading.Library
-import mobile.substance.sdk.music.loading.LibraryListener
-import mobile.substance.sdk.music.loading.MusicType
-import mobile.substance.sdk.music.playback.PlaybackRemote
-import mobile.substance.sdk.app.sample.viewholders.MusicViewHolder
+import mobile.substance.media.audio.playback.PlaybackRemote
+import mobile.substance.media.core.MediaObject
+import mobile.substance.media.core.audio.*
+import mobile.substance.media.sample.R
+import mobile.substance.media.sample.viewholders.MusicViewHolder
 
-class MusicAdapter<T : MediaObject>(private val type: MusicType) : RecyclerView.Adapter<MusicViewHolder>() {
+class MusicAdapter<T : MediaObject>(private val type: Long) : RecyclerView.Adapter<MusicViewHolder>() {
     var items: List<T>? = null
     var context: Context? = null
 
     init {
-        if (type == MusicType.SONGS) items = MusicData.getSongs() as List<T>
-        if (type == MusicType.ALBUMS) items = MusicData.getAlbums() as List<T>
-        if (type == MusicType.ARTISTS) items = MusicData.getArtists() as List<T>
-        if (type == MusicType.PLAYLISTS) items = MusicData.getPlaylists() as List<T>
-        if (type == MusicType.GENRES) items = MusicData.getGenres() as List<T>
+        if (type == AUDIO_TYPE_SONGS) items = AudioData.getSongs() as List<T>
+        if (type == AUDIO_TYPE_ALBUMS) items = AudioData.getAlbums() as List<T>
+        if (type == AUDIO_TYPE_ARTISTS) items = AudioData.getArtists() as List<T>
+        if (type == AUDIO_TYPE_PLAYLISTS) items = AudioData.getPlaylists() as List<T>
+        if (type == AUDIO_TYPE_GENRES) items = AudioData.getGenres() as List<T>
     }
 
     override fun onBindViewHolder(holder: MusicViewHolder?, position: Int) {
@@ -66,17 +62,15 @@ class MusicAdapter<T : MediaObject>(private val type: MusicType) : RecyclerView.
     }
 
     private fun bindAlbum(album: Album, holder: MusicViewHolder) {
-        holder.title?.text = album.albumName
-        holder.subtitle?.text = album.albumArtistName
-        album.requestArt(holder.image!!)
+        holder.title?.text = album.title
+        holder.subtitle?.text = album.artistName
+        album.loadArtwork(holder.image!!)
     }
 
     private fun bindSong(song: Song, holder: MusicViewHolder, position: Int) {
-        holder.title?.text = song.songTitle
-        holder.subtitle?.text = song.songArtistName
-        val album = MusicData.findAlbumById(song.songAlbumId ?: 0)
-        album?.requestArt(holder.image!!)
-
+        holder.title?.text = song.title
+        holder.subtitle?.text = song.artistName
+        song.loadArtwork(holder.image!!)
 
         holder.itemView.setOnClickListener { it ->
             PlaybackRemote.play(items as List<Song>, position)
@@ -84,7 +78,7 @@ class MusicAdapter<T : MediaObject>(private val type: MusicType) : RecyclerView.
     }
 
     private fun bindArtist(artist: Artist, holder: MusicViewHolder) {
-        holder.title?.text = artist.artistName
+        holder.title?.text = artist.name
         Glide.with(context)
                 .load(R.drawable.ic_person_black_24dp)
                 .crossFade()
@@ -93,15 +87,11 @@ class MusicAdapter<T : MediaObject>(private val type: MusicType) : RecyclerView.
     }
 
     private fun bindGenre(genre: Genre, holder: MusicViewHolder) {
-        holder.title!!.text = genre.genreName
-        val songs = MusicData.findSongsForGenre(genre)
-        if (songs.isNotEmpty()) MusicData.findAlbumById(songs.first().songAlbumId!!)!!.requestArt(holder.image!!)
+        holder.title!!.text = genre.name
     }
 
     private fun bindPlaylist(playlist: Playlist, holder: MusicViewHolder) {
-        holder.title!!.text = playlist.playlistName
-        val songs = MusicData.findSongsForPlaylist(playlist)
-        if (songs.isNotEmpty()) Library.findAlbumById(songs.first().songAlbumId!!)!!.requestArt(holder.image!!)
+        holder.title!!.text = playlist.title
     }
 
 }

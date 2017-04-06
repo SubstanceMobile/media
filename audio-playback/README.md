@@ -10,8 +10,8 @@ compile('com.github.SubstanceMobile.SDK:music-playback:-SNAPSHOT'@aar){
 ### API
 The basic use for this library is this:
 ```
-PlaybackRemote.init(Context) // Initialize the singleton
-PlaybackRemote.registerCallback(RemoteCallback) // Get notified of playback events
+PlaybackRemote.withActivity(Context) // Initialize the singleton
+PlaybackRemote.registerRemoteCallback(RemoteCallback) // Get notified of playback events
 PlaybackRemote.play(Song, true) // Starts playback and replaces the active queue
 ```
 All the heavy lifting is handled behind the scenes. But of course, this library provides some additional features to make this perfectly suit your usecase.

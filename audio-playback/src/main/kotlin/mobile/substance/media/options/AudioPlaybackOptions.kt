@@ -17,7 +17,7 @@
 package mobile.substance.media.options
 
 import android.support.v4.media.session.PlaybackStateCompat
-import mobile.substance.media.music.playback.PlaybackRemote
+import mobile.substance.media.audio.playback.PlaybackRemote
 
 /**
  * For configuring the Playback MediaStoreAudioHolder

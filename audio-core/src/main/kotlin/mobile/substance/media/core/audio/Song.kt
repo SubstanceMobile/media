@@ -16,10 +16,16 @@
 
 package mobile.substance.media.core.audio
 
+import android.net.Uri
+import android.support.v4.media.MediaMetadataCompat
+import android.widget.ImageView
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import mobile.substance.media.core.MediaObject
+import mobile.substance.media.options.AudioCoreOptions
 import mobile.substance.media.utils.AudioCoreUtil
 
-abstract class Song : MediaObject(), AudioFile {
+abstract class Song : AudioObject(), AudioFile {
     open var title: String? = null
     open var artistName: String? = null
     open var albumTitle: String? = null
@@ -27,13 +33,49 @@ abstract class Song : MediaObject(), AudioFile {
     open var year: Long? = null
     open var trackNumber: Int? = null
     open var lyrics: String? = null
-    open var artworkUri: String? = null
+    open var artworkUri: Uri? = null
     val formattedDuration: String
         get() = AudioCoreUtil.stringForTime(duration ?: 0L)
+
+    companion object {
+
+        fun from(uri: Uri) = NoMetadataSong(uri)
+
+    }
 
     abstract fun getArtist(): Artist?
 
     abstract fun getAlbum(): Album?
 
     abstract fun getGenre(): Genre?
+
+    override fun MediaMetadataCompat.Builder.withMetadata(): MediaMetadataCompat.Builder {
+        putString(MediaMetadataCompat.METADATA_KEY_TITLE, title)
+        putString(MediaMetadataCompat.METADATA_KEY_ARTIST, artistName)
+        putString(MediaMetadataCompat.METADATA_KEY_ALBUM, albumTitle)
+        putString(MediaMetadataCompat.METADATA_KEY_ART_URI, artworkUri.toString())
+        putLong(MediaMetadataCompat.METADATA_KEY_DURATION, duration ?: 0L)
+        putLong(MediaMetadataCompat.METADATA_KEY_TRACK_NUMBER, trackNumber?.toLong() ?: 0L)
+        putLong(MediaMetadataCompat.METADATA_KEY_YEAR, year?.toLong() ?: 0L)
+        return this
+    }
+
+    override fun loadArtwork(target: ImageView) {
+        if (AudioCoreOptions.glidePreferPlaceholder) {
+            Glide.with(getContext())
+                    .load(artworkUri)
+                    .placeholder(AudioCoreOptions.defaultArtResId)
+                    .diskCacheStrategy(DiskCacheStrategy.SOURCE)
+                    .crossFade()
+                    .centerCrop()
+                    .into(target)
+        } else Glide.with(getContext())
+                .load(artworkUri)
+                .error(AudioCoreOptions.defaultArtResId)
+                .diskCacheStrategy(DiskCacheStrategy.SOURCE)
+                .crossFade()
+                .centerCrop()
+                .into(target)
+    }
+
 }

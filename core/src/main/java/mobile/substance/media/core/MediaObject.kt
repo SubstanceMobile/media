@@ -17,7 +17,10 @@
 package mobile.substance.media.core
 
 import android.content.Context
+import android.net.Uri
 import android.support.v4.media.MediaMetadataCompat
+import android.widget.ImageView
+import mobile.substance.media.options.CoreOptions
 import java.util.*
 
 abstract class MediaObject {
@@ -35,7 +38,7 @@ abstract class MediaObject {
             .withMetadata()
             .build()
 
-    internal abstract fun MediaMetadataCompat.Builder.withMetadata(): MediaMetadataCompat.Builder
+    protected abstract fun MediaMetadataCompat.Builder.withMetadata(): MediaMetadataCompat.Builder
 
     ///////////////////////////////////////////////////////////////////////////
     // Extra Data Storage

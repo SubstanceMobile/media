@@ -10,13 +10,14 @@
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/app" />
+            <option value="$PROJECT_DIR$/audio" />
             <option value="$PROJECT_DIR$/audio-core" />
-            <option value="$PROJECT_DIR$/audio-loading" />
             <option value="$PROJECT_DIR$/audio-local" />
+            <option value="$PROJECT_DIR$/audio-local-playback" />
             <option value="$PROJECT_DIR$/audio-playback" />
             <option value="$PROJECT_DIR$/audio-tags" />
             <option value="$PROJECT_DIR$/core" />
-            <option value="$PROJECT_DIR$/loading-core" />
+            <option value="$PROJECT_DIR$/local-core" />
           </set>
         </option>
         <option name="resolveModulePerSourceSet" value="false" />

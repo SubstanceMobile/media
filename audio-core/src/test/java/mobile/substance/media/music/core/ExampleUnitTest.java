@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package mobile.substance.media.music.core;
+package mobile.substance.media.audio.core;
 
 import org.junit.Test;
 

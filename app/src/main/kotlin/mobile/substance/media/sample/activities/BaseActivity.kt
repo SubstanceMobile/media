@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package mobile.substance.sdk.app.sample.activities
+package mobile.substance.media.sample.activities
 
 import android.os.Bundle
 import com.afollestad.assent.Assent

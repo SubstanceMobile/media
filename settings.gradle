@@ -14,4 +14,4 @@
  * limitations under the License.
  */
 
-include ':app', ':core', ':audio-local', ':loading-core', ':audio-core', ':audio-loading', ':audio-playback', ':audio-tags'
+include ':app', ':core', ':audio', ':local-core', ':audio-core', ':audio-local', ':audio-playback', ':audio-tags', ':audio-local-playback'

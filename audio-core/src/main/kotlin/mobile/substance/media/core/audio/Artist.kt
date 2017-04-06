@@ -16,9 +16,10 @@
 
 package mobile.substance.media.core.audio
 
+import android.support.v4.media.MediaMetadataCompat
 import mobile.substance.media.core.MediaObject
 
-abstract class Artist : MediaObject() {
+abstract class Artist : AudioObject() {
     open var name: String? = null
     open var biography: String? = null
     open var artworkUri: String? = null
@@ -28,4 +29,12 @@ abstract class Artist : MediaObject() {
     abstract fun getSongs(): List<Song>?
 
     abstract fun getAlbums(): List<Album>?
+
+    override fun MediaMetadataCompat.Builder.withMetadata(): MediaMetadataCompat.Builder {
+        putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_TITLE, name)
+        putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_SUBTITLE, biography)
+        putLong(MediaMetadataCompat.METADATA_KEY_NUM_TRACKS, numberOfSongs?.toLong() ?: 0L)
+        return this
+    }
+
 }

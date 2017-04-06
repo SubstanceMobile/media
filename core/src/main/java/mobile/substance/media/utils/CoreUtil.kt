@@ -26,6 +26,7 @@ import android.provider.DocumentsContract
 import android.provider.MediaStore
 import android.support.annotation.WorkerThread
 import java.io.File
+import java.lang.reflect.Method
 
 object CoreUtil {
 
@@ -108,6 +109,26 @@ object CoreUtil {
         return cursor?.use {
             if (cursor.moveToFirst()) cursor.getLong(cursor.getColumnIndexOrThrow(BaseColumns._ID)) else 0L
         } ?: 0
+    }
+
+    fun <T> invokeSafelyOnSingleton(className: String, methodName: String, vararg args: Any): T? {
+        var clazz: Class<*>? = null
+        try {
+            clazz = Class.forName(className, false, this::class.java.classLoader)
+        } catch (e: ClassNotFoundException) {
+            e.printStackTrace()
+            return null
+        }
+        if (clazz != null) {
+            var method: Method? = null
+            try {
+                clazz.getDeclaredMethod(methodName, *Array(args.size, { args[it].javaClass }))
+            } catch (e: NoSuchMethodException) {
+                e.printStackTrace()
+                return null
+            }
+            return if (method != null) method.invoke(clazz.getDeclaredField("INSTANCE").get(null)) as T? else null
+        } else return null
     }
 
 }

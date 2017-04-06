@@ -17,7 +17,7 @@
 package mobile.substance.media.sample.fragments
 
 import android.support.v4.widget.DrawerLayout
-import mobile.substance.sdk.app.sample.activities.NavigationDrawerActivity
+import mobile.substance.media.sample.activities.NavigationDrawerActivity
 
 abstract class NavigationDrawerFragment : BaseFragment() {
 

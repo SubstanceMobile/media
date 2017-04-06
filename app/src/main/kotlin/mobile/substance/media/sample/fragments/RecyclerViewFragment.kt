@@ -20,12 +20,12 @@ import android.os.Bundle
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import butterknife.bindView
-import mobile.substance.media.audio.loading.MediaStoreAudioHolder
-import mobile.substance.media.audio.loading.MediaStoreAudioHolderListener
-import mobile.substance.media.audio.loading.objects.*
+import mobile.substance.media.audio.local.MediaStoreAudioHolder
+import mobile.substance.media.audio.local.MediaStoreAudioHolderListener
+import mobile.substance.media.audio.local.objects.*
 import mobile.substance.media.core.audio.*
-import mobile.substance.sdk.R
-import mobile.substance.sdk.app.sample.adapters.MusicAdapter
+import mobile.substance.media.sample.R
+import mobile.substance.media.sample.adapters.MusicAdapter
 
 class RecyclerViewFragment : BaseFragment(), MediaStoreAudioHolderListener {
     override fun onSongLoaded(item: MediaStoreSong, pos: Int) {

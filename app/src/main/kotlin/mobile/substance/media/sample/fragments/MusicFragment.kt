@@ -27,8 +27,8 @@ import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
 import butterknife.bindView
 import mobile.substance.media.core.audio.*
+import mobile.substance.media.sample.R
 import mobile.substance.media.sample.helpers.NavigationHelper
-import mobile.substance.sdk.R
 
 class MusicFragment : NavigationDrawerFragment() {
     private val tabs: TabLayout by bindView<TabLayout>(R.id.fragment_music_tabs)

@@ -12,6 +12,15 @@ object MediaCore {
     private val videoHolders: MutableList<MediaHolder> = ArrayList()
     private val imageHolders: MutableList<MediaHolder> = ArrayList()
 
+    fun getHoldersOfType(@MediaType type: Long): List<MediaHolder> {
+        when (type) {
+            MEDIA_TYPE_AUDIO -> return audioHolders
+            MEDIA_TYPE_VIDEO -> return videoHolders
+            MEDIA_TYPE_IMAGES -> return imageHolders
+            else -> return emptyList()
+        }
+    }
+
     private fun dispatchEvent(event: (MediaHolder).() -> Any) {
         audioHolders.forEach { it.event() }
         videoHolders.forEach { it.event() }

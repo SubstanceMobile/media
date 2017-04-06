@@ -19,7 +19,7 @@ package mobile.substance.media.sample.helpers
 import android.support.v4.view.GravityCompat
 import android.support.v4.widget.DrawerLayout
 import android.support.v7.widget.Toolbar
-import mobile.substance.sdk.R
+import mobile.substance.media.sample.R
 
 object NavigationHelper {
 
