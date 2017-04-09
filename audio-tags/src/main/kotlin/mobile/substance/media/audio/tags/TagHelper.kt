@@ -17,13 +17,10 @@
 package mobile.substance.media.audio.tags
 
 import android.content.Context
-import android.net.Uri
 import android.os.AsyncTask
-import mobile.substance.media.core.audio.AudioHolder
-import mobile.substance.media.core.audio.objects.Album
-import mobile.substance.media.core.MediaObject
-import mobile.substance.media.core.audio.objects.Song
-import mobile.substance.media.utils.AudioCoreUtil
+import mobile.substance.media.audio.local.objects.MediaStoreAlbum
+import mobile.substance.media.audio.local.objects.MediaStoreSong
+import mobile.substance.media.utils.CoreUtil.toFilePath
 import org.jaudiotagger.audio.AudioFileIO
 import org.jaudiotagger.tag.FieldKey
 import org.jaudiotagger.tag.Tag
@@ -45,8 +42,8 @@ class TagHelper {
 
         override fun doInBackground(vararg params: T?): R? {
             params.first() ?: return null
-            if (params.first() is Album) read(context, params.first() as Album)
-            if (params.first() is Song) read(context, params.first() as Song)
+            if (params.first() is MediaStoreAlbum) read(context, params.first() as MediaStoreAlbum)
+            if (params.first() is MediaStoreSong) read(context, params.first() as MediaStoreSong)
             return null
         }
 
@@ -57,9 +54,9 @@ class TagHelper {
 
     companion object {
 
-        fun read(context: Context, song: Song): TagSong? {
+        fun read(context: Context, song: MediaStoreSong): TagSong? {
             val tag: Tag?
-            val filePath = AudioCoreUtil.getFilePath(context, song.uri)
+            val filePath = song.uri.toFilePath(context)
             try {
                 tag = AudioFileIO.read(File(filePath)).tag
             } catch (e: Exception) {
@@ -81,33 +78,33 @@ class TagHelper {
                     .build()
         }
 
-        fun read(context: Context, album: Album): TagAlbum? {
+        fun read(context: Context, album: MediaStoreAlbum): TagAlbum? {
             val songs = ArrayList<TagSong>()
-            AudioHolder.findSongsForAlbum(album).forEach {
-                songs.add(read(context, it)!!)
+            album.getSongs()?.forEach {
+                songs.add(read(context, it as MediaStoreSong)!!)
             }
 
             val tagAlbum = TagAlbum.Builder()
-                    .setTitle(album.albumName.orEmpty())
-                    .setArtist(album.albumArtistName.orEmpty())
-                    .setGenre(album.albumGenreName.orEmpty())
-                    .setYear(album.albumYear.toString())
+                    .setTitle(album.title.orEmpty())
+                    .setArtist(album.artistName.orEmpty())
+                    .setGenre(album.genre.orEmpty())
+                    .setYear(album.year.toString())
                     .setSongs(songs)
 
 
-            if (album.albumArtworkPath != null && album.albumArtworkPath.orEmpty().length > 0) {
-                tagAlbum.setArtwork(ArtworkFactory.createArtworkFromFile(File(AudioCoreUtil.getFilePath(context, Uri.parse("file://" + album.albumArtworkPath)))))
+            if (album.artworkUri != null && album.artworkUri.toString().orEmpty().isNotEmpty()) {
+                tagAlbum.setArtwork(ArtworkFactory.createArtworkFromFile(File(album.artworkUri!!.toFilePath(context))))
             }
 
             return tagAlbum.build()
         }
 
-        fun readAsync(context: Context, song: Song, callback: ReadCallback<TagSong?>) {
-            AsyncRead<Song, TagSong>(context, callback).execute(song)
+        fun readAsync(context: Context, song: MediaStoreSong, callback: ReadCallback<TagSong?>) {
+            AsyncRead<MediaStoreSong, TagSong>(context, callback).execute(song)
         }
 
-        fun readAsync(context: Context, album: Album, callback: ReadCallback<TagAlbum?>) {
-            AsyncRead<Album, TagAlbum>(context, callback).execute(album)
+        fun readAsync(context: Context, album: MediaStoreAlbum, callback: ReadCallback<TagAlbum?>) {
+            AsyncRead<MediaStoreAlbum, TagAlbum>(context, callback).execute(album)
         }
     }
 }

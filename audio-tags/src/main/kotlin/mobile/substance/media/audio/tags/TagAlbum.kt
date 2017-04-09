@@ -16,12 +16,9 @@
 
 package mobile.substance.media.audio.tags
 
-import mobile.substance.media.core.audio.objects.Album
+import mobile.substance.media.audio.local.objects.MediaStoreAlbum
 import org.jaudiotagger.tag.images.Artwork
 
-/**
- * Created by Julian Os on 03.05.2016.
- */
 class TagAlbum : TagHelper.TagObject() {
     var songs: List<TagSong?>? = null
     var title: String = ""
@@ -31,11 +28,11 @@ class TagAlbum : TagHelper.TagObject() {
     var label: String = ""
     var comment: String = ""
     var artwork: Artwork? = null
-    var album: Album? = null
+    var album: MediaStoreAlbum? = null
 
     class Builder(private val base: TagAlbum = TagAlbum()) {
 
-        fun setAlbum(album: Album): Builder {
+        fun setAlbum(album: MediaStoreAlbum): Builder {
             base.album = album
             return this
         }

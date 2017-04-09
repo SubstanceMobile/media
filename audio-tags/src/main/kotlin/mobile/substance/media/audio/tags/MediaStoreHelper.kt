@@ -24,7 +24,7 @@ import android.media.MediaScannerConnection
 import android.net.Uri
 import android.provider.MediaStore
 import android.util.Log
-import mobile.substance.media.core.audio.objects.Album
+import mobile.substance.media.audio.local.objects.MediaStoreAlbum
 
 object MediaStoreHelper {
 
@@ -40,7 +40,7 @@ object MediaStoreHelper {
         }
     }
 
-    fun updateMedia(paths: Array<String?>, context: Context, callbacks: MediaStoreCallback, album: Album? = null, newArtworkPath: String) {
+    fun updateMedia(paths: Array<String?>, context: Context, callbacks: MediaStoreCallback, album: MediaStoreAlbum? = null, newArtworkPath: String) {
         var count = 0
         MediaScannerConnection.scanFile(context, paths, Array<String>(paths.size, { paths[it]?.substring(paths[it]?.lastIndexOf(".")!! + 1)!! })) { path, uri ->
             Log.d(MediaStoreHelper::class.java.simpleName, "successfully scanned $path")
@@ -54,8 +54,8 @@ object MediaStoreHelper {
         if (album != null) refreshArtwork(context, album, newArtworkPath)
     }
 
-    fun refreshArtwork(context: Context, album: Album, newArtworkPath: String) {
-        if (album.albumArtworkPath != null)
+    fun refreshArtwork(context: Context, album: MediaStoreAlbum, newArtworkPath: String) {
+        if (album.artworkUri != null)
             context.contentResolver.delete(Uri.parse("content://media/external/audio/albumart"), null, null)
         val cv = ContentValues()
         cv.put("album_id", album.id)

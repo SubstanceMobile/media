@@ -18,22 +18,19 @@ package mobile.substance.media.audio.tags
 
 import android.content.Context
 import android.util.Log
+import mobile.substance.media.audio.local.objects.MediaStorePlaylist
+import mobile.substance.media.audio.local.objects.MediaStoreSong
 
 import java.util.ArrayList
 
-import mobile.substance.media.core.audio.objects.Playlist
-import mobile.substance.media.core.audio.objects.Song
 import mobile.substance.media.utils.MusicTagsUtil
 
-/**
- * Created by Julian Os on 04.05.2016.
- */
-class PlaylistEditor(private val context: Context, playlist: Playlist) {
-    var playlist: Playlist? = null
+class PlaylistEditor(private val context: Context, playlist: MediaStorePlaylist) {
+    var playlist: MediaStorePlaylist? = null
         private set
     private var name: String? = null
-    private val songsToRemove = ArrayList<Song>()
-    private val songsToAdd = ArrayList<Song>()
+    private val songsToRemove = ArrayList<MediaStoreSong>()
+    private val songsToAdd = ArrayList<MediaStoreSong>()
     private var delete = false
     private var positions: Pair<Int, Int>? = null
 
@@ -47,22 +44,22 @@ class PlaylistEditor(private val context: Context, playlist: Playlist) {
         return this
     }
 
-    fun remove(songs: List<Song>): PlaylistEditor {
+    fun remove(songs: List<MediaStoreSong>): PlaylistEditor {
         this.songsToRemove.addAll(songs)
         return this
     }
 
-    fun remove(song: Song): PlaylistEditor {
+    fun remove(song: MediaStoreSong): PlaylistEditor {
         this.songsToRemove.add(song)
         return this
     }
 
-    fun add(song: Song): PlaylistEditor {
+    fun add(song: MediaStoreSong): PlaylistEditor {
         this.songsToAdd.add(song)
         return this
     }
 
-    fun add(songs: List<Song>): PlaylistEditor {
+    fun add(songs: List<MediaStoreSong>): PlaylistEditor {
         this.songsToAdd.addAll(songs)
         return this
     }

@@ -18,9 +18,6 @@ package mobile.substance.media.audio.tags
 
 import org.jaudiotagger.tag.images.Artwork
 
-/**
- * Created by Julian Os on 03.05.2016.
- */
 class TagSong : TagHelper.TagObject() {
     var title: String = ""
     var artist: String = ""
