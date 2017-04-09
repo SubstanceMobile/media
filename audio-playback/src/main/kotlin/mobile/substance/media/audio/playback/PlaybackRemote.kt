@@ -289,17 +289,17 @@ object PlaybackRemote : ServiceConnection {
      */
     fun swapQueueItems(fromPosition: Int, toPosition: Int, startAtCurrentPosition: Boolean = false, triggerCallbacks: Boolean = false) {
         Collections.swap(AudioQueue.getQueue(), if (startAtCurrentPosition) fromPosition + AudioQueue.POSITION + 1 else fromPosition, if (startAtCurrentPosition) toPosition + AudioQueue.POSITION + 1 else toPosition)
-        if (triggerCallbacks) AudioQueue.notifyChanged()
+        AudioQueue.notifyChanged(isInternalChange = !triggerCallbacks)
     }
 
     fun removeFromQueue(pos: Int, startsAtCurrentPosition: Boolean = false, triggerCallbacks: Boolean = false) {
         AudioQueue.getQueue().removeAt(if (startsAtCurrentPosition) AudioQueue.POSITION + 1 + pos else pos)
-        if (triggerCallbacks) AudioQueue.notifyChanged()
+        AudioQueue.notifyChanged(isInternalChange = !triggerCallbacks)
     }
 
     fun addToQueueAsNext(song: Song, triggerCallbacks: Boolean = false) {
         AudioQueue.getQueue().add(AudioQueue.POSITION + 1, song)
-        if (triggerCallbacks) AudioQueue.notifyChanged()
+        AudioQueue.notifyChanged(isInternalChange = !triggerCallbacks)
     }
 
     fun addToQueue(song: Song, triggerCallbacks: Boolean = false) = addToQueue(listOf(song), triggerCallbacks)
@@ -330,7 +330,7 @@ object PlaybackRemote : ServiceConnection {
 
     fun makeNotification(updateInterface: NotificationUpdateInterface): Notification {
         async {
-            updateInterface.updateNotification(makeNotification(await { AudioCoreUtil.getArtwork(AudioQueue.getCurrentSong()!!, service!!) }))
+            updateInterface.updateNotification(makeNotification(await { AudioQueue.getCurrentSong()!!.getArtwork() }))
         }
         return makeNotification(null)
     }

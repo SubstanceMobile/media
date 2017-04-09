@@ -17,7 +17,6 @@
 package mobile.substance.media.options
 
 object AudioCoreOptions {
-    var glidePreferPlaceholder = false
     var defaultArtResId: Int = 0
     var defaultArtUri: String = "https://substanceproject.net/img/Substance_512.png"
 }

@@ -39,7 +39,6 @@ object MediaCore {
     }
 
     fun dispatchOnStopActivity(activity: AppCompatActivity) {
-        this.activity = null
         dispatchEvent { onStopActivity(activity) }
     }
 

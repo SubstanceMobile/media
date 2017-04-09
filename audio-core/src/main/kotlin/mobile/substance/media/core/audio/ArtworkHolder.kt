@@ -16,25 +16,18 @@
 
 package mobile.substance.media.core.audio
 
+import android.graphics.Bitmap
+import android.support.annotation.UiThread
 import android.support.annotation.WorkerThread
-import android.support.v4.media.MediaMetadataCompat
+import android.widget.ImageView
 import mobile.substance.media.core.MediaObject
 
-abstract class Genre : MediaObject(), ArtworkHolder {
-    open var name: String? = null
-    open var numberOfSongs: Int? = null
-    open var numberOfAlbums: Int? = null
+interface ArtworkHolder {
+
+    @UiThread
+    fun loadArtwork(target: ImageView) = Unit
 
     @WorkerThread
-    abstract fun getSongs(): List<Song>?
-
-    @WorkerThread
-    abstract fun getAlbums(): List<Album>?
-
-    override fun MediaMetadataCompat.Builder.withMetadata(): MediaMetadataCompat.Builder {
-        putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_TITLE, name)
-        putLong(MediaMetadataCompat.METADATA_KEY_NUM_TRACKS, numberOfSongs?.toLong() ?: 0L)
-        return this
-    }
+    fun getArtwork(): Bitmap?
 
 }

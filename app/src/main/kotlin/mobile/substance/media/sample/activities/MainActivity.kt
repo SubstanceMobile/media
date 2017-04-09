@@ -55,12 +55,6 @@ class MainActivity : NavigationDrawerActivity(), PlaybackRemote.RemoteCallback {
 
     override fun init(savedInstanceState: Bundle?) {
         super.init(savedInstanceState)
-        MediaStoreAudioHolder.configure()
-                .load(AUDIO_TYPE_SONGS)
-                .load(AUDIO_TYPE_ALBUMS)
-                .load(AUDIO_TYPE_ARTISTS)
-                .load(AUDIO_TYPE_GENRES)
-                .load(AUDIO_TYPE_PLAYLISTS)
         if (!MediaStoreAudioHolder.isBuilt()) MediaStoreAudioHolder.build()
 
         navigationView.setNavigationItemSelectedListener { it ->
@@ -139,6 +133,12 @@ class MainActivity : NavigationDrawerActivity(), PlaybackRemote.RemoteCallback {
     override fun onStart() {
         super.onStart()
         Log.d("MainActivity.kt", "onStart()")
+        MediaStoreAudioHolder.configure()
+                .load(AUDIO_TYPE_SONGS)
+                .load(AUDIO_TYPE_ALBUMS)
+                .load(AUDIO_TYPE_ARTISTS)
+                .load(AUDIO_TYPE_GENRES)
+                .load(AUDIO_TYPE_PLAYLISTS)
         MediaCore.dispatchOnStartActivity(this)
         PlaybackRemote.withActivity(MyMusicServiceSubclass::class.java, this)
         PlaybackRemote.registerCallback(this)

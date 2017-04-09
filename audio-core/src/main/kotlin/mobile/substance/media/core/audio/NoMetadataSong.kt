@@ -17,20 +17,24 @@
 package mobile.substance.media.core.audio
 
 import android.net.Uri
+import android.support.annotation.WorkerThread
 import android.support.v4.media.MediaMetadataCompat
 import java.io.File
 
 class NoMetadataSong(override var uri: Uri) : Song() {
     override var title: String? = uri.toString().substring(uri.toString().lastIndexOf(File.separatorChar))
 
+    @WorkerThread
     override fun getAlbum(): Album? {
         return null
     }
 
+    @WorkerThread
     override fun getArtist(): Artist? {
         return null
     }
 
+    @WorkerThread
     override fun getGenre(): Genre? {
         return null
     }

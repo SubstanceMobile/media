@@ -20,8 +20,15 @@ import android.app.ActivityManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
 import android.net.wifi.WifiManager
+import android.support.annotation.WorkerThread
+import com.bumptech.glide.Glide
+import com.bumptech.glide.request.target.Target
+import jp.wasabeef.glide.transformations.BlurTransformation
 import mobile.substance.media.audio.playback.service.AudioService
+import mobile.substance.media.options.AudioCoreOptions
+import java.io.ByteArrayOutputStream
 import java.math.BigInteger
 import java.net.InetAddress
 import java.net.UnknownHostException
@@ -38,10 +45,7 @@ object AudioPlaybackUtil {
 
     fun isServiceRunning(context: Context, serviceClass: Class<*>): Boolean {
         val manager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
-        for (service in manager.getRunningServices(Integer.MAX_VALUE)) {
-            if (service.service.className == serviceClass.name) return true
-        }
-        return false
+        return manager.getRunningServices(Integer.MAX_VALUE).any { it.service.className == serviceClass.name }
     }
 
     fun getIpAddressString(context: Context): String? {
@@ -59,6 +63,28 @@ object AudioPlaybackUtil {
         }
 
         return ipAddressString
+    }
+
+    /**
+     * Bitmap blurring
+     *
+     * @param song song to get artwork of
+     *
+     * @param context required for the default artwork drawable fallback
+     *
+     * @return The retrieved Bitmap; null if a NetworkOnMainThreadException has been caught
+     */
+    @WorkerThread
+    fun blurBitmap(bitmap: Bitmap, context: Context): Bitmap? {
+        val byteArrayOutputStream = ByteArrayOutputStream()
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream)
+        val bytes = byteArrayOutputStream.toByteArray()
+        return Glide.with(context)
+                .load(bytes)
+                .asBitmap()
+                .error(AudioCoreOptions.defaultArtResId)
+                .transform(BlurTransformation(context))
+                .into(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL).get()
     }
 
     ///////////////////////////////////////////////////////////////////////////

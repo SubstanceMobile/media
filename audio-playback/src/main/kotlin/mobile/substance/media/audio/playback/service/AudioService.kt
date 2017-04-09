@@ -39,7 +39,7 @@ import mobile.substance.media.audio.playback.players.GaplessPlayback
 import mobile.substance.media.audio.playback.players.LocalPlayback
 import mobile.substance.media.audio.playback.players.Playback
 import mobile.substance.media.options.AudioPlaybackOptions
-import mobile.substance.media.utils.AudioCoreUtil
+import mobile.substance.media.utils.AudioPlaybackUtil
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.concurrent.thread
@@ -197,8 +197,9 @@ open class AudioService : MediaBrowserServiceCompat(), CastStateListener {
         val source = AudioQueue.getCurrentSong()?.getMetadata()
         val metadataCompat = MediaMetadataCompat.Builder(source)
         if (AudioPlaybackOptions.isLockscreenArtworkEnabled) {
-            metadataCompat.putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART,
-                    AudioCoreUtil.getArtwork(AudioQueue.getCurrentSong()!!, this, AudioPlaybackOptions.isLockscreenArtworkBlurEnabled))
+            metadataCompat.putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, if (AudioPlaybackOptions.isLockscreenArtworkBlurEnabled) {
+                AudioPlaybackUtil.blurBitmap(AudioQueue.getCurrentSong()!!.getArtwork()!!, this)
+            } else AudioQueue.getCurrentSong()!!.getArtwork())
         }
         session?.setMetadata(metadataCompat.build())
     }

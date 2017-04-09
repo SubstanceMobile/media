@@ -11,6 +11,7 @@ import mobile.substance.media.audio.playback.PlaybackRemote
 import mobile.substance.media.audio.playback.destroy
 import mobile.substance.media.audio.playback.prepareWithDataSource
 import mobile.substance.media.audio.playback.service.AudioQueue
+import mobile.substance.media.core.audio.Song
 
 object GaplessPlayback : Playback(),
         MediaPlayer.OnPreparedListener,
@@ -99,7 +100,14 @@ object GaplessPlayback : Playback(),
     // We'll probably have prepared the next song already, a change of the repeat mode invalidates this
     override fun onSetRepeatMode(repeatMode: Int) {
         super.onSetRepeatMode(repeatMode)
+        invalidateNextPlayer()
+    }
 
+    // We'll probably have prepared the next song already, a change of the queue invalidates this
+    override fun onQueueChanged() = invalidateNextPlayer()
+
+    private fun invalidateNextPlayer() {
+        if (preparedSong != PlaybackRemote.getNextSong()?.uri) return
         getInactivePlayer()?.reset()
         preparedSong = PlaybackRemote.getCurrentSong()?.uri
         if (shouldPrepareNext()) prepareNextPlayer(preparedSong!!)

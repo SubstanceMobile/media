@@ -14,13 +14,8 @@
  * limitations under the License.
  */
 
-package mobile.substance.media.core.audio
+package mobile.substance.media.options
 
-import android.widget.ImageView
-import mobile.substance.media.core.MediaObject
-
-abstract class AudioObject : MediaObject() {
-
-    open fun loadArtwork(target: ImageView) = Unit
-
+object AudioLocalOptions {
+    var useEmbeddedArtwork = false
 }

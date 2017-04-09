@@ -16,7 +16,23 @@
 
 package mobile.substance.media.extensions
 
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.Drawable
 import android.os.Handler
 import android.os.Looper
 
 fun mainThread(runnable: () -> Unit) = Handler(Looper.getMainLooper()).post(runnable)
+
+fun Drawable.asBitmap(): Bitmap {
+    if (this is BitmapDrawable) {
+        return bitmap
+    } else {
+        val bitmap = Bitmap.createBitmap(intrinsicWidth, intrinsicHeight, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bitmap)
+        setBounds(0, 0, canvas.width, canvas.height)
+        draw(canvas)
+        return bitmap
+    }
+}

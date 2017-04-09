@@ -88,9 +88,10 @@ internal object AudioQueue {
         Collections.shuffle(QUEUE_SECONDARY)
     }
 
-    fun notifyChanged(fullSwap: Boolean = false) = PlaybackRemote.delegate {
+    fun notifyChanged(fullSwap: Boolean = false, isInternalChange: Boolean = false) = PlaybackRemote.delegate {
         if (fullSwap) control()?.transportControls?.setRepeatMode(PlaybackStateCompat.REPEAT_MODE_NONE)
-        callback { onQueueChanged(getQueue()) }
+        engine.onQueueChanged()
+        if (!isInternalChange) callback { onQueueChanged(getQueue()) }
     }
 
 }

@@ -16,13 +16,15 @@
 
 package mobile.substance.media.core.audio
 
+import android.support.annotation.WorkerThread
 import android.support.v4.media.MediaMetadataCompat
 import mobile.substance.media.core.MediaObject
 
-abstract class Playlist : AudioObject() {
+abstract class Playlist : MediaObject(), ArtworkHolder {
     open var title: String? = null
     open var numberOfSongs: Int? = null
 
+    @WorkerThread
     abstract fun getSongs(): List<Song>?
 
     override fun MediaMetadataCompat.Builder.withMetadata(): MediaMetadataCompat.Builder {

@@ -16,6 +16,7 @@
 
 package mobile.substance.media.audio.local.objects
 
+import android.graphics.Bitmap
 import android.net.Uri
 import android.provider.MediaStore
 import mobile.substance.media.audio.local.MediaStoreAudioHolder
@@ -25,6 +26,8 @@ import mobile.substance.media.core.audio.Song
 import mobile.substance.media.local.core.MediaStoreAttributes
 
 class MediaStoreGenre : Genre(), MediaStoreAttributes {
+
+    override fun getArtwork(): Bitmap? = null
 
     override val baseUri: Uri = MediaStore.Audio.Genres.EXTERNAL_CONTENT_URI
 

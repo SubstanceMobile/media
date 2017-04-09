@@ -16,16 +16,22 @@
 
 package mobile.substance.media.core.audio
 
+import android.graphics.Bitmap
 import android.net.Uri
+import android.support.annotation.UiThread
+import android.support.annotation.WorkerThread
+import android.support.v4.content.ContextCompat
 import android.support.v4.media.MediaMetadataCompat
 import android.widget.ImageView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.bumptech.glide.request.target.Target
 import mobile.substance.media.core.MediaObject
+import mobile.substance.media.extensions.asBitmap
 import mobile.substance.media.options.AudioCoreOptions
 import mobile.substance.media.utils.AudioCoreUtil
 
-abstract class Song : AudioObject(), AudioFile {
+abstract class Song : MediaObject(), AudioFile, ArtworkHolder {
     open var title: String? = null
     open var artistName: String? = null
     open var albumTitle: String? = null
@@ -38,15 +44,16 @@ abstract class Song : AudioObject(), AudioFile {
         get() = AudioCoreUtil.stringForTime(duration ?: 0L)
 
     companion object {
-
         fun from(uri: Uri) = NoMetadataSong(uri)
-
     }
 
+    @WorkerThread
     abstract fun getArtist(): Artist?
 
+    @WorkerThread
     abstract fun getAlbum(): Album?
 
+    @WorkerThread
     abstract fun getGenre(): Genre?
 
     override fun MediaMetadataCompat.Builder.withMetadata(): MediaMetadataCompat.Builder {
@@ -60,22 +67,31 @@ abstract class Song : AudioObject(), AudioFile {
         return this
     }
 
+    @UiThread
     override fun loadArtwork(target: ImageView) {
-        if (AudioCoreOptions.glidePreferPlaceholder) {
-            Glide.with(getContext())
-                    .load(artworkUri)
-                    .placeholder(AudioCoreOptions.defaultArtResId)
-                    .diskCacheStrategy(DiskCacheStrategy.SOURCE)
-                    .crossFade()
-                    .centerCrop()
-                    .into(target)
-        } else Glide.with(getContext())
+        Glide.with(getContext())
                 .load(artworkUri)
+                .placeholder(AudioCoreOptions.defaultArtResId)
                 .error(AudioCoreOptions.defaultArtResId)
                 .diskCacheStrategy(DiskCacheStrategy.SOURCE)
                 .crossFade()
                 .centerCrop()
                 .into(target)
+    }
+
+    @WorkerThread
+    override fun getArtwork(): Bitmap? {
+        try {
+            return Glide.with(getContext())
+                    .load(artworkUri)
+                    .asBitmap()
+                    .diskCacheStrategy(DiskCacheStrategy.SOURCE)
+                    .centerCrop()
+                    .into(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL)
+                    .get()
+        } catch (e: Exception) {
+            return ContextCompat.getDrawable(getContext(), AudioCoreOptions.defaultArtResId).asBitmap()
+        }
     }
 
 }

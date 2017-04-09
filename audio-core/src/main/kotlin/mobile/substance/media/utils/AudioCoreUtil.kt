@@ -19,16 +19,14 @@ package mobile.substance.media.utils
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Bitmap
-import android.graphics.Canvas
-import android.graphics.drawable.BitmapDrawable
 import android.support.annotation.WorkerThread
-import android.support.v4.content.ContextCompat
 import android.webkit.URLUtil
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.Target
 import jp.wasabeef.glide.transformations.BlurTransformation
 import mobile.substance.media.core.audio.Song
 import mobile.substance.media.options.AudioCoreOptions
+import java.io.ByteArrayOutputStream
 
 
 object AudioCoreUtil {
@@ -48,42 +46,6 @@ object AudioCoreUtil {
         val minutes = totalSeconds / 60 % 60
         val hours = totalSeconds / 3600
         return if (hours > 0) java.lang.String.format("%d:%02d:%02d", hours, minutes, seconds) else java.lang.String.format("%02d:%02d", minutes, seconds)
-    }
-
-
-
-    /**
-     * Convenience method that simplifies getting the artwork for a specific song
-     *
-     * @param song song to get artwork of
-     *
-     * @param context required for the default artwork drawable fallback
-     *
-     * @return The retrieved Bitmap; null if a NetworkOnMainThreadException has been caught
-     */
-    @WorkerThread
-    fun getArtwork(song: Song, context: Context, blurIfPossible: Boolean = false): Bitmap? {
-        var bitmap: Bitmap? = null
-        val requestBuilder = Glide.with(context)
-                .load(song.artworkUri.toString())
-                .asBitmap()
-                .error(AudioCoreOptions.defaultArtResId)
-        if (blurIfPossible) requestBuilder.transform(BlurTransformation(context))
-        try {
-            bitmap = requestBuilder.into(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL).get()
-        } catch (ignored: Exception) {}
-        if (bitmap == null) {
-            val drawable = ContextCompat.getDrawable(context, AudioCoreOptions.defaultArtResId)
-            if (drawable is BitmapDrawable) {
-                bitmap = drawable.bitmap
-            } else {
-                bitmap = Bitmap.createBitmap(drawable.intrinsicWidth, drawable.intrinsicHeight, Bitmap.Config.ARGB_8888)
-                val canvas = Canvas(bitmap)
-                drawable.setBounds(0, 0, canvas.width, canvas.height)
-                drawable.draw(canvas)
-            }
-        }
-        return bitmap
     }
 
     ///////////////////////////////////////////////////////////////////////////

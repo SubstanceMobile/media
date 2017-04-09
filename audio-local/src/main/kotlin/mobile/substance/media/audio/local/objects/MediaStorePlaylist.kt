@@ -16,6 +16,7 @@
 
 package mobile.substance.media.audio.local.objects
 
+import android.graphics.Bitmap
 import android.net.Uri
 import android.provider.MediaStore
 import mobile.substance.media.audio.local.DateAdded
@@ -33,4 +34,7 @@ class MediaStorePlaylist : Playlist(), MediaStoreAttributes, DateAdded {
     override var id: Long = -1
 
     override fun getSongs(): List<Song> = MediaStoreAudioHolder.findSongsForPlaylist(this)
+
+    override fun getArtwork(): Bitmap? = null
+
 }

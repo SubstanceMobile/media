@@ -171,7 +171,10 @@ object MediaStoreAudioHolder : AudioHolder(), LoaderManager.LoaderCallbacks<List
             this.genresLoader = genresLoader
         }
 
-        if (isActive()) build()
+        if (isActive()) {
+            Log.d(MediaStoreAudioHolder::class.java.simpleName, "onStartActivity() called, isActive -> building")
+            build()
+        }
     }
 
     override fun onStopActivity(activity: Activity) {

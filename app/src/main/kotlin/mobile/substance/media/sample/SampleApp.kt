@@ -22,6 +22,7 @@ import com.google.android.gms.cast.CastMediaControlIntent
 import mobile.substance.media.audio.local.MediaStoreAudioHolder
 import mobile.substance.media.core.MediaCore
 import mobile.substance.media.options.AudioCoreOptions
+import mobile.substance.media.options.AudioLocalOptions
 import mobile.substance.media.options.AudioPlaybackOptions
 import java.lang.reflect.Field
 import kotlin.concurrent.thread
@@ -30,14 +31,15 @@ class SampleApp : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        MediaCore.activate(MediaStoreAudioHolder)
 
         thread {
-            MediaCore.activate(MediaStoreAudioHolder)
             AudioCoreOptions.defaultArtResId = R.drawable.default_artwork_gem
             AudioPlaybackOptions.statusbarIconResId = R.drawable.ic_audiotrack_white_24dp
             AudioPlaybackOptions.isCastEnabled = true
             AudioPlaybackOptions.isGaplessPlaybackEnabled = true
             AudioPlaybackOptions.isLockscreenArtworkBlurEnabled = true
+            //AudioLocalOptions.useEmbeddedArtwork = true
 
             var field: Field? = null
             try {
@@ -47,6 +49,11 @@ class SampleApp : Application() {
             }
             AudioPlaybackOptions.castApplicationId = if (field == null) CastMediaControlIntent.DEFAULT_MEDIA_RECEIVER_APPLICATION_ID else field.get(null) as String
         }
+    }
+
+    override fun onTerminate() {
+        super.onTerminate()
+        MediaCore.deactivate(MediaStoreAudioHolder)
     }
 
 }

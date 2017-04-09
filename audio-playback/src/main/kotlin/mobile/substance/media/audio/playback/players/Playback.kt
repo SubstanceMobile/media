@@ -16,30 +16,17 @@
 
 package mobile.substance.media.audio.playback.players
 
-import android.content.ContentUris
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
-import android.provider.MediaStore
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import android.support.v4.media.session.PlaybackStateCompat.STATE_NONE
 import android.util.Log
-import android.widget.Toast
-import mobile.substance.media.core.audio.AudioHolder
-import mobile.substance.media.utils.AudioCoreUtil
 import mobile.substance.media.audio.playback.PlaybackRemote
 import mobile.substance.media.audio.playback.service.AudioQueue
 import mobile.substance.media.audio.playback.service.AudioService
-import mobile.substance.media.core.audio.Album
 import mobile.substance.media.core.audio.Song
-import mobile.substance.media.utils.CoreUtil
 import java.util.*
-import kotlin.concurrent.thread
-import kotlin.jvm.internal.Ref
-import kotlin.reflect.KClass
 
 abstract class Playback : MediaSessionCompat.Callback() {
 
@@ -59,6 +46,8 @@ abstract class Playback : MediaSessionCompat.Callback() {
     }
 
     abstract fun init()
+
+    open fun onQueueChanged() = Unit
 
     ///////////////////////////////////////////////////////////////////////////
     // Player Helper methods
@@ -177,7 +166,7 @@ abstract class Playback : MediaSessionCompat.Callback() {
     // TODO STATE STUFF
     ///////////////////////////////////////////////////////////////////////////
 
-    open fun doPrev() = PlaybackRemote.playPreviousInternal()
+    open fun doPrevious() = PlaybackRemote.playPreviousInternal()
 
     open fun restart() = seek(0L)
 
@@ -185,14 +174,14 @@ abstract class Playback : MediaSessionCompat.Callback() {
      * Override this to set a new value. When the player is requested to skip back a song, it gets the current playing position.
      * If the position is greater then the value returned here, then it restarts the song, otherwise it actually skips back. This can be disabled entirely be returning -1
      */
-    open fun restartOnPrevWhen(): Long = 5000
+    open fun restartOnPreviousWhen(): Long = 5000
 
-    private fun shouldSkipBack() = getCurrentPosition() <= restartOnPrevWhen()
+    private fun shouldSkipBack() = getCurrentPosition() <= restartOnPreviousWhen()
 
     override fun onSkipToPrevious() {
         if (shouldSkipBack()) {
-            Log.d(TAG, "onSkipToPrevious() called. Calling doPrev()")
-            doPrev()
+            Log.d(TAG, "onSkipToPrevious() called. Calling doPrevious()")
+            doPrevious()
         } else {
             Log.d(TAG, "onSkipToPrevious() called. Calling prevRestart()")
             restart()
