@@ -12,6 +12,7 @@
       <module fileurl="file://$PROJECT_DIR$/audio-tags/audio-tags.iml" filepath="$PROJECT_DIR$/audio-tags/audio-tags.iml" />
       <module fileurl="file://$PROJECT_DIR$/core/core.iml" filepath="$PROJECT_DIR$/core/core.iml" />
       <module fileurl="file://$PROJECT_DIR$/local-core/local-core.iml" filepath="$PROJECT_DIR$/local-core/local-core.iml" />
+      <module fileurl="file://$PROJECT_DIR$/media.iml" filepath="$PROJECT_DIR$/media.iml" />
     </modules>
   </component>
 </project>
