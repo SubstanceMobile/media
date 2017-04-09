@@ -21,11 +21,8 @@ import android.content.ContentValues
 import android.content.Context
 import android.net.Uri
 import android.provider.MediaStore
-import android.support.v4.content.ContentResolverCompat
-import android.util.Log
-import mobile.substance.media.core.audio.objects.Song
 
-object MusicTagsUtil {
+object AudioTagsUtil {
 
     fun notifyChange(context: Context, uri: Uri) = context.contentResolver.notifyChange(uri, null)
 
@@ -34,7 +31,7 @@ object MusicTagsUtil {
      *
      * @param context  A Context used to access the ContentResolver
      * @param name  The name of the new playlist
-     * @return  The new playlist's row id, also the [mobile.substance.media.music.core.objects.Playlist.id]
+     * @return  The new playlist's row id, also the [mobile.substance.media.audio.local.objects.MediaStorePlaylist.id]
      */
     fun createPlaylist(context: Context, name: String): Long {
         val cursor = context.contentResolver.query(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, null, "${MediaStore.Audio.Playlists.NAME} = ?", arrayOf(name), null)
