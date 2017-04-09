@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Substance Mobile
+ * Copyright 2017 Substance Mobile
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -224,41 +224,41 @@ object MediaStoreAudioHolder : AudioHolder(), LoaderManager.LoaderCallbacks<List
     // Song //
     //////////
 
-    fun registerSongListener(songListener: MediaLoader.TaskListener<Song>) = songsLoader?.addListener(songListener)
+    fun registerSongListener(songListener: MediaLoader.TaskListener<MediaStoreSong>) = songsLoader?.addListener(songListener)
 
-    fun unregisterSongListener(songListener: MediaLoader.TaskListener<Song>) = songsLoader?.removeListener(songListener)
+    fun unregisterSongListener(songListener: MediaLoader.TaskListener<MediaStoreSong>) = songsLoader?.removeListener(songListener)
 
     ///////////
     // Album //
     ///////////
 
-    fun registerAlbumListener(albumListener: MediaLoader.TaskListener<Album>) = albumsLoader?.addListener(albumListener)
+    fun registerAlbumListener(albumListener: MediaLoader.TaskListener<MediaStoreAlbum>) = albumsLoader?.addListener(albumListener)
 
-    fun unregisterAlbumListener(albumListener: MediaLoader.TaskListener<Album>) = albumsLoader?.removeListener(albumListener)
+    fun unregisterAlbumListener(albumListener: MediaLoader.TaskListener<MediaStoreAlbum>) = albumsLoader?.removeListener(albumListener)
 
     //////////////
     // Playlist //
     //////////////
 
-    fun registerPlaylistListener(playlistListener: MediaLoader.TaskListener<Playlist>) = playlistsLoader?.addListener(playlistListener)
+    fun registerPlaylistListener(playlistListener: MediaLoader.TaskListener<MediaStorePlaylist>) = playlistsLoader?.addListener(playlistListener)
 
-    fun unregisterPlaylistListener(playlistListener: MediaLoader.TaskListener<Playlist>) = playlistsLoader?.removeListener(playlistListener)
+    fun unregisterPlaylistListener(playlistListener: MediaLoader.TaskListener<MediaStorePlaylist>) = playlistsLoader?.removeListener(playlistListener)
 
     ////////////
     // Artist //
     ////////////
 
-    fun registerArtistListener(artistListener: MediaLoader.TaskListener<Artist>) = artistsLoader?.addListener(artistListener)
+    fun registerArtistListener(artistListener: MediaLoader.TaskListener<MediaStoreArtist>) = artistsLoader?.addListener(artistListener)
 
-    fun unregisterArtistListener(artistListener: MediaLoader.TaskListener<Artist>) = artistsLoader?.removeListener(artistListener)
+    fun unregisterArtistListener(artistListener: MediaLoader.TaskListener<MediaStoreArtist>) = artistsLoader?.removeListener(artistListener)
 
     ////////////
     // Genres //
     ////////////
 
-    fun registerGenresListener(genreListener: MediaLoader.TaskListener<Genre>) = genresLoader?.addListener(genreListener)
+    fun registerGenresListener(genreListener: MediaLoader.TaskListener<MediaStoreGenre>) = genresLoader?.addListener(genreListener)
 
-    fun unregisterGenresListener(genreListener: MediaLoader.TaskListener<Genre>) = genresLoader?.removeListener(genreListener)
+    fun unregisterGenresListener(genreListener: MediaLoader.TaskListener<MediaStoreGenre>) = genresLoader?.removeListener(genreListener)
 
 
     ///////////////////////////////////////////////////////////////////////////
