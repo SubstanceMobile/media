@@ -16,6 +16,7 @@
 
 package mobile.substance.media.core.audio
 
+import android.net.Uri
 import android.support.annotation.WorkerThread
 import android.support.v4.media.MediaMetadataCompat
 import mobile.substance.media.core.MediaObject
@@ -23,7 +24,7 @@ import mobile.substance.media.core.MediaObject
 abstract class Artist : MediaObject(), ArtworkHolder {
     open var name: String? = null
     open var biography: String? = null
-    open var artworkUri: String? = null
+    open var artworkUri: Uri? = null
     open var numberOfSongs: Int? = null
     open var numberOfAlbums: Int? = null
 
