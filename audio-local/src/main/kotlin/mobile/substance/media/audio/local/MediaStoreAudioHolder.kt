@@ -178,7 +178,7 @@ object MediaStoreAudioHolder : AudioHolder(), LoaderManager.LoaderCallbacks<List
     }
 
     override fun onStopActivity(activity: Activity) {
-        // Do nothing
+        configure().clear()
     }
 
     fun configure() = config
