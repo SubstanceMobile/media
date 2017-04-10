@@ -28,40 +28,21 @@ import mobile.substance.media.sample.R
 import mobile.substance.media.sample.adapters.MusicAdapter
 
 class RecyclerViewFragment : BaseFragment(), MediaStoreAudioHolderListener {
-    override fun onSongLoaded(item: MediaStoreSong, pos: Int) {
-
-    }
 
     override fun onSongsCompleted(result: List<MediaStoreSong>) {
         if (type == AUDIO_TYPE_SONGS) setAdapter()
-    }
-
-    override fun onAlbumLoaded(item: MediaStoreAlbum, pos: Int) {
-
     }
 
     override fun onAlbumsCompleted(result: List<MediaStoreAlbum>) {
         if (type == AUDIO_TYPE_ALBUMS) setAdapter()
     }
 
-    override fun onArtistLoaded(item: MediaStoreArtist, pos: Int) {
-
-    }
-
     override fun onArtistsCompleted(result: List<MediaStoreArtist>) {
         if (type == AUDIO_TYPE_ARTISTS) setAdapter()
     }
 
-    override fun onPlaylistLoaded(item: MediaStorePlaylist, pos: Int) {
-
-    }
-
     override fun onPlaylistsCompleted(result: List<MediaStorePlaylist>) {
         if (type == AUDIO_TYPE_PLAYLISTS) setAdapter()
-    }
-
-    override fun onGenreLoaded(item: MediaStoreGenre, pos: Int) {
-
     }
 
     override fun onGenresCompleted(result: List<MediaStoreGenre>) {

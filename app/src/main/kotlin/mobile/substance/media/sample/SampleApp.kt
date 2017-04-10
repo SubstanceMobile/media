@@ -39,7 +39,7 @@ class SampleApp : Application() {
             AudioPlaybackOptions.isCastEnabled = true
             AudioPlaybackOptions.isGaplessPlaybackEnabled = true
             AudioPlaybackOptions.isLockscreenArtworkBlurEnabled = true
-            //AudioLocalOptions.useEmbeddedArtwork = true
+            AudioLocalOptions.useEmbeddedArtwork = true
 
             var field: Field? = null
             try {

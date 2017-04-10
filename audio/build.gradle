@@ -43,7 +43,7 @@ dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     testCompile 'junit:junit:4.12'
     compile project(':audio-core')
-    //compile project(':audio-tags')
+    compile project(':audio-tags')
     compile project(':audio-local')
     compile project(':audio-playback')
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"

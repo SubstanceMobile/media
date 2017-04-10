@@ -20,24 +20,24 @@ import mobile.substance.media.audio.local.objects.*
 
 interface MediaStoreAudioHolderListener {
 
-    fun onSongLoaded(item: MediaStoreSong, pos: Int)
+    fun onSongLoaded(item: MediaStoreSong, pos: Int) = Unit
 
-    fun onSongsCompleted(result: List<MediaStoreSong>)
+    fun onSongsCompleted(result: List<MediaStoreSong>) = Unit
 
-    fun onAlbumLoaded(item: MediaStoreAlbum, pos: Int)
+    fun onAlbumLoaded(item: MediaStoreAlbum, pos: Int) = Unit
 
-    fun onAlbumsCompleted(result: List<MediaStoreAlbum>)
+    fun onAlbumsCompleted(result: List<MediaStoreAlbum>) = Unit
 
-    fun onArtistLoaded(item: MediaStoreArtist, pos: Int)
+    fun onArtistLoaded(item: MediaStoreArtist, pos: Int) = Unit
 
-    fun onArtistsCompleted(result: List<MediaStoreArtist>)
+    fun onArtistsCompleted(result: List<MediaStoreArtist>) = Unit
 
-    fun onPlaylistLoaded(item: MediaStorePlaylist, pos: Int)
+    fun onPlaylistLoaded(item: MediaStorePlaylist, pos: Int) = Unit
 
-    fun onPlaylistsCompleted(result: List<MediaStorePlaylist>)
+    fun onPlaylistsCompleted(result: List<MediaStorePlaylist>) = Unit
 
-    fun onGenreLoaded(item: MediaStoreGenre, pos: Int)
+    fun onGenreLoaded(item: MediaStoreGenre, pos: Int) = Unit
 
-    fun onGenresCompleted(result: List<MediaStoreGenre>)
+    fun onGenresCompleted(result: List<MediaStoreGenre>) = Unit
 
 }

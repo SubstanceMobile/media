@@ -31,7 +31,7 @@ class MediaStoreAlbum : Album(), MediaStoreAttributes {
 
     override var id: Long = -1
 
-    override fun getSongs(): List<Song>? = MediaStoreAudioHolder.findSongsForAlbum(this)
+    override fun getSongs(): List<Song> = MediaStoreAudioHolder.findSongsForAlbum(this)
 
     override fun getArtist(): Artist? = MediaStoreAudioHolder.findArtistForAlbum(this)
 

@@ -220,47 +220,6 @@ object MediaStoreAudioHolder : AudioHolder(), LoaderManager.LoaderCallbacks<List
         buildFinishedListeners.add(listener)
     }
 
-    //////////
-    // Song //
-    //////////
-
-    fun registerSongListener(songListener: MediaLoader.TaskListener<MediaStoreSong>) = songsLoader?.addListener(songListener)
-
-    fun unregisterSongListener(songListener: MediaLoader.TaskListener<MediaStoreSong>) = songsLoader?.removeListener(songListener)
-
-    ///////////
-    // Album //
-    ///////////
-
-    fun registerAlbumListener(albumListener: MediaLoader.TaskListener<MediaStoreAlbum>) = albumsLoader?.addListener(albumListener)
-
-    fun unregisterAlbumListener(albumListener: MediaLoader.TaskListener<MediaStoreAlbum>) = albumsLoader?.removeListener(albumListener)
-
-    //////////////
-    // Playlist //
-    //////////////
-
-    fun registerPlaylistListener(playlistListener: MediaLoader.TaskListener<MediaStorePlaylist>) = playlistsLoader?.addListener(playlistListener)
-
-    fun unregisterPlaylistListener(playlistListener: MediaLoader.TaskListener<MediaStorePlaylist>) = playlistsLoader?.removeListener(playlistListener)
-
-    ////////////
-    // Artist //
-    ////////////
-
-    fun registerArtistListener(artistListener: MediaLoader.TaskListener<MediaStoreArtist>) = artistsLoader?.addListener(artistListener)
-
-    fun unregisterArtistListener(artistListener: MediaLoader.TaskListener<MediaStoreArtist>) = artistsLoader?.removeListener(artistListener)
-
-    ////////////
-    // Genres //
-    ////////////
-
-    fun registerGenresListener(genreListener: MediaLoader.TaskListener<MediaStoreGenre>) = genresLoader?.addListener(genreListener)
-
-    fun unregisterGenresListener(genreListener: MediaLoader.TaskListener<MediaStoreGenre>) = genresLoader?.removeListener(genreListener)
-
-
     ///////////////////////////////////////////////////////////////////////////
     // LoaderManager.LoaderCallbacks
     ///////////////////////////////////////////////////////////////////////////
