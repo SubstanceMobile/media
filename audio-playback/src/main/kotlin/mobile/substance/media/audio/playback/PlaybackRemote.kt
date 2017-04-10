@@ -133,19 +133,19 @@ object PlaybackRemote : ServiceConnection {
 
         fun onReceivedIntent(intent: Intent) = Unit
 
-        fun onProgressChanged(progress: Int)
+        fun onProgressChanged(progress: Int) = Unit
 
-        fun onDurationChanged(duration: Long, durationString: String)
+        fun onDurationChanged(duration: Long, durationString: String) = Unit
 
-        fun onSongChanged(song: Song)
+        fun onSongChanged(song: Song) = Unit
 
-        fun onStateChanged(@PlaybackStateCompat.State state: Int)
+        fun onStateChanged(@PlaybackStateCompat.State state: Int) = Unit
 
-        fun onRepeatModeChanged(@PlaybackStateCompat.RepeatMode mode: Int)
+        fun onRepeatModeChanged(@PlaybackStateCompat.RepeatMode mode: Int) = Unit
 
-        fun onQueueChanged(queue: List<Song>)
+        fun onQueueChanged(queue: List<Song>) = Unit
 
-        fun onError()
+        fun onError() = Unit
 
         fun onBufferStarted() = Unit
 
