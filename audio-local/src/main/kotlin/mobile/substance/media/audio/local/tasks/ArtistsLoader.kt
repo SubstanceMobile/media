@@ -23,24 +23,15 @@ import android.provider.MediaStore
 import mobile.substance.media.audio.local.objects.MediaStoreArtist
 import mobile.substance.media.local.core.MediaLoader
 
-class ArtistsLoader(context: Context) : MediaLoader<MediaStoreArtist>(context) {
+class ArtistsLoader<Artist : MediaStoreArtist>(context: Context) : MediaLoader<Artist>(context) {
 
-    override fun buildObject(cursor: Cursor): MediaStoreArtist? {
-        val name = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Artists.ARTIST))
-        val id = cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Artists._ID))
-        val numberOfSongs = cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Artists.NUMBER_OF_TRACKS))
-        val numberOfAlbums = cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Artists.NUMBER_OF_ALBUMS))
-
-        return MediaStoreArtist().apply {
-            this.name = name
-            this.id = id
-            this.numberOfSongs = numberOfSongs
-            this.numberOfAlbums = numberOfAlbums
-        }
+    override fun Artist.applyDefault(cursor: Cursor) {
+        name = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Artists.ARTIST))
+        id = cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Artists._ID))
+        numberOfSongs = cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Artists.NUMBER_OF_TRACKS))
+        numberOfAlbums = cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Artists.NUMBER_OF_ALBUMS))
     }
 
     override val uri: Uri = MediaStore.Audio.Artists.EXTERNAL_CONTENT_URI
-
-    override val loaderId: Int = 12
 
 }

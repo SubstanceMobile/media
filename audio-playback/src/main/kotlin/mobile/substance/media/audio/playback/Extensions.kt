@@ -21,8 +21,8 @@ import android.media.MediaPlayer
 import android.net.Uri
 import android.support.v4.media.session.MediaSessionCompat
 import android.util.Log
-import mobile.substance.media.utils.CoreUtil.toFilePath
 import mobile.substance.media.audio.playback.players.Playback
+import mobile.substance.media.extensions.toFilePath
 import mobile.substance.media.utils.AudioCoreUtil
 
 fun MediaPlayer.prepareWithDataSource(context: Context, dataSource: Uri) {

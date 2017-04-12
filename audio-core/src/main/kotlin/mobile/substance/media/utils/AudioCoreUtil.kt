@@ -17,20 +17,9 @@
 package mobile.substance.media.utils
 
 import android.annotation.SuppressLint
-import android.content.Context
-import android.graphics.Bitmap
-import android.support.annotation.WorkerThread
 import android.webkit.URLUtil
-import com.bumptech.glide.Glide
-import com.bumptech.glide.request.target.Target
-import jp.wasabeef.glide.transformations.BlurTransformation
-import mobile.substance.media.core.audio.Song
-import mobile.substance.media.options.AudioCoreOptions
-import java.io.ByteArrayOutputStream
-
 
 object AudioCoreUtil {
-    private val TAG = AudioCoreUtil::class.java.simpleName
 
     /**
      * Formats strings to match time. Is either hh:mm:ss or mm:ss
@@ -53,20 +42,5 @@ object AudioCoreUtil {
     ///////////////////////////////////////////////////////////////////////////
 
     fun isHttpUrl(url: String): Boolean = URLUtil.isValidUrl(url) && url.startsWith("http")
-
-
-    /*
-    @WorkerThread
-    fun createSongFromFile(path: String): Song {
-        val retriever = MediaMetadataRetriever()
-        retriever.setDataSource(path)
-        return Song.Builder()
-                .setTitle(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE) ?: path.substring(path.lastIndexOf("/") + 1))
-                .setArtistName(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST) ?: "<unknown>")
-                .setAlbumName(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM) ?: "<unknown>")
-                .setDuration(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION).toLong())
-                .build()
-    }
-    */
 
 }

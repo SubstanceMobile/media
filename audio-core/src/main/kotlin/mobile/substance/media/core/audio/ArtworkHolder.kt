@@ -17,17 +17,17 @@
 package mobile.substance.media.core.audio
 
 import android.graphics.Bitmap
+import android.net.Uri
 import android.support.annotation.UiThread
 import android.support.annotation.WorkerThread
 import android.widget.ImageView
 import mobile.substance.media.core.MediaObject
 
+// An interface used to implement an image/artwork, whether for a video thumbnail, an actual image or a song's album cover
 interface ArtworkHolder {
-
     @UiThread
-    fun loadArtwork(target: ImageView) = Unit
+    fun requestArtworkLoad(target: ImageView) = Unit
 
     @WorkerThread
-    fun getArtwork(): Bitmap?
-
+    fun requestArtworkBitmap(): Bitmap
 }

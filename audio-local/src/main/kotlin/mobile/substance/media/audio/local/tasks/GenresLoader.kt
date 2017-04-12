@@ -23,20 +23,13 @@ import android.provider.MediaStore
 import mobile.substance.media.audio.local.objects.MediaStoreGenre
 import mobile.substance.media.local.core.MediaLoader
 
-class GenresLoader(context: Context) : MediaLoader<MediaStoreGenre>(context) {
+class GenresLoader<Genre : MediaStoreGenre>(context: Context) : MediaLoader<Genre>(context) {
 
-    override fun buildObject(cursor: Cursor): MediaStoreGenre? {
-        val name = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Genres.NAME))
-        val id = cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Genres._ID))
-
-        return MediaStoreGenre().apply {
-            this.name = name
-            this.id = id
-        }
+    override fun Genre.applyDefault(cursor: Cursor) {
+        cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Genres.NAME))
+        cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Genres._ID))
     }
 
     override val uri: Uri = MediaStore.Audio.Genres.EXTERNAL_CONTENT_URI
-
-    override val loaderId: Int = 14
 
 }

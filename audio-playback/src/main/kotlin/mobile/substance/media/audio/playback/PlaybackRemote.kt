@@ -32,7 +32,6 @@ import android.util.Log
 import co.metalab.asyncawait.async
 import com.google.android.gms.cast.framework.CastContext
 import mobile.substance.media.core.audio.Song
-import mobile.substance.media.utils.AudioCoreUtil
 import mobile.substance.media.audio.playback.players.Playback
 import mobile.substance.media.audio.playback.service.DefaultMediaNotification
 import mobile.substance.media.audio.playback.service.MediaNotification
@@ -330,7 +329,7 @@ object PlaybackRemote : ServiceConnection {
 
     fun makeNotification(updateInterface: NotificationUpdateInterface): Notification {
         async {
-            updateInterface.updateNotification(makeNotification(await { AudioQueue.getCurrentSong()!!.getArtwork() }))
+            updateInterface.updateNotification(makeNotification(await { AudioQueue.getCurrentSong()!!.requestArtworkBitmap() }))
         }
         return makeNotification(null)
     }

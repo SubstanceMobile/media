@@ -16,16 +16,16 @@
 
 package mobile.substance.media.audio.local.objects
 
-import android.graphics.Bitmap
 import android.net.Uri
 import android.provider.MediaStore
 import mobile.substance.media.audio.local.DateAdded
-import mobile.substance.media.audio.local.MediaStoreAudioHolder
 import mobile.substance.media.core.audio.Playlist
 import mobile.substance.media.core.audio.Song
+import mobile.substance.media.core.mediaApiError
 import mobile.substance.media.local.core.MediaStoreAttributes
+import mobile.substance.media.options.AudioLocalOptions
 
-class MediaStorePlaylist : Playlist(), MediaStoreAttributes, DateAdded {
+open class MediaStorePlaylist : Playlist(), MediaStoreAttributes, DateAdded {
 
     override var dateAdded: Long = 0
 
@@ -33,8 +33,6 @@ class MediaStorePlaylist : Playlist(), MediaStoreAttributes, DateAdded {
 
     override var id: Long = -1
 
-    override fun getSongs(): List<Song> = MediaStoreAudioHolder.findSongsForPlaylist(this)
-
-    override fun getArtwork(): Bitmap? = null
+    override fun getSongs() = AudioLocalOptions.localAudioHolder?.findSongsForPlaylist(this) ?: mediaApiError(211)
 
 }

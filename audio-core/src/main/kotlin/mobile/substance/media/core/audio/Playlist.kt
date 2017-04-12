@@ -16,13 +16,21 @@
 
 package mobile.substance.media.core.audio
 
+import android.graphics.Bitmap
+import android.net.Uri
+import android.support.annotation.UiThread
 import android.support.annotation.WorkerThread
 import android.support.v4.media.MediaMetadataCompat
+import android.widget.ImageView
 import mobile.substance.media.core.MediaObject
+import mobile.substance.media.core.mediaApiError
+import mobile.substance.media.options.AudioCoreOptions
+import mobile.substance.media.options.CoreOptions
 
 abstract class Playlist : MediaObject(), ArtworkHolder {
     open var title: String? = null
     open var numberOfSongs: Int? = null
+    open var artworkUri: Uri = Uri.EMPTY
 
     @WorkerThread
     abstract fun getSongs(): List<Song>?
@@ -32,4 +40,11 @@ abstract class Playlist : MediaObject(), ArtworkHolder {
         putLong(MediaMetadataCompat.METADATA_KEY_NUM_TRACKS, numberOfSongs?.toLong() ?: 0L)
         return this
     }
+
+    @UiThread
+    override fun requestArtworkLoad(target: ImageView) = CoreOptions.imageLoadAdapter?.onRequestLoad(artworkUri, AudioCoreOptions.defaultPlaylistArtworkRes, target) ?: mediaApiError(102)
+
+    @WorkerThread
+    override fun requestArtworkBitmap(): Bitmap = CoreOptions.imageLoadAdapter?.onRequestBitmap(artworkUri, AudioCoreOptions.defaultPlaylistArtworkRes) ?: mediaApiError(102)
+
 }

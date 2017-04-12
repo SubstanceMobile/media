@@ -20,23 +20,20 @@ import android.graphics.Bitmap
 import android.net.Uri
 import android.support.annotation.UiThread
 import android.support.annotation.WorkerThread
-import android.support.v4.content.ContextCompat
 import android.support.v4.media.MediaMetadataCompat
 import android.widget.ImageView
-import com.bumptech.glide.Glide
-import com.bumptech.glide.load.engine.DiskCacheStrategy
-import com.bumptech.glide.request.target.Target
 import mobile.substance.media.core.MediaObject
-import mobile.substance.media.extensions.asBitmap
+import mobile.substance.media.core.mediaApiError
 import mobile.substance.media.options.AudioCoreOptions
+import mobile.substance.media.options.CoreOptions
 
 abstract class Album : MediaObject(), ArtworkHolder {
     open var title: String? = null
     open var artistName: String? = null
-    open var artworkUri: Uri? = null
     open var genre: String? = null
     open var numberOfSongs: Int? = null
     open var year: String? = null
+    open var artworkUri: Uri = Uri.EMPTY
 
     @WorkerThread
     abstract fun getSongs(): List<Song>?
@@ -49,7 +46,6 @@ abstract class Album : MediaObject(), ArtworkHolder {
 
     final override fun MediaMetadataCompat.Builder.withMetadata(): MediaMetadataCompat.Builder {
         putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_TITLE, title)
-        putString(MediaMetadataCompat.METADATA_KEY_ALBUM_ART_URI, artworkUri.toString())
         putString(MediaMetadataCompat.METADATA_KEY_ARTIST, artistName)
         putString(MediaMetadataCompat.METADATA_KEY_GENRE, genre)
         putLong(MediaMetadataCompat.METADATA_KEY_NUM_TRACKS, numberOfSongs?.toLong() ?: 0L)
@@ -58,30 +54,9 @@ abstract class Album : MediaObject(), ArtworkHolder {
     }
 
     @UiThread
-    override fun loadArtwork(target: ImageView) {
-        Glide.with(getContext())
-                .load(artworkUri)
-                .placeholder(AudioCoreOptions.defaultArtResId)
-                .error(AudioCoreOptions.defaultArtResId)
-                .diskCacheStrategy(DiskCacheStrategy.SOURCE)
-                .crossFade()
-                .centerCrop()
-                .into(target)
-    }
+    override fun requestArtworkLoad(target: ImageView) = CoreOptions.imageLoadAdapter?.onRequestLoad(artworkUri, AudioCoreOptions.defaultAlbumArtworkRes, target) ?: mediaApiError(102)
 
     @WorkerThread
-    override fun getArtwork(): Bitmap? {
-        try {
-            return Glide.with(getContext())
-                    .load(artworkUri)
-                    .asBitmap()
-                    .diskCacheStrategy(DiskCacheStrategy.SOURCE)
-                    .centerCrop()
-                    .into(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL)
-                    .get()
-        } catch (e: Exception) {
-            return ContextCompat.getDrawable(getContext(), AudioCoreOptions.defaultArtResId).asBitmap()
-        }
-    }
+    override fun requestArtworkBitmap(): Bitmap = CoreOptions.imageLoadAdapter?.onRequestBitmap(artworkUri, AudioCoreOptions.defaultAlbumArtworkRes) ?: mediaApiError(102)
 
 }

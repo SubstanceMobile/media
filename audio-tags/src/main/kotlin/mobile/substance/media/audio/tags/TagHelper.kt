@@ -20,7 +20,7 @@ import android.content.Context
 import android.os.AsyncTask
 import mobile.substance.media.audio.local.objects.MediaStoreAlbum
 import mobile.substance.media.audio.local.objects.MediaStoreSong
-import mobile.substance.media.utils.CoreUtil.toFilePath
+import mobile.substance.media.extensions.toFilePath
 import org.jaudiotagger.audio.AudioFileIO
 import org.jaudiotagger.tag.FieldKey
 import org.jaudiotagger.tag.Tag

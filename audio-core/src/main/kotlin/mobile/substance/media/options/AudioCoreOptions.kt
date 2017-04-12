@@ -17,6 +17,10 @@
 package mobile.substance.media.options
 
 object AudioCoreOptions {
-    var defaultArtResId: Int = 0
-    var defaultArtUri: String = "https://substanceproject.net/img/Substance_512.png"
+    var defaultSongArtworkRes: Int = 0
+    var defaultAlbumArtworkRes: Int = 0
+    var defaultArtistArtworkRes: Int = 0
+    var defaultPlaylistArtworkRes: Int = 0
+    var defaultGenreArtworkRes: Int = 0
+    var defaultSongArtworkUrl: String = "https://substanceproject.net/img/Substance_512.png"
 }

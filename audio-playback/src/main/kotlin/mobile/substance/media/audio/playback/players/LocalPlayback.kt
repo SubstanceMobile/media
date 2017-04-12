@@ -24,8 +24,8 @@ import android.os.Build
 import android.os.PowerManager
 import android.util.Log
 import mobile.substance.media.utils.AudioCoreUtil
-import mobile.substance.media.utils.CoreUtil.toFilePath
 import mobile.substance.media.audio.playback.destroy
+import mobile.substance.media.extensions.toFilePath
 
 
 object LocalPlayback : Playback(),
@@ -181,7 +181,7 @@ object LocalPlayback : Playback(),
     }
 
     ///////////////////////////////////////////////////////////////////////////
-    // MediaCore Player Callbacks
+    // Media Player Callbacks
     // STATUS: TODO
     ///////////////////////////////////////////////////////////////////////////
 

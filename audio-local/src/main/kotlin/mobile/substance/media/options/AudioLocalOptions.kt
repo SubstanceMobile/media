@@ -16,6 +16,26 @@
 
 package mobile.substance.media.options
 
+import mobile.substance.media.audio.local.LocalAudioHolder
+import mobile.substance.media.core.audio.AudioType
+
 object AudioLocalOptions {
+    var localAudioHolder: LocalAudioHolder<*, *, *, *, *>? = null
     var useEmbeddedArtwork = false
+    val config = LoadConfiguration()
+
+    class LoadConfiguration {
+        private val config = arrayListOf<@AudioType Long>()
+
+        fun clear() = config.clear()
+
+        fun load(@AudioType type: Long): LoadConfiguration {
+            if (!contains(type)) config += type
+            return this
+        }
+
+        fun contains(@AudioType type: Long) = config.contains(type)
+
+    }
+
 }

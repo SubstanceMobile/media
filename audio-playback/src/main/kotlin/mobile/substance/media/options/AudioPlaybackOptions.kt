@@ -52,6 +52,7 @@ object AudioPlaybackOptions {
     // Lockscreen artwork
     var isLockscreenArtworkEnabled = true
     var isLockscreenArtworkBlurEnabled = false
+    var lockscreenArtworkBlurRadius = 25F
 
     // Cast
     var castApplicationId = "null"

@@ -24,8 +24,8 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import android.widget.Toast
+import mobile.substance.media.extensions.toFilePath
 import mobile.substance.media.utils.AudioCoreUtil
-import mobile.substance.media.utils.CoreUtil.toFilePath
 
 import org.jaudiotagger.audio.AudioFile
 import org.jaudiotagger.audio.AudioFileIO

@@ -28,15 +28,14 @@ import com.google.android.gms.cast.framework.*
 import com.google.android.gms.cast.framework.media.RemoteMediaClient
 import com.google.android.gms.common.api.Status
 import com.google.android.gms.common.images.WebImage
-import mobile.substance.media.core.audio.AudioHolder
 import mobile.substance.media.audio.playback.PlaybackRemote
 import mobile.substance.media.audio.playback.cast.HttpServer
 import mobile.substance.media.core.audio.Song
+import mobile.substance.media.extensions.toFilePath
 import mobile.substance.media.options.AudioCoreOptions
 import mobile.substance.media.options.AudioPlaybackOptions
 import mobile.substance.media.utils.AudioCoreUtil
 import mobile.substance.media.utils.AudioPlaybackUtil
-import mobile.substance.media.utils.CoreUtil.toFilePath
 
 object CastPlayback : Playback(), SessionManagerListener<Session>, RemoteMediaClient.Listener, RemoteMediaClient.ProgressListener {
 
@@ -132,7 +131,7 @@ object CastPlayback : Playback(), SessionManagerListener<Session>, RemoteMediaCl
 
                     val mediaInfo = MediaInfo.Builder(audioUrl)
                             .setContentType("audio/$fileType")
-                            .setMetadata(buildMetadata(if (artworkUri != null) artworkUrl else AudioCoreOptions.defaultArtUri, metadata ?: MediaMetadataCompat.Builder().build()))
+                            .setMetadata(buildMetadata(if (artworkUri != null) artworkUrl else AudioCoreOptions.defaultSongArtworkUrl, metadata ?: MediaMetadataCompat.Builder().build()))
                             .setStreamType(MediaInfo.STREAM_TYPE_NONE)
                             .build()
                     doLoad(mediaInfo, true)
@@ -147,7 +146,7 @@ object CastPlayback : Playback(), SessionManagerListener<Session>, RemoteMediaCl
 
                     val mediaInfo = MediaInfo.Builder(fileUri.toString())
                             .setContentType("audio/*")
-                            .setMetadata(buildMetadata(artworkUrl ?: artworkUri?.toString() ?: AudioCoreOptions.defaultArtUri, metadata ?: MediaMetadataCompat.Builder().build()))
+                            .setMetadata(buildMetadata(artworkUrl ?: artworkUri?.toString() ?: AudioCoreOptions.defaultSongArtworkUrl, metadata ?: MediaMetadataCompat.Builder().build()))
                             .setStreamType(MediaInfo.STREAM_TYPE_LIVE)
                             .build()
                     doLoad(mediaInfo, true)

@@ -18,25 +18,29 @@ package mobile.substance.media.audio.local
 
 import mobile.substance.media.audio.local.objects.*
 
+/**
+ * The listener for [LocalAudioHolder] load events.
+ * [Unit] is provided as default implementation so your files ain't getting bloated with unused overrides
+ */
 interface MediaStoreAudioHolderListener {
 
-    fun onSongLoaded(item: MediaStoreSong, pos: Int) = Unit
+    fun onSongLoaded(item: MediaStoreSong) = Unit
 
     fun onSongsCompleted(result: List<MediaStoreSong>) = Unit
 
-    fun onAlbumLoaded(item: MediaStoreAlbum, pos: Int) = Unit
+    fun onAlbumLoaded(item: MediaStoreAlbum) = Unit
 
     fun onAlbumsCompleted(result: List<MediaStoreAlbum>) = Unit
 
-    fun onArtistLoaded(item: MediaStoreArtist, pos: Int) = Unit
+    fun onArtistLoaded(item: MediaStoreArtist) = Unit
 
     fun onArtistsCompleted(result: List<MediaStoreArtist>) = Unit
 
-    fun onPlaylistLoaded(item: MediaStorePlaylist, pos: Int) = Unit
+    fun onPlaylistLoaded(item: MediaStorePlaylist) = Unit
 
     fun onPlaylistsCompleted(result: List<MediaStorePlaylist>) = Unit
 
-    fun onGenreLoaded(item: MediaStoreGenre, pos: Int) = Unit
+    fun onGenreLoaded(item: MediaStoreGenre) = Unit
 
     fun onGenresCompleted(result: List<MediaStoreGenre>) = Unit
 

@@ -17,10 +17,8 @@
 package mobile.substance.media.local.core
 
 import android.content.Context
-import android.database.ContentObserver
 import android.database.Cursor
 import android.net.Uri
-import android.os.Handler
 import android.support.annotation.UiThread
 import android.support.annotation.WorkerThread
 import android.support.v4.content.AsyncTaskLoader
@@ -28,32 +26,26 @@ import android.support.v4.content.ContentResolverCompat
 import android.support.v4.content.Loader
 import android.support.v4.os.CancellationSignal
 import android.support.v4.os.OperationCanceledException
-import android.util.Log
-import mobile.substance.media.core.MediaObject
+import mobile.substance.media.core.mediaApiError
+import java.lang.reflect.ParameterizedType
 import java.util.*
 
 abstract class MediaLoader<Output : MediaStoreAttributes>(context: Context) : AsyncTaskLoader<List<Output>>(context) {
     val observer = ForceLoadContentObserver()
-    abstract val loaderId: Int
     abstract val uri: Uri
     open val selection: String? = null
     open val selectionArgs: Array<String>? = null
     open val sortOrder: String? = null
-
     private var cancellationSignal: CancellationSignal? = CancellationSignal()
+    var applicator: Applicator<Output>? = null
+    var listener: Listener<Output>? = null
 
-    protected var listeners: MutableList<TaskListener<Output>> = ArrayList()
-    private var currentData: List<Output> = ArrayList()
-    val verifyListener = object : TaskListener<Output> {
-        override fun onOneLoaded(item: Output, pos: Int) {
-            for (listener in listeners) listener.onOneLoaded(item, pos)
-        }
-
-        override fun onCompleted(result: List<Output>) {
-            if (currentData !== result)
-                for (listener in listeners) listener.onCompleted(result)
-            currentData = ArrayList<Output>()
-        }
+    /**
+     * A callback allowing users of a X-local library to apply additional attributes
+     */
+    interface Applicator<Output> {
+        fun newInstance(): Output
+        fun Output.apply()
     }
 
     /**
@@ -61,28 +53,14 @@ abstract class MediaLoader<Output : MediaStoreAttributes>(context: Context) : As
 
      * @param Output type of variable should be passed to the listener. When extending [MediaLoader], you will specify what this should be
      */
-    interface TaskListener<in Output> {
-        fun onOneLoaded(item: Output, pos: Int)
+    interface Listener<in Output> {
+        fun onLoaded(item: Output)
 
-        fun onCompleted(result: List<Output>)
-    }
-
-    ///////////////////////////////////////////////////////////////////////////
-    // Listener
-    ///////////////////////////////////////////////////////////////////////////
-
-    @UiThread
-    fun addListener(listener: TaskListener<Output>) {
-        listeners.add(listener)
-    }
-
-    @UiThread
-    fun removeListener(listener: TaskListener<Output>) {
-        listeners.remove(listener)
+        fun onLoaded(output: List<Output>)
     }
 
     @WorkerThread
-    protected abstract fun buildObject(cursor: Cursor): Output?
+    protected abstract fun Output.applyDefault(cursor: Cursor)
 
     ///////////////////////////////////////////////////////////////////////////
     // Sorting
@@ -109,11 +87,15 @@ abstract class MediaLoader<Output : MediaStoreAttributes>(context: Context) : As
             //If there is data then continue
             val generated = ArrayList<Output>()
             do {
-                val obj = buildObject(cursor)
-                if (obj != null) {
-                    generated.add(obj)
-                    verifyListener.onOneLoaded(obj, cursor.position)
-                }
+                val item = applicator?.newInstance()
+                if (item != null) {
+                    println("item is NOT null!")
+                    item.applyDefault(cursor)
+                    with(applicator!!) { item.apply() }
+                    generated.add(item)
+                    listener?.onLoaded(item)
+                } else cancelLoadInBackground()
+                println("We are actually doing stuff...")
             } while (cursor.moveToNext() && !cursor.isClosed && !isReset && !isAbandoned)
             sort(generated)
             return generated

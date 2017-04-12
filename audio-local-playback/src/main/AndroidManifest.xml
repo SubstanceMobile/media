@@ -15,8 +15,7 @@
   -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-
-    package="mobile.substance.media">
+    package="mobile.substance.media.audio.local.playback">
 
     <application
         android:allowBackup="true"

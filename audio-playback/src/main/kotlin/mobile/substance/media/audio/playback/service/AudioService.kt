@@ -22,12 +22,20 @@ import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.Paint
 import android.os.*
 import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaBrowserServiceCompat
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
+import android.renderscript.Allocation
+import android.renderscript.Element
+import android.renderscript.RenderScript
+import android.renderscript.ScriptIntrinsicBlur
 import android.util.Log
 import com.google.android.gms.cast.framework.CastContext
 import com.google.android.gms.cast.framework.CastState
@@ -39,7 +47,6 @@ import mobile.substance.media.audio.playback.players.GaplessPlayback
 import mobile.substance.media.audio.playback.players.LocalPlayback
 import mobile.substance.media.audio.playback.players.Playback
 import mobile.substance.media.options.AudioPlaybackOptions
-import mobile.substance.media.utils.AudioPlaybackUtil
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.concurrent.thread
@@ -67,7 +74,7 @@ open class AudioService : MediaBrowserServiceCompat(), CastStateListener {
 
     private var notificationManager: NotificationManager? = null
 
-    // MediaCore Session
+    // Media Session
     private var session: MediaSessionCompat? = null
 
     private var remoteCallbacks = ArrayList<PlaybackRemote.RemoteCallback>()
@@ -198,10 +205,40 @@ open class AudioService : MediaBrowserServiceCompat(), CastStateListener {
         val metadataCompat = MediaMetadataCompat.Builder(source)
         if (AudioPlaybackOptions.isLockscreenArtworkEnabled) {
             metadataCompat.putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, if (AudioPlaybackOptions.isLockscreenArtworkBlurEnabled) {
-                AudioPlaybackUtil.blurBitmap(AudioQueue.getCurrentSong()!!.getArtwork()!!, this)
-            } else AudioQueue.getCurrentSong()!!.getArtwork())
+                val bitmap = AudioQueue.getCurrentSong()!!.requestArtworkBitmap()
+                blurBitmap(bitmap)
+            } else AudioQueue.getCurrentSong()!!.requestArtworkBitmap())
         }
         session?.setMetadata(metadataCompat.build())
+    }
+
+    private fun blurBitmap(source: Bitmap): Bitmap {
+        val bitmap = Bitmap.createBitmap(source.width, source.height, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bitmap)
+        val paint = Paint()
+        paint.color = Color.BLACK
+        canvas.drawBitmap(source, 0F, 0F, null)
+        var renderScript: RenderScript? = null
+        var input: Allocation? = null
+        var output: Allocation? = null
+        var blur: ScriptIntrinsicBlur? = null
+        try {
+            renderScript = RenderScript.create(this)
+            renderScript.messageHandler = RenderScript.RSMessageHandler()
+            input = Allocation.createFromBitmap(renderScript, bitmap, Allocation.MipmapControl.MIPMAP_NONE, Allocation.USAGE_SCRIPT)
+            output = Allocation.createTyped(renderScript, input.type)
+            blur = ScriptIntrinsicBlur.create(renderScript, Element.U8_4(renderScript))
+            blur.setInput(input)
+            blur.setRadius(AudioPlaybackOptions.lockscreenArtworkBlurRadius)
+            blur.forEach(output)
+            output.copyTo(bitmap)
+        } finally {
+            renderScript?.destroy()
+            input?.destroy()
+            output?.destroy()
+            blur?.destroy()
+            return bitmap
+        }
     }
 
     ///////////////////////////////////////////////////////////////////////////

@@ -23,30 +23,19 @@ import android.provider.MediaStore
 import mobile.substance.media.audio.local.objects.MediaStoreAlbum
 import mobile.substance.media.local.core.MediaLoader
 
-class AlbumsLoader(context: Context) : MediaLoader<MediaStoreAlbum>(context) {
+class AlbumsLoader<Album : MediaStoreAlbum>(context: Context) : MediaLoader<Album>(context) {
 
-    override fun buildObject(cursor: Cursor): MediaStoreAlbum? {
-        val title = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Albums.ALBUM))
-        val id = cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Albums._ID))
-        val artistName = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Albums.ARTIST))
-        val numberOfSongs = cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Albums.NUMBER_OF_SONGS))
-        val year = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Albums.LAST_YEAR))
-        val artworkUri = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Albums.ALBUM_ART))
-
-        return MediaStoreAlbum().apply {
-            this.title = title
-            this.id = id
-            this.artistName = artistName
-            this.numberOfSongs = numberOfSongs
-            this.year = year
-            this.artworkUri = Uri.parse("file://" + artworkUri)
-        }
+    override fun Album.applyDefault(cursor: Cursor) {
+        title = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Albums.ALBUM))
+        id = cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Albums._ID))
+        artistName = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Albums.ARTIST))
+        numberOfSongs = cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Albums.NUMBER_OF_SONGS))
+        year = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Albums.LAST_YEAR))
+        artworkUri = Uri.parse("file://" + cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Albums.ALBUM_ART)))
     }
 
     override val uri: Uri = MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI
 
     override val sortOrder: String? = MediaStore.Audio.Albums.DEFAULT_SORT_ORDER
-
-    override val loaderId: Int = 11
 
 }

@@ -5,7 +5,22 @@ Project Managed by the entire Substance Mobile development team
 
 Full README coming soon!
 
-# Structure
+## Errors
+The errors are listed below. They are thrown when you (the dev, not the user) do something wrong.
+
+##### Each error belongs to a specific module:
+1XX -> core
+2XX -> audio
+3XX -> video
+4XX -> images
+
+##### 
+
+| Code 	| Module     	| Description                                        	|
+|------	|:-------------:|----------------------------------------------------	|
+| 102  	| core       	| No ImageLoadAdapter set or not working as expected 	|
+
+## Structure
 * media
     * core
     * local-core

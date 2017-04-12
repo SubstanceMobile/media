@@ -1,0 +1,68 @@
+/*
+ * Copyright 2017 Substance Mobile
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+// Google Cast ID code. Unless specified in the build environment, it will use the default cast ID
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+
+def CAST_ID = '"CC1AD845"'
+def DEBUG = "n"
+if (project.hasProperty("SECURE_CAST_ID")) {
+    CAST_ID = '"' + SECURE_CAST_ID + '"'
+}
+if (project.hasProperty("ALLOWIDDEBUG")) {
+    DEBUG = ALLOWIDDEBUG
+}
+if (DEBUG.equals("y")) {
+    println "CAST ID:" + CAST_ID
+} // Used for debugging
+
+android {
+    compileSdkVersion Integer.parseInt(project.compileSdkVersion)
+    buildToolsVersion String.valueOf(project.buildToolsVersion)
+
+    defaultConfig {
+        applicationId "mobile.substance.media"
+        minSdkVersion Integer.parseInt(project.minSdkVersion)
+        targetSdkVersion Integer.parseInt(project.targetSdkVersion)
+        versionCode Integer.parseInt(project.versionCode)
+        versionName project.versionName
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+    sourceSets {
+        main.java.srcDirs += 'src/main/kotlin'
+    }
+}
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile 'com.afollestad:assent:0.2.5'
+    compile 'com.github.bumptech.glide:glide:3.7.0'
+    compile "com.android.support:design:$project.supportLibraryVersion"
+    compile "com.android.support:cardview-v7:$project.supportLibraryVersion"
+    compile 'com.jakewharton:kotterknife:0.1.0-SNAPSHOT'
+    compile project(':audio')
+    compile project(':video')
+    compile project(':images')
+}

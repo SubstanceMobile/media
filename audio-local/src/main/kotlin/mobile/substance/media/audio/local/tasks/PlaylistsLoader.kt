@@ -23,20 +23,13 @@ import android.provider.MediaStore
 import mobile.substance.media.audio.local.objects.MediaStorePlaylist
 import mobile.substance.media.local.core.MediaLoader
 
-class PlaylistsLoader(context: Context) : MediaLoader<MediaStorePlaylist>(context) {
+class PlaylistsLoader<Playlist : MediaStorePlaylist>(context: Context) : MediaLoader<Playlist>(context) {
 
-    override fun buildObject(cursor: Cursor): MediaStorePlaylist? {
-        val title = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Playlists.NAME))
-        val id = cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Playlists._ID))
-        val dateAdded = cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Playlists.DATE_ADDED))
-        val numberOfSongs = cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Playlists._COUNT))
-
-        return MediaStorePlaylist().apply {
-            this.title = title
-            this.id = id
-            this.dateAdded = dateAdded
-            this.numberOfSongs = numberOfSongs
-        }
+    override fun Playlist.applyDefault(cursor: Cursor) {
+        title = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Playlists.NAME))
+        id = cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Playlists._ID))
+        dateAdded = cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Playlists.DATE_ADDED))
+        numberOfSongs = cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Playlists._COUNT))
     }
 
     override val uri: Uri
@@ -44,7 +37,5 @@ class PlaylistsLoader(context: Context) : MediaLoader<MediaStorePlaylist>(contex
 
     override val sortOrder: String
         get() = MediaStore.Audio.Playlists.DEFAULT_SORT_ORDER
-
-    override val loaderId: Int = 13
 
 }

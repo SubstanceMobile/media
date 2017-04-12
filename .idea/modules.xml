@@ -2,17 +2,25 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/SDK.iml" filepath="$PROJECT_DIR$/SDK.iml" />
-      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/sample/app.iml" filepath="$PROJECT_DIR$/sample/app.iml" />
       <module fileurl="file://$PROJECT_DIR$/audio/audio.iml" filepath="$PROJECT_DIR$/audio/audio.iml" />
       <module fileurl="file://$PROJECT_DIR$/audio-core/audio-core.iml" filepath="$PROJECT_DIR$/audio-core/audio-core.iml" />
       <module fileurl="file://$PROJECT_DIR$/audio-local/audio-local.iml" filepath="$PROJECT_DIR$/audio-local/audio-local.iml" />
       <module fileurl="file://$PROJECT_DIR$/audio-local-playback/audio-local-playback.iml" filepath="$PROJECT_DIR$/audio-local-playback/audio-local-playback.iml" />
       <module fileurl="file://$PROJECT_DIR$/audio-playback/audio-playback.iml" filepath="$PROJECT_DIR$/audio-playback/audio-playback.iml" />
       <module fileurl="file://$PROJECT_DIR$/audio-tags/audio-tags.iml" filepath="$PROJECT_DIR$/audio-tags/audio-tags.iml" />
-      <module fileurl="file://$PROJECT_DIR$/core/core.iml" filepath="$PROJECT_DIR$/core/core.iml" />
+      <module fileurl="file://$PROJECT_DIR$/media-core/core.iml" filepath="$PROJECT_DIR$/media-core/core.iml" />
+      <module fileurl="file://$PROJECT_DIR$/images/images.iml" filepath="$PROJECT_DIR$/images/images.iml" />
+      <module fileurl="file://$PROJECT_DIR$/images-core/images-core.iml" filepath="$PROJECT_DIR$/images-core/images-core.iml" />
+      <module fileurl="file://$PROJECT_DIR$/images-local/images-local.iml" filepath="$PROJECT_DIR$/images-local/images-local.iml" />
       <module fileurl="file://$PROJECT_DIR$/local-core/local-core.iml" filepath="$PROJECT_DIR$/local-core/local-core.iml" />
       <module fileurl="file://$PROJECT_DIR$/media.iml" filepath="$PROJECT_DIR$/media.iml" />
+      <module fileurl="file://$PROJECT_DIR$/media-core/media-core.iml" filepath="$PROJECT_DIR$/media-core/media-core.iml" />
+      <module fileurl="file://$PROJECT_DIR$/sample/sample.iml" filepath="$PROJECT_DIR$/sample/sample.iml" />
+      <module fileurl="file://$PROJECT_DIR$/video/video.iml" filepath="$PROJECT_DIR$/video/video.iml" />
+      <module fileurl="file://$PROJECT_DIR$/video-core/video-core.iml" filepath="$PROJECT_DIR$/video-core/video-core.iml" />
+      <module fileurl="file://$PROJECT_DIR$/video-local/video-local.iml" filepath="$PROJECT_DIR$/video-local/video-local.iml" />
+      <module fileurl="file://$PROJECT_DIR$/video-playback/video-playback.iml" filepath="$PROJECT_DIR$/video-playback/video-playback.iml" />
     </modules>
   </component>
 </project>

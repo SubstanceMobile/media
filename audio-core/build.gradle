@@ -19,14 +19,14 @@ apply plugin: 'kotlin-android'
 apply plugin: 'com.github.dcendents.android-maven'
 
 android {
-    compileSdkVersion 25
-    buildToolsVersion "25.0.2"
+    compileSdkVersion Integer.parseInt(project.compileSdkVersion)
+    buildToolsVersion String.valueOf(project.buildToolsVersion)
 
     defaultConfig {
-        minSdkVersion 17
-        targetSdkVersion 25
-        versionCode 1
-        versionName "1.0"
+        minSdkVersion Integer.parseInt(project.minSdkVersion)
+        targetSdkVersion Integer.parseInt(project.targetSdkVersion)
+        versionCode Integer.parseInt(project.versionCode)
+        versionName project.versionName
     }
     buildTypes {
         release {
@@ -41,9 +41,6 @@ android {
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    testCompile 'junit:junit:4.12'
-    compile project(':core')
-    compile 'jp.wasabeef:glide-transformations:2.0.2'
-    compile 'com.github.bumptech.glide:glide:3.7.0'
-    compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    compile project(':media-core')
+
 }

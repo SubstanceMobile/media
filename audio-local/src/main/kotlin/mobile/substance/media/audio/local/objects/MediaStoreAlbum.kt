@@ -18,23 +18,24 @@ package mobile.substance.media.audio.local.objects
 
 import android.net.Uri
 import android.provider.MediaStore
-import mobile.substance.media.audio.local.MediaStoreAudioHolder
 import mobile.substance.media.core.audio.Album
 import mobile.substance.media.core.audio.Artist
 import mobile.substance.media.core.audio.Genre
 import mobile.substance.media.core.audio.Song
+import mobile.substance.media.core.mediaApiError
 import mobile.substance.media.local.core.MediaStoreAttributes
+import mobile.substance.media.options.AudioLocalOptions
 
-class MediaStoreAlbum : Album(), MediaStoreAttributes {
+open class MediaStoreAlbum : Album(), MediaStoreAttributes {
 
     override val baseUri: Uri = MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI
 
     override var id: Long = -1
 
-    override fun getSongs(): List<Song> = MediaStoreAudioHolder.findSongsForAlbum(this)
+    override fun getSongs(): List<Song> = AudioLocalOptions.localAudioHolder?.findSongsForAlbum(this) ?: mediaApiError(211)
 
-    override fun getArtist(): Artist? = MediaStoreAudioHolder.findArtistForAlbum(this)
+    override fun getArtist(): Artist = AudioLocalOptions.localAudioHolder?.findArtistForAlbum(this) ?: mediaApiError(211)
 
-    override fun getGenre(): Genre? = MediaStoreAudioHolder.findGenreForAlbum(this)
+    override fun getGenre(): Genre = AudioLocalOptions.localAudioHolder?.findGenreForAlbum(this) ?: mediaApiError(211)
 
 }

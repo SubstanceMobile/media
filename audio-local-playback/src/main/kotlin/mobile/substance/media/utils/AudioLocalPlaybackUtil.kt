@@ -21,22 +21,15 @@ import android.content.Context
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.provider.MediaStore
-import android.widget.Toast
-import mobile.substance.media.audio.local.MediaStoreAudioHolder
 import mobile.substance.media.audio.local.objects.MediaStoreAlbum
 import mobile.substance.media.audio.local.objects.MediaStoreArtist
 import mobile.substance.media.audio.local.objects.MediaStoreGenre
 import mobile.substance.media.audio.local.objects.MediaStorePlaylist
 import mobile.substance.media.audio.playback.PlaybackRemote
-import mobile.substance.media.core.audio.Album
-import mobile.substance.media.core.audio.AudioData
-import mobile.substance.media.core.audio.AudioHolder
 import mobile.substance.media.core.audio.Song
 import mobile.substance.media.extensions.mainThread
-import mobile.substance.media.local.core.MediaStoreAttributes
+import mobile.substance.media.options.AudioLocalOptions
 import kotlin.concurrent.thread
 
 object AudioLocalPlaybackUtil {
@@ -45,16 +38,28 @@ object AudioLocalPlaybackUtil {
         var songs: List<Song>? = null
         try {
             when (extras.get(MediaStore.EXTRA_MEDIA_FOCUS)) {
-                MediaStore.Audio.Media.ENTRY_CONTENT_TYPE -> songs = AudioData.filterSongs(extras.getString(MediaStore.EXTRA_MEDIA_TITLE))
-                MediaStore.Audio.Albums.ENTRY_CONTENT_TYPE -> songs = MediaStoreAudioHolder.findSongsForAlbum(MediaStoreAudioHolder.filterAlbums(extras.getString(MediaStore.EXTRA_MEDIA_ALBUM)).first() as MediaStoreAlbum)
-                MediaStore.Audio.Artists.ENTRY_CONTENT_TYPE -> songs = MediaStoreAudioHolder.findSongsForArtist(MediaStoreAudioHolder.filterArtists(extras.getString(MediaStore.EXTRA_MEDIA_ARTIST)).first() as MediaStoreArtist)
+                MediaStore.Audio.Media.ENTRY_CONTENT_TYPE -> songs = AudioLocalOptions.localAudioHolder?.filterSongs(extras.getString(MediaStore.EXTRA_MEDIA_TITLE))
+                MediaStore.Audio.Albums.ENTRY_CONTENT_TYPE -> {
+                    val matchingAlbums = AudioLocalOptions.localAudioHolder?.filterAlbums(extras.getString(MediaStore.EXTRA_MEDIA_ALBUM))
+                    songs = matchingAlbums?.first()?.getSongs()
+                }
+                MediaStore.Audio.Artists.ENTRY_CONTENT_TYPE -> {
+                    val matchingArtists = AudioLocalOptions.localAudioHolder?.filterArtists(extras.getString(MediaStore.EXTRA_MEDIA_ARTIST))
+                    songs = matchingArtists?.first()?.getSongs()
+                }
                 MediaStore.Audio.Playlists.ENTRY_CONTENT_TYPE -> {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) songs = MediaStoreAudioHolder.findSongsForPlaylist(MediaStoreAudioHolder.filterPlaylists(extras.getString(MediaStore.EXTRA_MEDIA_PLAYLIST)).first() as MediaStorePlaylist)
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                        val matchingPlaylists = AudioLocalOptions.localAudioHolder?.filterPlaylists(extras.getString(MediaStore.EXTRA_MEDIA_PLAYLIST))
+                        songs = matchingPlaylists?.first()?.getSongs()
+                    }
                 }
                 MediaStore.Audio.Genres.ENTRY_CONTENT_TYPE -> {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) songs = MediaStoreAudioHolder.findSongsForGenre(MediaStoreAudioHolder.filterGenres(extras.getString(MediaStore.EXTRA_MEDIA_GENRE)).first() as MediaStoreGenre)
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                        val matchingGenres = AudioLocalOptions.localAudioHolder?.filterGenres(extras.getString(MediaStore.EXTRA_MEDIA_GENRE))
+                        songs = matchingGenres?.first()?.getSongs()
+                    }
                 }
-                else -> songs = AudioData.filterSongs(query)
+                else -> songs = AudioLocalOptions.localAudioHolder?.filterSongs(query)
             }
         } catch (e: KotlinNullPointerException) {
             e.printStackTrace()
@@ -67,8 +72,8 @@ object AudioLocalPlaybackUtil {
         if (uri != null) thread {
             var song: Song? = null
             when (uri.scheme) {
-                "content" -> song = MediaStoreAudioHolder.findSongById(ContentUris.parseId(uri))
-                "file" -> song = MediaStoreAudioHolder.findSongById(CoreUtil.retrieveMediaId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, context, uri.path))
+                "content" -> song = AudioLocalOptions.localAudioHolder?.findSongById(ContentUris.parseId(uri))
+                "file" -> song = AudioLocalOptions.localAudioHolder?.findSongById(CoreUtil.retrieveMediaId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, context, uri.path))
                 "http", "https" -> song = Song.from(uri)
             }
             if (song != null) mainThread {
@@ -78,7 +83,7 @@ object AudioLocalPlaybackUtil {
     }
 
     fun playFromMediaId(mediaId: String?, extras: Bundle?) {
-        val song = MediaStoreAudioHolder.findSongById(mediaId?.toLong() ?: 0L)
+        val song = AudioLocalOptions.localAudioHolder?.findSongById(mediaId?.toLong() ?: 0L)
         if (song != null) PlaybackRemote.play(song)
     }
 
